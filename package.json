@@ -2,6 +2,15 @@
   "name": "cartransport-au",
   "type": "module",
   "version": "0.0.1",
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,astro}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,md,html}": [
+      "prettier --write"
+    ]
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -25,11 +34,14 @@
     "eslint": "^9.39.2",
     "eslint-plugin-astro": "^1.5.0",
     "happy-dom": "^20.0.11",
-    "husky": "^9.1.7",
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
     "sharp": "^0.34.5",
     "typescript-eslint": "^8.51.0",
     "vitest": "^3.2.4"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
   }
 }
