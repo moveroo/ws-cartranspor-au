@@ -1,8 +1,8 @@
 ---
-title: "Depot to Depot Car Transport"
-description: "The most cost-effective way to move your car across Australia. Drop off and pick up at our secure depots."
-icon: "🏢"
-heroImage: "/images/depot-transport.jpg"
+title: 'Depot to Depot Car Transport'
+description: 'The most cost-effective way to move your car across Australia. Drop off and pick up at our secure depots.'
+icon: '🏢'
+heroImage: '/images/depot-transport.jpg'
 ---
 
 # Depot to Depot Car Transport

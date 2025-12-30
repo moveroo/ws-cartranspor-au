@@ -5,11 +5,11 @@ export default [
   ...tseslint.configs.recommended,
   ...eslintPluginAstro.configs.recommended,
   {
-    ignores: ["dist/", ".astro/", "node_modules/"],
+    ignores: ['dist/', '.astro/', 'node_modules/'],
   },
   {
-      rules: {
-          // Custom rules
-      },
+    rules: {
+      // Custom rules
+    },
   },
 ];

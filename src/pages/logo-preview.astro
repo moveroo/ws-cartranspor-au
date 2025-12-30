@@ -4,7 +4,6 @@ import Layout from '../layouts/Layout.astro';
 
 <Layout title="Logo Preview">
   <div class="min-h-screen p-8 space-y-8">
-    
     <section>
       <h1 class="text-3xl font-bold mb-4">Logo Preview</h1>
       <p class="mb-8 text-gray-600">Reviewing `public/logo.svg` in different contexts.</p>
@@ -50,12 +49,19 @@ import Layout from '../layouts/Layout.astro';
 
     <!-- Colors -->
     <section class="p-8 bg-gray-50 rounded-xl border border-gray-200">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">Brand Colors</h2>
-        <div class="flex gap-4">
-            <div class="w-24 h-24 bg-brand-orange-500 rounded-lg shadow-sm flex items-center justify-center text-white font-bold">Primary</div>
-            <div class="w-24 h-24 bg-brand-navy-900 rounded-lg shadow-sm flex items-center justify-center text-white font-bold">Dark</div>
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Brand Colors</h2>
+      <div class="flex gap-4">
+        <div
+          class="w-24 h-24 bg-brand-orange-500 rounded-lg shadow-sm flex items-center justify-center text-white font-bold"
+        >
+          Primary
         </div>
+        <div
+          class="w-24 h-24 bg-brand-navy-900 rounded-lg shadow-sm flex items-center justify-center text-white font-bold"
+        >
+          Dark
+        </div>
+      </div>
     </section>
-
   </div>
 </Layout>

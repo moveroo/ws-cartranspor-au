@@ -1,10 +1,9 @@
 ---
-title: "How to Collect a Vehicle from an Auction House: The Complete Guide"
-pubDate: "2023-10-09"
-description: "Migrated from WordPress"
-author: "Vehicle Transport Australia"
+title: 'How to Collect a Vehicle from an Auction House: The Complete Guide'
+pubDate: '2023-10-09'
+description: 'Migrated from WordPress'
+author: 'Vehicle Transport Australia'
 ---
-
 
 <h2><strong>Essential Steps for Collecting a Car from an Auction House in Australia: Why Choosing a Transport Company is the Best Option</strong></h2>
 <p><em>Buying a car at an auction? Learn everything you need to know about collecting your new vehicle, including the advantages of opting for a professional transport service.</em></p>
@@ -62,4 +61,3 @@ author: "Vehicle Transport Australia"
 </ul>
 </li>
 </ol>
-

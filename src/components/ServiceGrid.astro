@@ -2,55 +2,66 @@
 const services = [
   {
     title: 'Interstate Transport',
-    description: 'Reliable vehicle transport between all major capital cities and regional centers across Australia.',
+    description:
+      'Reliable vehicle transport between all major capital cities and regional centers across Australia.',
     icon: '🚛',
-    href: '/services/interstate'
+    href: '/services/interstate',
   },
   {
     title: 'Depot to Depot',
-    description: 'Cost-effective option. Drop off and pick up your vehicle from one of our secure depots.',
+    description:
+      'Cost-effective option. Drop off and pick up your vehicle from one of our secure depots.',
     icon: '🏢',
-    href: '/services/depot-to-depot'
+    href: '/services/depot-to-depot',
   },
   {
     title: 'Door to Door',
-    description: 'Premium convenience. We collect from your driveway and deliver directly to your destination.',
+    description:
+      'Premium convenience. We collect from your driveway and deliver directly to your destination.',
     icon: '🏠',
-    href: '/services/door-to-door'
+    href: '/services/door-to-door',
   },
   {
     title: 'Commercial & Fleet',
-    description: 'Scalable logistics solutions for dealerships, auction houses, and corporate fleets.',
+    description:
+      'Scalable logistics solutions for dealerships, auction houses, and corporate fleets.',
     icon: '🏢',
-    href: '/services/commercial'
-  }
+    href: '/services/commercial',
+  },
 ];
 ---
 
 <section class="py-16 md:py-24 bg-white">
   <div class="container mx-auto px-4">
     <div class="text-center max-w-3xl mx-auto mb-16">
-      <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Comprehensive Transport Services</h2>
-      <p class="text-lg text-slate-600">We offer a range of flexible options to suit your budget and schedule.</p>
+      <h2 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+        Comprehensive Transport Services
+      </h2>
+      <p class="text-lg text-slate-600">
+        We offer a range of flexible options to suit your budget and schedule.
+      </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-      {services.map(service => (
-        <a href={service.href} class="group p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:border-brand-orange-200 hover:shadow-xl hover:shadow-brand-orange-500/5 transition-all duration-300">
-          <div class="text-4xl mb-6 bg-white w-16 h-16 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-            {service.icon}
-          </div>
-          <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-brand-orange-500 transition-colors">
-            {service.title}
-          </h3>
-          <p class="text-slate-600 leading-relaxed mb-6">
-            {service.description}
-          </p>
-          <span class="text-brand-orange-500 font-semibold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
-            Learn more <span class="text-lg">→</span>
-          </span>
-        </a>
-      ))}
+      {
+        services.map((service) => (
+          <a
+            href={service.href}
+            class="group p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:border-brand-orange-200 hover:shadow-xl hover:shadow-brand-orange-500/5 transition-all duration-300"
+          >
+            <div class="text-4xl mb-6 bg-white w-16 h-16 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              {service.icon}
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-brand-orange-500 transition-colors">
+              {service.title}
+            </h3>
+            <p class="text-slate-600 leading-relaxed mb-6">{service.description}</p>
+            <span class="text-brand-orange-500 font-semibold text-sm flex items-center gap-2 group-hover:gap-3 transition-all">
+              Learn more <span class="text-lg">→</span>
+            </span>
+          </a>
+        ))
+      }
     </div>
   </div>
 </section>

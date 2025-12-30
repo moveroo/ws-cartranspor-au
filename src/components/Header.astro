@@ -7,36 +7,62 @@ const links = [
 ];
 ---
 
-<header class="bg-slate-900 border-b border-brand-orange-500/20 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+<header
+  class="bg-slate-900 border-b border-brand-orange-500/20 sticky top-0 z-50 backdrop-blur-md bg-opacity-90"
+>
   <div class="container mx-auto px-4 h-20 flex items-center justify-between">
     <!-- Logo -->
     <a href="/" class="flex items-center gap-3 group">
-      <img src="/logo.svg" alt="Vehicle Transport Australia" class="h-10 w-10 transition-transform group-hover:scale-105" />
+      <img
+        src="/logo.svg"
+        alt="Vehicle Transport Australia"
+        class="h-10 w-10 transition-transform group-hover:scale-105"
+      />
       <div class="flex flex-col">
-        <span class="text-white font-bold text-lg leading-tight group-hover:text-brand-orange-400 transition-colors">Vehicle Transport</span>
-        <span class="text-brand-orange-400 text-xs font-medium tracking-wide uppercase">Australia</span>
+        <span
+          class="text-white font-bold text-lg leading-tight group-hover:text-brand-orange-400 transition-colors"
+          >Vehicle Transport</span
+        >
+        <span class="text-brand-orange-400 text-xs font-medium tracking-wide uppercase"
+          >Australia</span
+        >
       </div>
     </a>
 
     <!-- Desktop Nav -->
     <nav class="hidden md:flex items-center gap-8">
-      {links.map(link => (
-        <a 
-          href={link.href} 
-          class="text-slate-300 hover:text-white hover:text-brand-orange-400 font-medium transition-colors relative py-2"
-        >
-          {link.label}
-        </a>
-      ))}
-      <a href="/quote" class="bg-brand-orange-500 hover:bg-brand-orange-600 text-white px-6 py-2.5 rounded-lg font-bold transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-brand-orange-500/20">
+      {
+        links.map((link) => (
+          <a
+            href={link.href}
+            class="text-slate-300 hover:text-white hover:text-brand-orange-400 font-medium transition-colors relative py-2"
+          >
+            {link.label}
+          </a>
+        ))
+      }
+      <a
+        href="/quote"
+        class="bg-brand-orange-500 hover:bg-brand-orange-600 text-white px-6 py-2.5 rounded-lg font-bold transition-all transform hover:scale-105 hover:shadow-lg hover:shadow-brand-orange-500/20"
+      >
         Get a Quote
       </a>
     </nav>
-    
+
     <!-- Mobile Menu Button (Placeholder) -->
     <button class="md:hidden text-slate-300 p-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-6 w-6"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 6h16M4 12h16M4 18h16"></path>
       </svg>
     </button>
   </div>

@@ -54,7 +54,7 @@ const pageTitle = title ? `${title} | ${siteName}` : siteName;
     <meta property="twitter:title" content={pageTitle} />
     <meta property="twitter:description" content={description} />
     {image && <meta property="twitter:image" content={new URL(image, Astro.url)} />}
-    
+
     <BrainAnalytics />
     <slot name="head" />
   </head>

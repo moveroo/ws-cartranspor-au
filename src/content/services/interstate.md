@@ -1,8 +1,8 @@
 ---
-title: "Interstate Car Transport"
-description: "Reliable and affordable interstate vehicle transport handling routes between all major Australian cities."
-icon: "🚛"
-heroImage: "/images/interstate-transport.jpg"
+title: 'Interstate Car Transport'
+description: 'Reliable and affordable interstate vehicle transport handling routes between all major Australian cities.'
+icon: '🚛'
+heroImage: '/images/interstate-transport.jpg'
 ---
 
 # Interstate Car Transport

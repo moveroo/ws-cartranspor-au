@@ -7,20 +7,18 @@ interface Props {
   preconnect?: string[];
 }
 
-const {
-  fonts = [],
-  preconnect = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'],
-} = Astro.props;
+const { fonts = [], preconnect = ['https://fonts.googleapis.com', 'https://fonts.gstatic.com'] } =
+  Astro.props;
 
 // Generate Google Fonts URL
 function generateGoogleFontsUrl(fonts: { family: string; weights?: string[] }[]): string {
   if (fonts.length === 0) return '';
-  
-  const families = fonts.map(font => {
+
+  const families = fonts.map((font) => {
     const weights = font.weights?.join(';') || '400';
     return `family=${font.family.replace(' ', '+')}:wght@${weights}`;
   });
-  
+
   return `https://fonts.googleapis.com/css2?${families.join('&')}&display=swap`;
 }
 
@@ -28,11 +26,7 @@ const fontsUrl = generateGoogleFontsUrl(fonts);
 ---
 
 {/* Preconnect for faster font loading */}
-{preconnect.map(url => (
-  <link rel="preconnect" href={url} crossorigin />
-))}
+{preconnect.map((url) => <link rel="preconnect" href={url} crossorigin />)}
 
 {/* Load fonts with display:swap for better LCP */}
-{fontsUrl && (
-  <link rel="stylesheet" href={fontsUrl} />
-)}
+{fontsUrl && <link rel="stylesheet" href={fontsUrl} />}

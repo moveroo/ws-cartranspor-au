@@ -18,24 +18,18 @@ import Footer from '../components/Footer.astro';
 import Schema from '../components/Schema.astro';
 ---
 
-<SEO 
-  title={title} 
-  description={description} 
-  image={image} 
-  type={type} 
-  noindex={noindex}
->
-  <Schema 
-    type="Organization" 
+<SEO title={title} description={description} image={image} type={type} noindex={noindex}>
+  <Schema
+    type="Organization"
     data={{
-      name: "Vehicle Transport Australia",
-      logo: "/logo.svg",
+      name: 'Vehicle Transport Australia',
+      logo: '/logo.svg',
       url: import.meta.env.PUBLIC_SITE_URL,
       contactPoint: {
-        "@type": "ContactPoint",
-        telephone: "+61-123-456-789",
-        contactType: "customer service"
-      }
+        '@type': 'ContactPoint',
+        telephone: '+61-123-456-789',
+        contactType: 'customer service',
+      },
     }}
   />
   <div class="font-sans antialiased text-slate-800 bg-slate-50 min-h-screen flex flex-col">

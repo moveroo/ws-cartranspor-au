@@ -1,8 +1,8 @@
 ---
-title: "Commercial & Fleet Transport"
-description: "Scalable vehicle logistics solutions for dealerships, auction houses, and corporate fleets."
-icon: "🏢"
-heroImage: "/images/commercial-fleet.jpg"
+title: 'Commercial & Fleet Transport'
+description: 'Scalable vehicle logistics solutions for dealerships, auction houses, and corporate fleets.'
+icon: '🏢'
+heroImage: '/images/commercial-fleet.jpg'
 ---
 
 # Commercial Vehicle Logistics

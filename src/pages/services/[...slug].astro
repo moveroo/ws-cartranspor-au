@@ -5,8 +5,8 @@ import FAQ from '../../components/FAQ.astro';
 
 export async function getStaticPaths() {
   const services = await getCollection('services');
-  return services.map(service => ({
-    params: { slug: service.id }, 
+  return services.map((service) => ({
+    params: { slug: service.id },
     props: { service },
   }));
 }
@@ -15,8 +15,8 @@ const { service } = Astro.props;
 const { Content } = await render(service);
 ---
 
-<Layout 
-  title={service.data.title + " | Vehicle Transport Australia"}
+<Layout
+  title={service.data.title + ' | Vehicle Transport Australia'}
   description={service.data.description}
 >
   <!-- Hero -->
@@ -28,7 +28,10 @@ const { Content } = await render(service);
       <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-10">
         {service.data.description}
       </p>
-      <a href="/quote" class="inline-block bg-brand-orange-500 hover:bg-brand-orange-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-brand-orange-500/20 transition-all">
+      <a
+        href="/quote"
+        class="inline-block bg-brand-orange-500 hover:bg-brand-orange-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-brand-orange-500/20 transition-all"
+      >
         Get an Instant Quote
       </a>
     </div>
@@ -37,19 +40,24 @@ const { Content } = await render(service);
   <!-- Content -->
   <section class="py-16 bg-white">
     <div class="container mx-auto px-4 max-w-4xl">
-      <article class="prose prose-lg mx-auto prose-headings:text-slate-900 prose-p:text-slate-600 prose-li:text-slate-600 prose-strong:text-slate-800">
+      <article
+        class="prose prose-lg mx-auto prose-headings:text-slate-900 prose-p:text-slate-600 prose-li:text-slate-600 prose-strong:text-slate-800"
+      >
         <Content />
       </article>
     </div>
   </section>
 
   <FAQ />
-  
+
   <!-- CTA -->
   <section class="py-16 bg-slate-50 border-t border-slate-200">
     <div class="container mx-auto px-4 text-center">
       <h2 class="text-3xl font-bold text-slate-900 mb-6">Ready to book your transport?</h2>
-      <a href="/quote" class="inline-block bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-10 rounded-full transition-transform transform hover:scale-105 shadow-xl">
+      <a
+        href="/quote"
+        class="inline-block bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-10 rounded-full transition-transform transform hover:scale-105 shadow-xl"
+      >
         Get Free Quote
       </a>
     </div>
