@@ -37,3 +37,16 @@ jobs:
         with:
           name: dist
           path: dist/
+
+      # Notify Domain Monitor of deployment
+      - name: Notify Domain Monitor
+        if: success() && github.ref == 'refs/heads/main'
+        run: |
+          curl -s -X POST "${{ secrets.DOMAIN_MONITOR_URL }}/api/deployments" \
+            -H "Authorization: Bearer ${{ secrets.DOMAIN_MONITOR_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "domain": "cartransport.au",
+              "commit": "${{ github.sha }}",
+              "notes": "Deployed via GitHub Actions"
+            }'
