@@ -1,0 +1,50 @@
+---
+interface BreadcrumbItem {
+  name: string;
+  url?: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+}
+
+const { items } = Astro.props;
+
+const schemaItems = items.map((item, index) => ({
+  '@type': 'ListItem',
+  position: index + 1,
+  name: item.name,
+  item: item.url,
+}));
+---
+
+<!-- Visual Breadcrumbs -->
+<nav aria-label="Breadcrumb" class="text-sm text-gray-600 dark:text-gray-400">
+  <ol class="flex items-center space-x-2">
+    {items.map((item, index) => (
+      <li class="flex items-center">
+        {index > 0 && (
+          <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        )}
+        {item.url && index < items.length - 1 ? (
+          <a href={item.url} class="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            {item.name}
+          </a>
+        ) : (
+          <span class="text-gray-900 dark:text-gray-200 font-medium">
+            {item.name}
+          </span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<!-- Schema.org Markup -->
+<script type="application/ld+json" set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: schemaItems,
+}, null, 2)} />

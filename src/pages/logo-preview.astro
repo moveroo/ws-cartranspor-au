@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Logo Preview">
+  <div class="min-h-screen p-8 space-y-8">
+    
+    <section>
+      <h1 class="text-3xl font-bold mb-4">Logo Preview</h1>
+      <p class="mb-8 text-gray-600">Reviewing `public/logo.svg` in different contexts.</p>
+    </section>
+
+    <!-- Light Background -->
+    <section class="p-8 bg-white rounded-xl shadow-sm border border-gray-200">
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">Light Background</h2>
+      <div class="flex items-end gap-8">
+        <div class="text-center">
+          <img src="/logo.svg" alt="Logo default" class="w-32 h-32 mx-auto mb-2" />
+          <span class="text-xs text-gray-500">Default (32 class)</span>
+        </div>
+        <div class="text-center">
+          <img src="/logo.svg" alt="Logo small" class="w-16 h-16 mx-auto mb-2" />
+          <span class="text-xs text-gray-500">Small (16 class)</span>
+        </div>
+        <div class="text-center">
+          <img src="/logo.svg" alt="Logo tiny" class="w-8 h-8 mx-auto mb-2" />
+          <span class="text-xs text-gray-500">Tiny (8 class)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dark Background -->
+    <section class="p-8 bg-slate-900 rounded-xl shadow-sm">
+      <h2 class="text-xl font-semibold mb-4 text-white">Dark Background</h2>
+      <div class="flex items-end gap-8">
+        <div class="text-center">
+          <img src="/logo.svg" alt="Logo default" class="w-32 h-32 mx-auto mb-2" />
+          <span class="text-xs text-gray-400">Default (32 class)</span>
+        </div>
+        <div class="text-center">
+          <img src="/logo.svg" alt="Logo small" class="w-16 h-16 mx-auto mb-2" />
+          <span class="text-xs text-gray-400">Small (16 class)</span>
+        </div>
+        <div class="text-center">
+          <img src="/logo.svg" alt="Logo tiny" class="w-8 h-8 mx-auto mb-2" />
+          <span class="text-xs text-gray-400">Tiny (8 class)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Colors -->
+    <section class="p-8 bg-gray-50 rounded-xl border border-gray-200">
+        <h2 class="text-xl font-semibold mb-4 text-gray-800">Brand Colors</h2>
+        <div class="flex gap-4">
+            <div class="w-24 h-24 bg-brand-orange-500 rounded-lg shadow-sm flex items-center justify-center text-white font-bold">Primary</div>
+            <div class="w-24 h-24 bg-brand-navy-900 rounded-lg shadow-sm flex items-center justify-center text-white font-bold">Dark</div>
+        </div>
+    </section>
+
+  </div>
+</Layout>

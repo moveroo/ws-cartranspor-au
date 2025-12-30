@@ -1,0 +1,61 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: 'website' | 'article';
+  canonical?: string;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = import.meta.env.PUBLIC_SITE_DESCRIPTION || '',
+  image = import.meta.env.PUBLIC_SITE_IMAGE || '',
+  type = 'website',
+  canonical = Astro.url.href,
+  noindex = false,
+} = Astro.props;
+
+const siteName = import.meta.env.PUBLIC_SITE_NAME || 'My Site';
+const pageTitle = title ? `${title} | ${siteName}` : siteName;
+---
+
+<!doctype html>
+<html lang={Astro.props.lang || 'en'}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="canonical" href={canonical} />
+
+    <title>{pageTitle}</title>
+    <meta name="title" content={pageTitle} />
+
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    {image && <meta property="og:image" content={new URL(image, Astro.url)} />}
+    <meta property="og:site_name" content={siteName} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonical} />
+    <meta property="twitter:title" content={pageTitle} />
+    <meta property="twitter:description" content={description} />
+    {image && <meta property="twitter:image" content={new URL(image, Astro.url)} />}
+    
+    <slot name="head" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

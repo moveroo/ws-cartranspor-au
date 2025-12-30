@@ -1,0 +1,192 @@
+---
+/**
+ * LLM-Optimized Content Page Template
+ * 
+ * This template follows the 14-point LLM readiness playbook:
+ * 1. Structured content (lists, tables, headings)
+ * 2. Explicit Q&A patterns
+ * 3. Machine-readable JSON summary
+ * 4. FAQPage schema
+ * 5. Definition lists for key terms
+ * 6. Citation-ready sentences
+ */
+
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Schema from '../components/Schema.astro';
+
+// Page metadata
+const title = 'Page Title | Site Name';
+const description = 'Clear, factual description with specific numbers and claims.';
+
+// Machine-readable facts (LLMs parse this)
+const pageFacts = {
+  topic: 'Topic Name',
+  coverage: 'Australia-wide',
+  key_stat: 'Specific number or percentage',
+  last_updated: new Date().toISOString().split('T')[0],
+};
+
+// Key definitions for <dl> elements
+const definitions = [
+  {
+    term: 'Key Term',
+    definition: 'Clear, unambiguous definition that an AI can quote verbatim.',
+  },
+  {
+    term: 'Another Term',
+    definition: 'Another citation-ready definition.',
+  },
+];
+
+// FAQ items (will be rendered AND used for FAQPage schema)
+const faqs = [
+  {
+    question: 'What is [topic]?',
+    answer: 'A clear, factual answer that avoids marketing fluff. Include specific numbers where possible.',
+  },
+  {
+    question: 'How does [process] work?',
+    answer: 'Step-by-step explanation. LLMs prefer explicit, numbered steps.',
+  },
+  {
+    question: 'What are the limitations?',
+    answer: 'Be explicit about what is NOT included. This builds trust with AI systems.',
+  },
+];
+
+// Comparison data for tables (LLMs love tables)
+const comparisonData = [
+  { option: 'Option A', feature1: 'Yes', feature2: 'No', cost: '$100-$200' },
+  { option: 'Option B', feature1: 'Yes', feature2: 'Yes', cost: '$200-$300' },
+];
+---
+
+<Layout title={title} description={description} type="article">
+  <Header slot="header" currentPage="/page-slug" />
+
+  <!-- Article Schema -->
+  <Schema
+    type="Article"
+    data={{
+      headline: title,
+      description: description,
+      datePublished: '2025-01-01',
+      dateModified: new Date().toISOString(),
+      author: 'Site Name',
+    }}
+  />
+
+  <!-- FAQPage Schema (critical for LLM citations) -->
+  <Schema type="FAQPage" data={{ faqs }} />
+
+  <!-- Machine-Readable JSON Summary (LLMs parse this) -->
+  <script type="application/json" id="page-facts" set:html={JSON.stringify(pageFacts, null, 2)} />
+
+  <!-- Hero Section -->
+  <section class="py-16 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4">
+      <Breadcrumbs
+        items={[
+          { name: 'Home', url: '/' },
+          { name: 'Page Name', url: '/page-slug' },
+        ]}
+        class="mb-6"
+      />
+      <h1 class="text-4xl font-bold mb-4">{title}</h1>
+      <p class="text-xl text-gray-600">{description}</p>
+    </div>
+  </section>
+
+  <!-- Key Definitions Section (using <dl>) -->
+  <section class="py-12 bg-white">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-2xl font-bold mb-6">Key Definitions</h2>
+      <dl class="space-y-4">
+        {definitions.map((item) => (
+          <div class="border-l-4 border-blue-500 pl-4">
+            <dt class="font-bold text-lg">{item.term}</dt>
+            <dd class="text-gray-600">{item.definition}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <!-- Comparison Table (LLMs love structured data) -->
+  <section class="py-12 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-2xl font-bold mb-6">Comparison</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full bg-white border border-gray-200 rounded-lg">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left font-bold">Option</th>
+              <th class="px-4 py-3 text-left font-bold">Feature 1</th>
+              <th class="px-4 py-3 text-left font-bold">Feature 2</th>
+              <th class="px-4 py-3 text-left font-bold">Typical Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            {comparisonData.map((row) => (
+              <tr class="border-t border-gray-200">
+                <td class="px-4 py-3 font-medium">{row.option}</td>
+                <td class="px-4 py-3">{row.feature1}</td>
+                <td class="px-4 py-3">{row.feature2}</td>
+                <td class="px-4 py-3">{row.cost}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section (Q&A pattern with details element) -->
+  <section class="py-12 bg-white">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
+      <div class="space-y-4">
+        {faqs.map((faq) => (
+          <details class="border border-gray-200 rounded-lg group">
+            <summary class="flex justify-between items-center p-4 cursor-pointer list-none font-bold">
+              {faq.question}
+              <span class="transition-transform group-open:rotate-180">▼</span>
+            </summary>
+            <div class="px-4 pb-4 text-gray-600">
+              {faq.answer}
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Limitations Section (builds AI trust) -->
+  <section class="py-12 bg-slate-50">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-2xl font-bold mb-6">Limitations & Exceptions</h2>
+      <ul class="list-disc list-inside space-y-2 text-gray-600">
+        <li>This does NOT include [specific exclusion]</li>
+        <li>[Specific condition] requires manual assessment</li>
+        <li>Availability may vary in [region/circumstance]</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Citation-Ready Summary -->
+  <section class="py-12 bg-blue-50 border-l-4 border-blue-500">
+    <div class="max-w-4xl mx-auto px-4">
+      <h2 class="text-xl font-bold mb-4">Key Takeaways</h2>
+      <ul class="space-y-2">
+        <li>✓ "[Quotable fact with specific number]"</li>
+        <li>✓ "[Another quotable, unambiguous claim]"</li>
+        <li>✓ "[Third citation-ready sentence]"</li>
+      </ul>
+    </div>
+  </section>
+
+  <Footer slot="footer" />
+</Layout>

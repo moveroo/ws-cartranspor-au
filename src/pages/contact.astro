@@ -1,0 +1,118 @@
+---
+import Layout from '../layouts/Layout.astro';
+import FAQ from '../components/FAQ.astro';
+
+const contactDetails = [
+  {
+    icon: '📞',
+    title: 'Phone',
+    content: '1300 XXX XXX',
+    sub: 'Mon-Fri, 9am - 5pm AEST'
+  },
+  {
+    icon: '📧',
+    title: 'Email',
+    content: 'info@cartransport.au',
+    sub: 'Responses within 24 hours'
+  },
+  {
+    icon: '📍',
+    title: 'Head Office',
+    content: 'Brisbane, QLD',
+    sub: 'Australia Wide Service'
+  }
+];
+---
+
+<Layout 
+  title="Contact Us | Vehicle Transport Australia"
+  description="Get in touch with our team for car transport quotes, support, or general enquiries."
+>
+  <!-- Header -->
+  <section class="bg-slate-900 py-20 text-center">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">Contact Us</h1>
+      <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+        Have questions about moving your vehicle? Our team is here to help.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16 md:py-24 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        
+        <!-- Contact Info -->
+        <div>
+          <h2 class="text-3xl font-bold text-slate-900 mb-8">Get in Touch</h2>
+          <div class="grid gap-8 mb-12">
+            {contactDetails.map(detail => (
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-brand-orange-50 rounded-lg flex items-center justify-center text-2xl">
+                  {detail.icon}
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-900 text-lg">{detail.title}</h3>
+                  <p class="text-brand-orange-600 font-medium text-lg">{detail.content}</p>
+                  <p class="text-slate-500 text-sm">{detail.sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div class="bg-slate-50 p-8 rounded-2xl border border-slate-100">
+             <h3 class="font-bold text-slate-900 text-xl mb-4">Need a quick price?</h3>
+             <p class="text-slate-600 mb-6">Skip the email back-and-forth. Our instant quote tool gives you live pricing in seconds.</p>
+             <a href="/quote" class="inline-block bg-brand-orange-500 hover:bg-brand-orange-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+               Get Instant Quote
+             </a>
+          </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+          <h2 class="text-2xl font-bold text-slate-900 mb-6">Send us a message</h2>
+          <form class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">First Name</label>
+                <input type="text" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-orange-500 outline-none transition-shadow" placeholder="John" />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Last Name</label>
+                <input type="text" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-orange-500 outline-none transition-shadow" placeholder="Doe" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
+              <input type="email" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-orange-500 outline-none transition-shadow" placeholder="john@example.com" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Subject</label>
+              <select class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-orange-500 outline-none transition-shadow bg-white">
+                <option>General Enquiry</option>
+                <option>Quote Issue</option>
+                <option>Existing Booking</option>
+                <option>Partnership</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Message</label>
+              <textarea rows="4" class="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-brand-orange-500 outline-none transition-shadow" placeholder="How can we help?"></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 rounded-lg transition-all transform hover:-translate-y-0.5 shadow-lg">
+              Send Message
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </section>
+  
+  <FAQ />
+</Layout>

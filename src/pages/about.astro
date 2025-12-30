@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const stats = [
+  { value: '15+', label: 'Years Experience' },
+  { value: '50k+', label: 'Vehicles Moved' },
+  { value: '98%', label: 'On-Time Delivery' },
+  { value: '100%', label: 'Australian Owned' }
+];
+---
+
+<Layout 
+  title="About Us | Vehicle Transport Australia"
+  description="Learn about Australia's leading vehicle transport service. We specialize in safe, reliable interstate car shipping."
+>
+  <!-- Header -->
+  <section class="bg-slate-900 py-20 text-center">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">About Us</h1>
+      <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+        Driving excellence in Australian logistics since 2010.
+      </p>
+    </div>
+  </section>
+
+  <!-- Mission -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="max-w-3xl mx-auto text-center mb-16">
+        <h2 class="text-3xl font-bold text-slate-900 mb-6">Our Mission</h2>
+        <p class="text-xl text-slate-600 leading-relaxed">
+          To provide the most reliable, transparent, and stress-free vehicle transport service in Australia. We believe moving your car should be as easy as booking a flight.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {stats.map(stat => (
+          <div class="text-center p-6 bg-slate-50 rounded-2xl border border-slate-100">
+            <div class="text-4xl font-bold text-brand-orange-500 mb-2">{stat.value}</div>
+            <div class="text-slate-600 font-medium">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <section class="py-16 md:py-24 bg-slate-50">
+    <div class="container mx-auto px-4 max-w-4xl">
+      <div class="prose prose-lg mx-auto text-slate-600">
+        <h3>Why Choose Us?</h3>
+        <p>
+          We know that your vehicle is one of your most valuable assets. That's why we treat every car we move as if it were our own. From classic cars to daily drivers, our network of professional carriers ensures your vehicle arrives safely and on time.
+        </p>
+        
+        <h3>Our Network</h3>
+        <p>
+          We operate depots in every major capital city and have a vast network of carriers allowing us to service even the most remote regional areas. Whether you're moving from Sydney to Perth or Darwin to Adelaide, we have a solution.
+        </p>
+
+        <h3>Technology Driven</h3>
+        <p>
+          We use state-of-the-art tracking and logistics software to keep you informed every step of the way. Our instant quote engine analyzes thousands of routes in real-time to give you the best possible price.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>
