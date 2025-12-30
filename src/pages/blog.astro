@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+
+const posts = (await getCollection('posts')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<Layout title="Transport Guide | Expert Vehicle Transport Advice">
+  <div class="bg-slate-900 py-20 border-b border-slate-800">
+    <div class="container mx-auto px-4 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">Transport Guide</h1>
+      <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+        Expert advice, guides, and tips for moving your vehicle across Australia.
+      </p>
+    </div>
+  </div>
+
+  <main class="container mx-auto px-4 py-16">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {
+        posts.map((post) => (
+          <a
+            href={`/${post.id}`}
+            class="group bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+          >
+            <div class="p-8">
+              <div class="text-sm text-brand-orange-600 font-semibold mb-3">
+                {post.data.pubDate.toLocaleDateString('en-AU', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </div>
+              <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-brand-orange-600 transition-colors">
+                {post.data.title}
+              </h3>
+              {post.data.description && (
+                <p class="text-slate-600 line-clamp-3 leading-relaxed">{post.data.description}</p>
+              )}
+            </div>
+            <div class="px-8 pb-8 pt-0">
+              <span class="text-brand-orange-600 font-semibold text-sm group-hover:underline">
+                Read Article &rarr;
+              </span>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </main>
+</Layout>
