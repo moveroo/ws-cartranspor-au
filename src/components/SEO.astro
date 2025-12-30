@@ -8,6 +8,8 @@ interface Props {
   noindex?: boolean;
 }
 
+import BrainAnalytics from './BrainAnalytics.astro';
+
 const {
   title,
   description = import.meta.env.PUBLIC_SITE_DESCRIPTION || '',
@@ -53,6 +55,7 @@ const pageTitle = title ? `${title} | ${siteName}` : siteName;
     <meta property="twitter:description" content={description} />
     {image && <meta property="twitter:image" content={new URL(image, Astro.url)} />}
     
+    <BrainAnalytics />
     <slot name="head" />
   </head>
   <body>

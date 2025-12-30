@@ -1,0 +1,8 @@
+---
+const PUBLIC_BRAIN_URL = import.meta.env.PUBLIC_BRAIN_URL;
+const PUBLIC_BRAIN_KEY = import.meta.env.PUBLIC_BRAIN_KEY;
+---
+
+{PUBLIC_BRAIN_URL && PUBLIC_BRAIN_KEY && (
+  <script is:inline src="/brain-analytics.js" data-brain-url={PUBLIC_BRAIN_URL} data-brain-key={PUBLIC_BRAIN_KEY}></script>
+)}

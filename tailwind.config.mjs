@@ -5,12 +5,30 @@ export default {
 		extend: {
 			colors: {
 				brand: {
-					red: '#f97316',    // Primary: Orange-500
-					yellow: '#fdba74', // Secondary: Orange-300
-					accent: '#3b82f6', // Accent: Blue-500
-					dark: '#0f172a',   // Background: Slate-900 (Navy)
-					light: '#f8fafc',  // Text: Slate-50
-					gray: '#334155',   // Muted: Slate-700
+					orange: {
+						DEFAULT: '#f97316',
+						50: '#fff7ed',
+						100: '#ffedd5',
+						200: '#fed7aa',
+						300: '#fdba74',
+						400: '#fb923c',
+						500: '#f97316',
+						600: '#ea580c',
+						700: '#c2410c',
+						800: '#9a3412',
+						900: '#7c2d12',
+						950: '#431407',
+					},
+					navy: {
+						DEFAULT: '#0f172a', // Slate-900
+						900: '#0f172a',
+						800: '#1e293b', // Slate-800
+					},
+					blue: '#3b82f6',   // Blue-500
+					slate: {
+						50: '#f8fafc',
+						700: '#334155',
+					}
 				}
 			}
 		},
