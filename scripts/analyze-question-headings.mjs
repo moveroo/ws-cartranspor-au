@@ -11,7 +11,13 @@
 
 import fs from 'fs';
 import { join } from 'path';
-import { findPageFiles, readFile, parseAstroFile, getRelativePagePath, projectRoot } from './utils.mjs';
+import {
+  findPageFiles,
+  readFile,
+  parseAstroFile,
+  getRelativePagePath,
+  projectRoot,
+} from './utils.mjs';
 
 // Helper: Extract headings using JSDOM
 function extractHeadings(content) {
@@ -21,19 +27,19 @@ function extractHeadings(content) {
 
   // Query all H2 and H3 elements
   const elements = doc.querySelectorAll('h2, h3');
-  
-  elements.forEach(el => {
+
+  elements.forEach((el) => {
     const text = el.textContent.trim();
     if (text) {
       headings.push({
         level: parseInt(el.tagName.substring(1)),
         text: text,
-        type: 'html' // JSDOM normalizes everything to HTML elements
+        type: 'html', // JSDOM normalizes everything to HTML elements
       });
     }
   });
 
-  // Note: Markdown-style headings (##) in Astro frontmatter or raw markdown components 
+  // Note: Markdown-style headings (##) in Astro frontmatter or raw markdown components
   // might be missed by JSDOM if they aren't rendered to HTML in the static source check.
   // For standard Astro usage (HTML-like syntax), this is much more robust.
 
@@ -43,8 +49,20 @@ function extractHeadings(content) {
 // Helper: Check if heading is already a question
 function isQuestion(text) {
   const questionWords = [
-    'what', 'why', 'how', 'when', 'where', 'who', 'which',
-    'can', 'do', 'does', 'is', 'are', 'will', 'should'
+    'what',
+    'why',
+    'how',
+    'when',
+    'where',
+    'who',
+    'which',
+    'can',
+    'do',
+    'does',
+    'is',
+    'are',
+    'will',
+    'should',
   ];
   const lowerText = text.toLowerCase().trim();
   return questionWords.some((word) => lowerText.startsWith(word)) || lowerText.endsWith('?');
@@ -70,32 +88,62 @@ function suggestQuestion(text) {
 
   // Patterns for conversion
   const conversions = [
-    { pattern: /^routes?\s+from\s+(.+)$/i, suggestion: (m) => `What Routes Are Available from ${capitalizeWords(m[1])}?` },
-    { pattern: /^routes?\s+to\s+(.+)$/i, suggestion: (m) => `What Routes Are Available to ${capitalizeWords(m[1])}?` },
-    { pattern: /^popular\s+(.+)$/i, suggestion: (m) => `What Are the Popular ${capitalizeWords(m[1])}?` },
-    { pattern: /^(.+)\s+guide$/i, suggestion: (m) => `What Is the ${capitalizeWords(m[1])} Guide?` },
-    { 
-      pattern: /^(.+)\s+pricing$/i, 
+    {
+      pattern: /^routes?\s+from\s+(.+)$/i,
+      suggestion: (m) => `What Routes Are Available from ${capitalizeWords(m[1])}?`,
+    },
+    {
+      pattern: /^routes?\s+to\s+(.+)$/i,
+      suggestion: (m) => `What Routes Are Available to ${capitalizeWords(m[1])}?`,
+    },
+    {
+      pattern: /^popular\s+(.+)$/i,
+      suggestion: (m) => `What Are the Popular ${capitalizeWords(m[1])}?`,
+    },
+    {
+      pattern: /^(.+)\s+guide$/i,
+      suggestion: (m) => `What Is the ${capitalizeWords(m[1])} Guide?`,
+    },
+    {
+      pattern: /^(.+)\s+pricing$/i,
       suggestion: (m) => {
         const noun = m[1].toLowerCase();
-        return noun.includes('backload') ? 'How Much Does Backloading Cost?' : `How Much Does ${capitalizeWords(m[1])} Cost?`;
-      } 
+        return noun.includes('backload')
+          ? 'How Much Does Backloading Cost?'
+          : `How Much Does ${capitalizeWords(m[1])} Cost?`;
+      },
     },
     { pattern: /^pricing$/i, suggestion: () => 'How Much Does It Cost?' },
     { pattern: /^benefits?$/i, suggestion: () => 'What Are the Benefits?' },
-    { pattern: /^(.+)\s+benefits?$/i, suggestion: (m) => `What Are the Benefits of ${capitalizeWords(m[1])}?` },
-    { 
-      pattern: /^how\s+(.+)$/i, 
-      suggestion: (m) => m[1].toLowerCase().includes('work') ? `How Does ${m[1]}?` : `How Does ${m[1]} Work?` 
+    {
+      pattern: /^(.+)\s+benefits?$/i,
+      suggestion: (m) => `What Are the Benefits of ${capitalizeWords(m[1])}?`,
+    },
+    {
+      pattern: /^how\s+(.+)$/i,
+      suggestion: (m) =>
+        m[1].toLowerCase().includes('work') ? `How Does ${m[1]}?` : `How Does ${m[1]} Work?`,
     },
     { pattern: /^how\s+to\s+(.+)$/i, suggestion: (m) => `How Do You ${capitalizeWords(m[1])}?` },
     { pattern: /^why\s+(.+)$/i, suggestion: (m) => `Why ${capitalizeWords(m[1])}?` },
-    { pattern: /^(.+)\s+options?$/i, suggestion: (m) => `What Are ${capitalizeWords(m[1])} Options?` },
-    { pattern: /^(.+)\s+process$/i, suggestion: (m) => `How Does the ${capitalizeWords(m[1])} Process Work?` },
+    {
+      pattern: /^(.+)\s+options?$/i,
+      suggestion: (m) => `What Are ${capitalizeWords(m[1])} Options?`,
+    },
+    {
+      pattern: /^(.+)\s+process$/i,
+      suggestion: (m) => `How Does the ${capitalizeWords(m[1])} Process Work?`,
+    },
     { pattern: /^(.+)\s+coverage$/i, suggestion: () => 'What Areas Do You Cover?' },
     { pattern: /^coverage$/i, suggestion: () => 'What Areas Do You Cover?' },
-    { pattern: /^(.+)\s+service$/i, suggestion: (m) => `What ${capitalizeWords(m[1])} Services Do You Offer?` },
-    { pattern: /^moving\s+to\s+or\s+from\s+(.+)$/i, suggestion: (m) => `What Routes Are Available to or from ${capitalizeWords(m[1])}?` }
+    {
+      pattern: /^(.+)\s+service$/i,
+      suggestion: (m) => `What ${capitalizeWords(m[1])} Services Do You Offer?`,
+    },
+    {
+      pattern: /^moving\s+to\s+or\s+from\s+(.+)$/i,
+      suggestion: (m) => `What Routes Are Available to or from ${capitalizeWords(m[1])}?`,
+    },
   ];
 
   for (const { pattern, suggestion } of conversions) {
@@ -109,7 +157,7 @@ function suggestQuestion(text) {
   // Fallbacks
   const words = originalText.split(' ');
   if (words.length <= 2 && originalText.length < 25) {
-      return `What Is ${capitalizeWords(originalText)}?`;
+    return `What Is ${capitalizeWords(originalText)}?`;
   }
   return `How Does ${capitalizeWords(originalText)} Work?`;
 }
@@ -188,8 +236,12 @@ async function main() {
   console.log('======================================================================\n');
 
   console.log(`Total Headings Found: ${totalHeadings}`);
-  console.log(`  ✅ Question Headings: ${totalQuestions} (${Math.round((totalQuestions / (totalHeadings || 1)) * 100)}%)`);
-  console.log(`  📝 Statement Headings: ${totalStatements} (${Math.round((totalStatements / (totalHeadings || 1)) * 100)}%)\n`);
+  console.log(
+    `  ✅ Question Headings: ${totalQuestions} (${Math.round((totalQuestions / (totalHeadings || 1)) * 100)}%)`
+  );
+  console.log(
+    `  📝 Statement Headings: ${totalStatements} (${Math.round((totalStatements / (totalHeadings || 1)) * 100)}%)\n`
+  );
 
   console.log(`Pages with Conversion Suggestions: ${pagesWithSuggestions.length}\n`);
 
@@ -214,7 +266,8 @@ async function main() {
   const outputPath = join(projectRoot, 'analysis-question-headings.json');
   fs.writeFileSync(
     outputPath,
-    JSON.stringify({
+    JSON.stringify(
+      {
         analyzedAt: new Date().toISOString(),
         summary: {
           totalPages: pageFiles.length,
@@ -223,7 +276,10 @@ async function main() {
           totalStatements,
         },
         detailedPages: allAnalyses,
-      }, null, 2)
+      },
+      null,
+      2
+    )
   );
 
   console.log(`📁 Detailed report saved: ${outputPath}\n`);

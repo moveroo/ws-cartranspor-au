@@ -12,7 +12,13 @@
 
 import fs from 'fs';
 import { join } from 'path';
-import { findPageFiles, readFile, parseAstroFile, getRelativePagePath, projectRoot } from './utils.mjs';
+import {
+  findPageFiles,
+  readFile,
+  parseAstroFile,
+  getRelativePagePath,
+  projectRoot,
+} from './utils.mjs';
 
 // Helper: Extract schema JSON-LD info using JSDOM
 function analyzeSchema(filePath) {
@@ -27,63 +33,62 @@ function analyzeSchema(filePath) {
   // 1. Find all JSON-LD scripts
   const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
   let schemas = [];
-  
+
   // Note: static analysis of dynamic JSON-LD in Astro often appears as raw text in the script tag
   // often template literals. We try to parse valid JSON, or regex match known fields if JSON parse fails.
-  
-  scripts.forEach(script => {
-     try {
-       const json = JSON.parse(script.textContent);
-       if (Array.isArray(json)) schemas.push(...json);
-       else schemas.push(json);
-     } catch (e) {
-       // If it's a template literal or has variables, JSON.parse fails.
-       // We'll treat the raw text as a "schema blob" to check for keys.
-       schemas.push({ _raw: script.textContent });
-     }
+
+  scripts.forEach((script) => {
+    try {
+      const json = JSON.parse(script.textContent);
+      if (Array.isArray(json)) schemas.push(...json);
+      else schemas.push(json);
+    } catch (e) {
+      // If it's a template literal or has variables, JSON.parse fails.
+      // We'll treat the raw text as a "schema blob" to check for keys.
+      schemas.push({ _raw: script.textContent });
+    }
   });
 
   // Also check for "schema-org" integration props if used (usually via component props)
   // But usually schema is output as JSON-LD.
 
-  const allSchemaText = schemas.map(s => s._raw ? s._raw : JSON.stringify(s)).join(' ');
+  const allSchemaText = schemas.map((s) => (s._raw ? s._raw : JSON.stringify(s))).join(' ');
 
   // CHECK: LocalBusiness
   const hasLocalBusiness = allSchemaText.includes('LocalBusiness');
   if (hasLocalBusiness) {
-      if (!allSchemaText.includes('telephone')) {
-          issues.push({
-            type: 'missing-telephone',
-            severity: 'high',
-            message: 'LocalBusiness schema missing telephone field',
-          });
-      }
+    if (!allSchemaText.includes('telephone')) {
+      issues.push({
+        type: 'missing-telephone',
+        severity: 'high',
+        message: 'LocalBusiness schema missing telephone field',
+      });
+    }
   }
 
   // CHECK: FAQ Content matching
   const detailsTags = doc.querySelectorAll('details');
-  const faqCount = Array.from(detailsTags).filter(d => 
-      d.textContent.toLowerCase().includes('faq') || 
-      d.querySelector('summary')
+  const faqCount = Array.from(detailsTags).filter(
+    (d) => d.textContent.toLowerCase().includes('faq') || d.querySelector('summary')
   ).length;
 
   if (faqCount > 0) {
-      const hasFAQSchema = allSchemaText.includes('FAQPage');
-      if (!hasFAQSchema) {
-        issues.push({
-          type: 'missing-faq-schema',
-          severity: 'medium',
-          message: `Found ${faqCount} FAQ-like items (<details>) but no FAQPage schema`,
-          faqCount,
-        });
-      }
+    const hasFAQSchema = allSchemaText.includes('FAQPage');
+    if (!hasFAQSchema) {
+      issues.push({
+        type: 'missing-faq-schema',
+        severity: 'medium',
+        message: `Found ${faqCount} FAQ-like items (<details>) but no FAQPage schema`,
+        faqCount,
+      });
+    }
   }
 
   // CHECK: BreadcrumbList
   const hasBreadcrumbSchema = allSchemaText.includes('BreadcrumbList');
   const isHomepage = fileName === 'index.astro';
   const isDynamicRoute = fileName.includes('[') || fileName.includes(']');
-  
+
   if (!isHomepage && !isDynamicRoute && !hasBreadcrumbSchema) {
     issues.push({
       type: 'missing-breadcrumb',
@@ -93,8 +98,12 @@ function analyzeSchema(filePath) {
   }
 
   // CHECK: AggregateRating
-  if (hasLocalBusiness && !allSchemaText.includes('aggregateRating') && !allSchemaText.includes('AggregateRating')) {
-     issues.push({
+  if (
+    hasLocalBusiness &&
+    !allSchemaText.includes('aggregateRating') &&
+    !allSchemaText.includes('AggregateRating')
+  ) {
+    issues.push({
       type: 'missing-rating',
       severity: 'low',
       message: 'LocalBusiness could include aggregateRating for star snippets (optional)',
@@ -108,7 +117,6 @@ function analyzeSchema(filePath) {
   };
 }
 
-
 // Main analysis
 async function main() {
   console.log('\n🔍 Checking All Pages for Schema Issues (JSDOM-Enhanced)\n');
@@ -119,8 +127,8 @@ async function main() {
 
   const results = [];
   for (const file of files) {
-      const res = analyzeSchema(file);
-      if (res) results.push(res);
+    const res = analyzeSchema(file);
+    if (res) results.push(res);
   }
 
   // Group issues by type
@@ -196,13 +204,20 @@ async function main() {
 
   // Save report
   const reportPath = join(projectRoot, 'schema-issues-report.json');
-  fs.writeFileSync(reportPath, JSON.stringify({
-    analyzedAt: new Date().toISOString(),
-    totalPages: files.length,
-    issuesByType,
-    allResults: results,
-  }, null, 2));
-  
+  fs.writeFileSync(
+    reportPath,
+    JSON.stringify(
+      {
+        analyzedAt: new Date().toISOString(),
+        totalPages: files.length,
+        issuesByType,
+        allResults: results,
+      },
+      null,
+      2
+    )
+  );
+
   console.log(`\n💾 Detailed report saved to: schema-issues-report.json\n`);
 }
 

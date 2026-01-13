@@ -13,21 +13,29 @@
 
 import fs from 'fs';
 import { join } from 'path';
-import { findPageFiles, readFile, parseAstroFile, extractTextContent, getRelativePagePath, projectRoot } from './utils.mjs';
+import {
+  findPageFiles,
+  readFile,
+  parseAstroFile,
+  extractTextContent,
+  getRelativePagePath,
+  projectRoot,
+} from './utils.mjs';
 
 // Helper: Extract visible text (from specific sections) using JSDOM
 function extractVisibleContent(dom) {
   const doc = dom.window.document;
-  
+
   // Clean up non-visible or noise elements
-  doc.querySelectorAll('script, style, nav, footer, header').forEach(el => el.remove());
+  doc.querySelectorAll('script, style, nav, footer, header').forEach((el) => el.remove());
 
   // Focus on content-heavy elements
   const sections = [];
-  doc.querySelectorAll('p, h1, h2, h3, li, article, main').forEach(el => {
+  doc.querySelectorAll('p, h1, h2, h3, li, article, main').forEach((el) => {
     const text = el.textContent.trim();
-    if (text.length > 20) { // arbitrary threshold for meaningful content
-        sections.push(text);
+    if (text.length > 20) {
+      // arbitrary threshold for meaningful content
+      sections.push(text);
     }
   });
 
@@ -42,22 +50,110 @@ function getWordCount(text) {
 // Helper: Calculate content similarity (simple word overlap)
 function calculateSimilarity(text1, text2) {
   // Use sets of 4+ letter words for comparison
-  const tokenize = (t) => new Set(t.toLowerCase().split(/\s+/).filter(w => w.length > 3));
-  
+  const tokenize = (t) =>
+    new Set(
+      t
+        .toLowerCase()
+        .split(/\s+/)
+        .filter((w) => w.length > 3)
+    );
+
   const words1 = tokenize(text1);
   const words2 = tokenize(text2);
-  
+
   // Common stop words to filter out (expanded list)
   const stopWords = new Set([
-     'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'her', 'was', 'one', 'our', 'out', 'day', 'get', 'has', 'him', 'his', 'how', 'its', 'may', 'new', 'now', 'old', 'see', 'two', 'way', 'who', 'boy', 'did', 'she', 'use', 'her', 'many', 'than', 'them', 'these', 'so', 'some', 'would', 'make', 'like', 'into', 'time', 'has', 'look', 'more', 'very', 'what', 'know', 'just', 'first', 'also', 'after', 'back', 'other', 'many', 'then', 'them', 'these', 'want', 'been', 'good', 'much', 'some', 'time', 'very', 'when', 'come', 'here', 'just', 'like', 'long', 'make', 'many', 'over', 'such', 'take', 'than', 'them', 'well', 'were'
+    'the',
+    'and',
+    'for',
+    'are',
+    'but',
+    'not',
+    'you',
+    'all',
+    'can',
+    'her',
+    'was',
+    'one',
+    'our',
+    'out',
+    'day',
+    'get',
+    'has',
+    'him',
+    'his',
+    'how',
+    'its',
+    'may',
+    'new',
+    'now',
+    'old',
+    'see',
+    'two',
+    'way',
+    'who',
+    'boy',
+    'did',
+    'she',
+    'use',
+    'her',
+    'many',
+    'than',
+    'them',
+    'these',
+    'so',
+    'some',
+    'would',
+    'make',
+    'like',
+    'into',
+    'time',
+    'has',
+    'look',
+    'more',
+    'very',
+    'what',
+    'know',
+    'just',
+    'first',
+    'also',
+    'after',
+    'back',
+    'other',
+    'many',
+    'then',
+    'them',
+    'these',
+    'want',
+    'been',
+    'good',
+    'much',
+    'some',
+    'time',
+    'very',
+    'when',
+    'come',
+    'here',
+    'just',
+    'like',
+    'long',
+    'make',
+    'many',
+    'over',
+    'such',
+    'take',
+    'than',
+    'them',
+    'well',
+    'were',
   ]);
 
-  const filtered1 = Array.from(words1).filter(w => !stopWords.has(w));
-  const filtered2 = Array.from(words2).filter(w => !stopWords.has(w));
+  const filtered1 = Array.from(words1).filter((w) => !stopWords.has(w));
+  const filtered2 = Array.from(words2).filter((w) => !stopWords.has(w));
 
   if (filtered1.length === 0 || filtered2.length === 0) return 0;
 
-  const intersection = filtered1.filter(w => filtered2.includes(w));
+  const intersection = filtered1.filter((w) => filtered2.includes(w));
   const union = new Set([...filtered1, ...filtered2]);
 
   return intersection.length / union.size;
@@ -65,7 +161,10 @@ function calculateSimilarity(text1, text2) {
 
 // Helper: Extract key phrases (n-grams)
 function extractKeyPhrases(text, minLength = 3, maxLength = 5) {
-  const words = text.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  const words = text
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((w) => w.length > 2);
   const phrases = new Set();
 
   for (let n = minLength; n <= maxLength && n <= words.length; n++) {
@@ -86,15 +185,18 @@ function analyzePage(filePath) {
 
   const fileName = getRelativePagePath(filePath);
   const dom = parseAstroFile(content);
-  
+
   const fullText = extractTextContent(dom.window.document);
   const visibleText = extractVisibleContent(dom);
   const wordCount = getWordCount(fullText);
   const visibleWordCount = getWordCount(visibleText);
 
   // Extract title and description metadata (simple regex still okay for frontmatter/props)
-  const titleMatch = content.match(/title\s*=\s*["']([^"']+)["']/) || content.match(/title\s*=\s*\{`([^`]+)`\}/);
-  const descMatch = content.match(/description\s*=\s*["']([^"']+)["']/) || content.match(/description\s*=\s*\{`([^`]+)`\}/);
+  const titleMatch =
+    content.match(/title\s*=\s*["']([^"']+)["']/) || content.match(/title\s*=\s*\{`([^`]+)`\}/);
+  const descMatch =
+    content.match(/description\s*=\s*["']([^"']+)["']/) ||
+    content.match(/description\s*=\s*\{`([^`]+)`\}/);
 
   return {
     file: fileName,
@@ -131,9 +233,9 @@ async function main() {
   const similarities = [];
   const duplicateThreshold = 0.7; // 70%
 
-  // Optimization: Pre-compute word sets to avoid re-tokenizing inside the loop? 
+  // Optimization: Pre-compute word sets to avoid re-tokenizing inside the loop?
   // For now, keeping logic simple as the main bottleneck was DOM parsing.
-  
+
   for (let i = 0; i < allPages.length; i++) {
     for (let j = i + 1; j < allPages.length; j++) {
       const similarity = calculateSimilarity(allPages[i].visibleText, allPages[j].visibleText);
@@ -156,14 +258,16 @@ async function main() {
   const excellentContent = allPages.filter((page) => page.wordCount >= 1000);
 
   const highSimilarity = similarities.filter((s) => s.similarity >= duplicateThreshold * 100);
-  const mediumSimilarity = similarities.filter((s) => s.similarity >= 50 && s.similarity < duplicateThreshold * 100);
+  const mediumSimilarity = similarities.filter(
+    (s) => s.similarity >= 50 && s.similarity < duplicateThreshold * 100
+  );
 
   // Output results
   console.log('======================================================================');
   console.log('📊 CONTENT ANALYSIS RESULTS');
   console.log('======================================================================\n');
   console.log(`Total Pages Analyzed: ${allPages.length}\n`);
-  
+
   console.log('📝 Word Count Distribution:\n');
   console.log(`  ❌ Thin Content (< 300 words): ${thinContent.length} pages`);
   console.log(`  🟡 Good Content (300-999 words): ${goodContent.length} pages`);
@@ -175,15 +279,18 @@ async function main() {
 
   if (thinContent.length > 0) {
     console.log('\n❌ THIN CONTENT PAGES (< 300 words)');
-    thinContent.sort((a, b) => a.wordCount - b.wordCount).slice(0, 10).forEach(p => {
+    thinContent
+      .sort((a, b) => a.wordCount - b.wordCount)
+      .slice(0, 10)
+      .forEach((p) => {
         console.log(`  - ${p.file} (${p.wordCount} words)`);
-    });
+      });
   }
 
   if (highSimilarity.length > 0) {
     console.log('\n🔴 TOP DUPLICATE CANDIDATES');
-    highSimilarity.slice(0, 5).forEach(p => {
-        console.log(`  - ${p.page1} <-> ${p.page2} (${p.similarity}%)`);
+    highSimilarity.slice(0, 5).forEach((p) => {
+      console.log(`  - ${p.page1} <-> ${p.page2} (${p.similarity}%)`);
     });
   }
 
@@ -191,17 +298,23 @@ async function main() {
   const outputPath = join(projectRoot, 'analysis-content-uniqueness.json');
   fs.writeFileSync(
     outputPath,
-    JSON.stringify({
+    JSON.stringify(
+      {
         analyzedAt: new Date().toISOString(),
         summary: {
-           totalPages: allPages.length,
-           thinContent: thinContent.length,
-           highSimilarityPairs: highSimilarity.length,
-           averageWordCount: Math.round(allPages.reduce((sum, p) => sum + p.wordCount, 0) / (allPages.length || 1)),
+          totalPages: allPages.length,
+          thinContent: thinContent.length,
+          highSimilarityPairs: highSimilarity.length,
+          averageWordCount: Math.round(
+            allPages.reduce((sum, p) => sum + p.wordCount, 0) / (allPages.length || 1)
+          ),
         },
-        thinContent: thinContent.map(p => ({ file: p.file, wordCount: p.wordCount })),
+        thinContent: thinContent.map((p) => ({ file: p.file, wordCount: p.wordCount })),
         highSimilarity: highSimilarity,
-      }, null, 2)
+      },
+      null,
+      2
+    )
   );
 
   console.log(`\n📁 Detailed report saved: ${outputPath}\n`);

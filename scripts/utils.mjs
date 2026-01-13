@@ -13,7 +13,7 @@ const projectRoot = join(__dirname, '..');
 
 /**
  * Read file content safely
- * @param {string} filePath 
+ * @param {string} filePath
  * @returns {string|null}
  */
 export function readFile(filePath) {
@@ -31,7 +31,7 @@ export function readFile(filePath) {
  */
 export function findPageFiles() {
   const pagesDir = join(projectRoot, 'src', 'pages');
-  
+
   function getFiles(dir) {
     const dirents = fs.readdirSync(dir, { withFileTypes: true });
     const files = [];
@@ -57,7 +57,7 @@ export function findPageFiles() {
 /**
  * Parse Astro file content into a DOM object
  * Handles stripping frontmatter and script/style tags
- * @param {string} content 
+ * @param {string} content
  * @returns {JSDOM}
  */
 export function parseAstroFile(content) {
@@ -65,37 +65,35 @@ export function parseAstroFile(content) {
   let html = content.replace(/^---[\s\S]*?---\n/, '');
 
   // 2. Remove Astro components specific syntax that JSDOM might choke on
-  // This is a naive cleanup, but works for content extraction. 
+  // This is a naive cleanup, but works for content extraction.
   // We want to keep the HTML structure mostly intact.
-  
+
   // Remove {variables} expressions somewhat safely to avoid breaking HTML
   // (Note: This is still imperfect for complex expressions but better than raw)
-  // html = html.replace(/\{[^}]+\}/g, ''); 
+  // html = html.replace(/\{[^}]+\}/g, '');
 
   // 3. Load into JSDOM
   const dom = new JSDOM(html);
-  
+
   // 4. Remove scripts and styles for pure content analysis
   const doc = dom.window.document;
-  doc.querySelectorAll('script, style').forEach(el => el.remove());
+  doc.querySelectorAll('script, style').forEach((el) => el.remove());
 
   return dom;
 }
 
 /**
  * Extract text content from a JSDOM Document
- * @param {Document} doc 
+ * @param {Document} doc
  * @returns {string} cleaned text
  */
 export function extractTextContent(doc) {
-  return (doc.body.textContent || '')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
 }
 
 /**
  * Get relative path from project src/pages
- * @param {string} fullPath 
+ * @param {string} fullPath
  * @returns {string}
  */
 export function getRelativePagePath(fullPath) {
@@ -109,31 +107,31 @@ export function getRelativePagePath(fullPath) {
 export function getAllRoutes() {
   const files = findPageFiles();
   const routes = new Set();
-  
-  files.forEach(file => {
-      let route = getRelativePagePath(file);
-      
-      // Remove extension
-      route = route.replace(/\.astro$/, '');
-      
-      // Handle index
-      if (route.endsWith('index')) {
-          route = route.replace(/index$/, '');
-      }
-      
-      // Ensure leading slash
-      if (!route.startsWith('/')) {
-        route = '/' + route;
-      }
-      
-      // Clean up trailing slash if it's not root
-      if (route !== '/' && route.endsWith('/')) {
-          route = route.slice(0, -1);
-      }
-      
-      routes.add(route);
+
+  files.forEach((file) => {
+    let route = getRelativePagePath(file);
+
+    // Remove extension
+    route = route.replace(/\.astro$/, '');
+
+    // Handle index
+    if (route.endsWith('index')) {
+      route = route.replace(/index$/, '');
+    }
+
+    // Ensure leading slash
+    if (!route.startsWith('/')) {
+      route = '/' + route;
+    }
+
+    // Clean up trailing slash if it's not root
+    if (route !== '/' && route.endsWith('/')) {
+      route = route.slice(0, -1);
+    }
+
+    routes.add(route);
   });
-  
+
   return routes;
 }
 

@@ -10,7 +10,13 @@
 
 import fs from 'fs';
 import { join } from 'path';
-import { findPageFiles, readFile, parseAstroFile, getRelativePagePath, projectRoot } from './utils.mjs';
+import {
+  findPageFiles,
+  readFile,
+  parseAstroFile,
+  getRelativePagePath,
+  projectRoot,
+} from './utils.mjs';
 
 function analyzeHeadings(filePath) {
   const content = readFile(filePath);
@@ -26,7 +32,10 @@ function analyzeHeadings(filePath) {
   if (h1s.length === 0) {
     issues.push({ type: 'missing-h1', message: 'Page is missing an H1 heading' });
   } else if (h1s.length > 1) {
-    issues.push({ type: 'multiple-h1', message: `Page has ${h1s.length} H1 headings (should have exactly 1)` });
+    issues.push({
+      type: 'multiple-h1',
+      message: `Page has ${h1s.length} H1 headings (should have exactly 1)`,
+    });
   }
 
   // 2. Hierarchy Check
@@ -39,13 +48,13 @@ function analyzeHeadings(filePath) {
 
     // Skip H1 check here as it is done above, but track it for hierarchy
     if (currentLevel !== 0 && level > currentLevel + 1) {
-       // Skipped a level (e.g. H2 -> H4)
-       issues.push({
-         type: 'skipped-level',
-         message: `Skipped heading level: H${currentLevel} -> H${level} ("${text}...")`
-       });
+      // Skipped a level (e.g. H2 -> H4)
+      issues.push({
+        type: 'skipped-level',
+        message: `Skipped heading level: H${currentLevel} -> H${level} ("${text}...")`,
+      });
     }
-    
+
     // Update current level
     currentLevel = level;
   });
@@ -53,7 +62,7 @@ function analyzeHeadings(filePath) {
   return {
     file: fileName,
     issues,
-    headingCount: headings.length
+    headingCount: headings.length,
   };
 }
 
@@ -70,29 +79,36 @@ async function main() {
     if (res) results.push(res);
   }
 
-  const pagesWithIssues = results.filter(r => r.issues.length > 0);
-  
+  const pagesWithIssues = results.filter((r) => r.issues.length > 0);
+
   console.log(`Analyzed ${files.length} pages.`);
   console.log(`Found ${pagesWithIssues.length} pages with structure issues.\n`);
 
   if (pagesWithIssues.length > 0) {
-    pagesWithIssues.forEach(p => {
-        console.log(`📄 ${p.file}`);
-        p.issues.forEach(i => console.log(`   ❌ ${i.message}`));
-        console.log('');
+    pagesWithIssues.forEach((p) => {
+      console.log(`📄 ${p.file}`);
+      p.issues.forEach((i) => console.log(`   ❌ ${i.message}`));
+      console.log('');
     });
     // Exit with error code for CI/CD
     process.exit(1);
   } else {
-      console.log('✅ No heading structure issues found.');
+    console.log('✅ No heading structure issues found.');
   }
 
   // Save report
   const outputPath = join(projectRoot, 'analysis-heading-structure.json');
-  fs.writeFileSync(outputPath, JSON.stringify({
-      analyzedAt: new Date().toISOString(),
-      issues: pagesWithIssues
-  }, null, 2));
+  fs.writeFileSync(
+    outputPath,
+    JSON.stringify(
+      {
+        analyzedAt: new Date().toISOString(),
+        issues: pagesWithIssues,
+      },
+      null,
+      2
+    )
+  );
 
   console.log(`📁 Detailed report saved: ${outputPath}\n`);
 }

@@ -28,7 +28,7 @@ async function runScript(item) {
   return new Promise((resolve) => {
     console.log(`\n🚀 Running ${item.name} Check...`);
     const child = spawn('node', [join(__dirname, item.script)], { stdio: 'inherit' });
-    
+
     child.on('close', (code) => {
       resolve({ ...item, code });
     });
@@ -40,26 +40,26 @@ async function main() {
   console.log('=========================================\n');
 
   let failureCount = 0;
-  
+
   for (const item of scripts) {
-      const result = await runScript(item);
-      if (result.code !== 0 && result.critical) {
-          console.error(`❌ ${result.name} Check Failed!`);
-          failureCount++;
-      } else if (result.code !== 0) {
-          console.warn(`⚠️  ${result.name} Check returned warnings (Non-critical)`);
-      } else {
-          console.log(`✅ ${result.name} Check Passed`);
-      }
+    const result = await runScript(item);
+    if (result.code !== 0 && result.critical) {
+      console.error(`❌ ${result.name} Check Failed!`);
+      failureCount++;
+    } else if (result.code !== 0) {
+      console.warn(`⚠️  ${result.name} Check returned warnings (Non-critical)`);
+    } else {
+      console.log(`✅ ${result.name} Check Passed`);
+    }
   }
 
   console.log('\n=========================================');
   if (failureCount > 0) {
-      console.error(`❌ Validation Failed with ${failureCount} critical errors.`);
-      process.exit(1);
+    console.error(`❌ Validation Failed with ${failureCount} critical errors.`);
+    process.exit(1);
   } else {
-      console.log('✅ All Critical Structure Checks Passed!');
-      process.exit(0);
+    console.log('✅ All Critical Structure Checks Passed!');
+    process.exit(0);
   }
 }
 
