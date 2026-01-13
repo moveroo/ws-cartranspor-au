@@ -1,0 +1,161 @@
+{
+  "analyzedAt": "2026-01-13T02:09:36.862Z",
+  "summary": {
+    "totalPages": 10,
+    "totalHeadings": 20,
+    "totalQuestions": 4,
+    "totalStatements": 16
+  },
+  "detailedPages": [
+    {
+      "file": "404.astro",
+      "totalHeadings": 1,
+      "questionHeadings": 0,
+      "statementHeadings": 1,
+      "suggestions": [
+        {
+          "original": "Page Not Found",
+          "suggested": "How Does Page Not Found Work?",
+          "level": 2
+        }
+      ]
+    },
+    {
+      "file": "about.astro",
+      "totalHeadings": 4,
+      "questionHeadings": 1,
+      "statementHeadings": 3,
+      "suggestions": [
+        {
+          "original": "Our Mission",
+          "suggested": "What Is Our Mission?",
+          "level": 2
+        },
+        {
+          "original": "Our Network",
+          "suggested": "What Is Our Network?",
+          "level": 3
+        },
+        {
+          "original": "Technology Driven",
+          "suggested": "What Is Technology Driven?",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "file": "blog.astro",
+      "totalHeadings": 1,
+      "questionHeadings": 0,
+      "statementHeadings": 1,
+      "suggestions": [
+        {
+          "original": "{post.data.title}",
+          "suggested": "What Is {post.data.title}?",
+          "level": 3
+        }
+      ]
+    },
+    {
+      "file": "contact.astro",
+      "totalHeadings": 4,
+      "questionHeadings": 1,
+      "statementHeadings": 3,
+      "suggestions": [
+        {
+          "original": "Get in Touch",
+          "suggested": "How Does Get In Touch Work?",
+          "level": 2
+        },
+        {
+          "original": "{detail.title}",
+          "suggested": "What Is {detail.title}?",
+          "level": 3
+        },
+        {
+          "original": "Send us a message",
+          "suggested": "How Does Send Us A Message Work?",
+          "level": 2
+        }
+      ]
+    },
+    {
+      "file": "index.astro",
+      "totalHeadings": 1,
+      "questionHeadings": 1,
+      "statementHeadings": 0,
+      "suggestions": []
+    },
+    {
+      "file": "logo-preview.astro",
+      "totalHeadings": 3,
+      "questionHeadings": 0,
+      "statementHeadings": 3,
+      "suggestions": [
+        {
+          "original": "Light Background",
+          "suggested": "What Is Light Background?",
+          "level": 2
+        },
+        {
+          "original": "Dark Background",
+          "suggested": "What Is Dark Background?",
+          "level": 2
+        },
+        {
+          "original": "Brand Colors",
+          "suggested": "What Is Brand Colors?",
+          "level": 2
+        }
+      ]
+    },
+    {
+      "file": "privacy.astro",
+      "totalHeadings": 3,
+      "questionHeadings": 0,
+      "statementHeadings": 3,
+      "suggestions": [
+        {
+          "original": "Interpretation and Definitions",
+          "suggested": "How Does Interpretation And Definitions Work?",
+          "level": 2
+        },
+        {
+          "original": "Interpretation",
+          "suggested": "What Is Interpretation?",
+          "level": 3
+        },
+        {
+          "original": "Collection and Use of Your Personal Data",
+          "suggested": "How Does Collection And Use Of Your Personal Data Work?",
+          "level": 2
+        }
+      ]
+    },
+    {
+      "file": "services/[...slug].astro",
+      "totalHeadings": 1,
+      "questionHeadings": 1,
+      "statementHeadings": 0,
+      "suggestions": []
+    },
+    {
+      "file": "terms.astro",
+      "totalHeadings": 2,
+      "questionHeadings": 0,
+      "statementHeadings": 2,
+      "suggestions": [
+        {
+          "original": "Acknowledgment",
+          "suggested": "What Is Acknowledgment?",
+          "level": 2
+        },
+        {
+          "original": "Carriage of Goods",
+          "suggested": "How Does Carriage Of Goods Work?",
+          "level": 2
+        }
+      ]
+    }
+  ]
+}

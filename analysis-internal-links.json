@@ -1,0 +1,16 @@
+{
+  "analyzedAt": "2026-01-13T02:09:35.685Z",
+  "routes": [
+    "/404",
+    "/[...slug]",
+    "/about",
+    "/blog",
+    "/contact",
+    "/",
+    "/logo-preview",
+    "/privacy",
+    "/services/[...slug]",
+    "/terms"
+  ],
+  "issues": []
+}

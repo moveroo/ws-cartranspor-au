@@ -1,0 +1,52 @@
+{
+  "analyzedAt": "2026-01-13T02:09:37.231Z",
+  "summary": {
+    "totalPages": 10,
+    "thinContent": 10,
+    "highSimilarityPairs": 0,
+    "averageWordCount": 60
+  },
+  "thinContent": [
+    {
+      "file": "[...slug].astro",
+      "wordCount": 7
+    },
+    {
+      "file": "services/[...slug].astro",
+      "wordCount": 15
+    },
+    {
+      "file": "index.astro",
+      "wordCount": 18
+    },
+    {
+      "file": "404.astro",
+      "wordCount": 20
+    },
+    {
+      "file": "logo-preview.astro",
+      "wordCount": 33
+    },
+    {
+      "file": "blog.astro",
+      "wordCount": 37
+    },
+    {
+      "file": "contact.astro",
+      "wordCount": 69
+    },
+    {
+      "file": "terms.astro",
+      "wordCount": 103
+    },
+    {
+      "file": "privacy.astro",
+      "wordCount": 131
+    },
+    {
+      "file": "about.astro",
+      "wordCount": 170
+    }
+  ],
+  "highSimilarity": []
+}

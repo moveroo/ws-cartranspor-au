@@ -1,0 +1,147 @@
+{
+  "analyzedAt": "2026-01-13T02:09:36.057Z",
+  "totalPages": 10,
+  "issuesByType": {
+    "missing-telephone": [],
+    "missing-faq-schema": [],
+    "missing-breadcrumb": [
+      {
+        "file": "404.astro",
+        "type": "missing-breadcrumb",
+        "severity": "low",
+        "message": "Page could benefit from BreadcrumbList schema"
+      },
+      {
+        "file": "about.astro",
+        "type": "missing-breadcrumb",
+        "severity": "low",
+        "message": "Page could benefit from BreadcrumbList schema"
+      },
+      {
+        "file": "blog.astro",
+        "type": "missing-breadcrumb",
+        "severity": "low",
+        "message": "Page could benefit from BreadcrumbList schema"
+      },
+      {
+        "file": "contact.astro",
+        "type": "missing-breadcrumb",
+        "severity": "low",
+        "message": "Page could benefit from BreadcrumbList schema"
+      },
+      {
+        "file": "logo-preview.astro",
+        "type": "missing-breadcrumb",
+        "severity": "low",
+        "message": "Page could benefit from BreadcrumbList schema"
+      },
+      {
+        "file": "privacy.astro",
+        "type": "missing-breadcrumb",
+        "severity": "low",
+        "message": "Page could benefit from BreadcrumbList schema"
+      },
+      {
+        "file": "terms.astro",
+        "type": "missing-breadcrumb",
+        "severity": "low",
+        "message": "Page could benefit from BreadcrumbList schema"
+      }
+    ],
+    "missing-rating": []
+  },
+  "allResults": [
+    {
+      "file": "404.astro",
+      "hasLocalBusiness": false,
+      "issues": [
+        {
+          "type": "missing-breadcrumb",
+          "severity": "low",
+          "message": "Page could benefit from BreadcrumbList schema"
+        }
+      ]
+    },
+    {
+      "file": "[...slug].astro",
+      "hasLocalBusiness": false,
+      "issues": []
+    },
+    {
+      "file": "about.astro",
+      "hasLocalBusiness": false,
+      "issues": [
+        {
+          "type": "missing-breadcrumb",
+          "severity": "low",
+          "message": "Page could benefit from BreadcrumbList schema"
+        }
+      ]
+    },
+    {
+      "file": "blog.astro",
+      "hasLocalBusiness": false,
+      "issues": [
+        {
+          "type": "missing-breadcrumb",
+          "severity": "low",
+          "message": "Page could benefit from BreadcrumbList schema"
+        }
+      ]
+    },
+    {
+      "file": "contact.astro",
+      "hasLocalBusiness": false,
+      "issues": [
+        {
+          "type": "missing-breadcrumb",
+          "severity": "low",
+          "message": "Page could benefit from BreadcrumbList schema"
+        }
+      ]
+    },
+    {
+      "file": "index.astro",
+      "hasLocalBusiness": false,
+      "issues": []
+    },
+    {
+      "file": "logo-preview.astro",
+      "hasLocalBusiness": false,
+      "issues": [
+        {
+          "type": "missing-breadcrumb",
+          "severity": "low",
+          "message": "Page could benefit from BreadcrumbList schema"
+        }
+      ]
+    },
+    {
+      "file": "privacy.astro",
+      "hasLocalBusiness": false,
+      "issues": [
+        {
+          "type": "missing-breadcrumb",
+          "severity": "low",
+          "message": "Page could benefit from BreadcrumbList schema"
+        }
+      ]
+    },
+    {
+      "file": "services/[...slug].astro",
+      "hasLocalBusiness": false,
+      "issues": []
+    },
+    {
+      "file": "terms.astro",
+      "hasLocalBusiness": false,
+      "issues": [
+        {
+          "type": "missing-breadcrumb",
+          "severity": "low",
+          "message": "Page could benefit from BreadcrumbList schema"
+        }
+      ]
+    }
+  ]
+}
