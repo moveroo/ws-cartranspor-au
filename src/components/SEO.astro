@@ -21,6 +21,11 @@ const {
 
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'My Site';
 const pageTitle = title ? `${title} | ${siteName}` : siteName;
+// MM BRAIN Matomo rollout
+const matomoBaseUrl = (
+  import.meta.env.PUBLIC_MATOMO_BASE_URL || 'https://stats.redirection.com.au'
+).replace(/\/$/, '');
+const matomoSiteId = import.meta.env.PUBLIC_MATOMO_SITE_ID || '11';
 ---
 
 <!doctype html>
@@ -56,6 +61,17 @@ const pageTitle = title ? `${title} | ${siteName}` : siteName;
     {image && <meta property="twitter:image" content={new URL(image, Astro.url)} />}
 
     <BrainAnalytics />
+    <!-- MM BRAIN Matomo -->
+    <link rel="preconnect" href={matomoBaseUrl} />
+    <link rel="dns-prefetch" href={matomoBaseUrl} />
+    {
+      matomoBaseUrl && matomoSiteId && (
+        <script
+          is:inline
+          set:html={`var _paq = window._paq = window._paq || []; _paq.push(['trackPageView']); _paq.push(['enableLinkTracking']); (function() { var u='${matomoBaseUrl}/'; _paq.push(['setTrackerUrl', u + 'piwik.php']); _paq.push(['setSiteId', '${matomoSiteId}']); var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.async=true; g.src=u + 'piwik.js'; s.parentNode.insertBefore(g,s); })();`}
+        />
+      )
+    }
     <slot name="head" />
   </head>
   <body>
