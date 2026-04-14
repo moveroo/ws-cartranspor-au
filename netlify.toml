@@ -2,6 +2,54 @@
   command = "npm run build"
   publish = "dist"
 
+[[redirects]]
+  from = "/contact"
+  to = "https://quoting.cartransport.au/contact"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact/"
+  to = "https://quoting.cartransport.au/contact"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact-us"
+  to = "https://quoting.cartransport.au/contact"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact-us/"
+  to = "https://quoting.cartransport.au/contact"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact-page"
+  to = "https://quoting.cartransport.au/contact"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact-page/"
+  to = "https://quoting.cartransport.au/contact"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact-au"
+  to = "https://quoting.cartransport.au/contact"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/contact-au/"
+  to = "https://quoting.cartransport.au/contact"
+  status = 301
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
