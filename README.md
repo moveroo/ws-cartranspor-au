@@ -1,43 +1,65 @@
-# Astro Starter Kit: Minimal
+# MM-cartransport.au
 
-```sh
-npm create astro@latest -- --template minimal
+Canonical Astro controller for `cartransport.au`.
+
+This repo contains the live `cartransport.au` Astro site: a route-heavy SEO-focused transport site with custom components, analysis scripts, and a broader content/application surface than the small fleet marketing repos.
+
+## Current State
+
+- domain: `https://cartransport.au`
+- framework: Astro
+- hosting: Netlify (per current controller record)
+- local controller path: `MM-cartransport.au`
+- site shape: content-led vehicle transport site with city, blog, legal, and support pages
+
+The current migration and operating paperwork lives in:
+
+- [docs/migration-ledger.md](docs/migration-ledger.md)
+- [docs/redirect-map.md](docs/redirect-map.md)
+- [docs/indexed-valid-inventory.md](docs/indexed-valid-inventory.md)
+- [docs/homepage-audit.md](docs/homepage-audit.md)
+- [docs/live-cutover-status.md](docs/live-cutover-status.md)
+- [docs/PROJECT-CHECKLIST.md](docs/PROJECT-CHECKLIST.md)
+
+## Important Commands
+
+```bash
+npm run dev
+npm run build
+npm run check
+npm run check:seo
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Useful supporting commands:
 
-## 🚀 Project Structure
+- `npm run test:run`
+- `npm run seo:audit`
+- `npm run analyze:duplicates`
+- `npm run analyze:content`
+- `npm run check:links`
 
-Inside of your Astro project, you'll see the following folders and files:
+## Site Shape
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+Current important building blocks:
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+- public marketing, legal, and blog pages in `src/pages/`
+- a route/content layer rendered through `[...slug].astro`
+- custom SEO, schema, analytics, and FAQ components
+- a large set of SEO-analysis and cleanup scripts in `scripts/`
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Environment
 
-Any static assets, like images, can be placed in the `public/` directory.
+Copy `.env.example` to `.env` when needed:
 
-## 🧞 Commands
+- `PUBLIC_SITE_URL`
+- `PUBLIC_SITE_NAME`
+- `PUBLIC_SITE_DESCRIPTION`
+- `PUBLIC_SITE_IMAGE`
+- `PUBLIC_GA_ID`
+- `PUBLIC_MATOMO_BASE_URL`
+- `PUBLIC_MATOMO_SITE_ID`
 
-All commands are run from the root of the project, from a terminal:
+## Notes
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+- this repo had never been normalized after the folder rename, so it was still carrying the Astro starter README
+- the current standardization pass adds the fleet controller contract and fixes the canonical robots URL generation
