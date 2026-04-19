@@ -1,0 +1,49 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { site } from '../config/site';
+---
+
+<Layout title="HTML Sitemap" description="Human-readable sitemap for Vehicle Transport Australia.">
+  <section class="bg-white py-20">
+    <div class="container mx-auto px-4 max-w-5xl">
+      <p class="text-sm font-semibold uppercase tracking-[0.24em] text-brand-orange-500">
+        HTML sitemap
+      </p>
+      <h1 class="mt-4 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
+        Vehicle Transport Australia sitemap
+      </h1>
+      <p class="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
+        A simple directory of the main public pages, quote destinations, and legal references.
+      </p>
+      <div class="mt-10 grid gap-4 md:grid-cols-2">
+        <section class="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+          <h2 class="text-xl font-semibold text-slate-900">Public pages</h2>
+          <ul class="mt-4 space-y-2 text-slate-700">
+            {
+              site.publicPages.map((page) => (
+                <li>
+                  <a class="hover:text-brand-orange-500" href={page.href}>
+                    {page.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+        <section class="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
+          <h2 class="text-xl font-semibold text-slate-900">Quote pathways</h2>
+          <ul class="mt-4 space-y-2 text-slate-700">
+            <li>
+              <a class="hover:text-brand-orange-500" href={site.destinations.quote}
+                >Vehicle quote</a>
+            </li>
+            <li>
+              <a class="hover:text-brand-orange-500" href={site.destinations.contact}
+                >Contact team</a>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </section>
+</Layout>

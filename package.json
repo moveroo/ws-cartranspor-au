@@ -37,6 +37,7 @@
     "check:links": "node scripts/analyze-internal-links.mjs"
   },
   "dependencies": {
+    "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.6.0",
     "@astrojs/tailwind": "^6.0.2",
     "@fontsource/roboto": "^5.2.9",

@@ -1,0 +1,17 @@
+---
+const matomoBaseUrl = (
+  import.meta.env.PUBLIC_MATOMO_BASE_URL || 'https://stats.redirection.com.au'
+).replace(/\/$/, '');
+const matomoSiteId = import.meta.env.PUBLIC_MATOMO_SITE_ID || '11';
+---
+
+<link rel="preconnect" href={matomoBaseUrl} />
+<link rel="dns-prefetch" href={matomoBaseUrl} />
+{
+  matomoBaseUrl && matomoSiteId && (
+    <script
+      is:inline
+      set:html={`var _paq = window._paq = window._paq || []; _paq.push(['trackPageView']); _paq.push(['enableLinkTracking']); (function() { var u='${matomoBaseUrl}/'; _paq.push(['setTrackerUrl', u + 'piwik.php']); _paq.push(['setSiteId', '${matomoSiteId}']); var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0]; g.async=true; g.src=u + 'piwik.js'; s.parentNode.insertBefore(g,s); })();`}
+    />
+  )
+}
