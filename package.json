@@ -17,6 +17,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
+    "check:contract": "node ./scripts/check-contract.mjs",
     "check:seo": "node scripts/check-seo.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
