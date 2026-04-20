@@ -1,9 +1,63 @@
 ---
-import LegacyAnalytics from '../Analytics.astro';
 import BrainAnalytics from '../BrainAnalytics.astro';
+import Ga4 from './Ga4.astro';
 import Matomo from './Matomo.astro';
+import { site } from '../../config/site';
+
+function parseJsonRecord(value) {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(value);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    return Object.fromEntries(
+      Object.entries(parsed).map(([key, item]) => [key, item == null ? '' : String(item)])
+    );
+  } catch {
+    return null;
+  }
+}
+
+const analyticsEnabled = import.meta.env.PUBLIC_ANALYTICS_ENABLED;
+const analyticsProvider = import.meta.env.PUBLIC_ANALYTICS_PROVIDER;
+const analyticsConfig = parseJsonRecord(import.meta.env.PUBLIC_ANALYTICS_CONFIG);
+
+let provider = null;
+let config = {};
+
+if (analyticsProvider && analyticsConfig) {
+  provider = analyticsProvider;
+  config = analyticsConfig;
+} else if (import.meta.env.PUBLIC_GA_MEASUREMENT_ID || 'G-NSD8TY54WZ') {
+  provider = 'ga4';
+  config = {
+    measurement_id: import.meta.env.PUBLIC_GA_MEASUREMENT_ID || 'G-NSD8TY54WZ',
+    tag_url: import.meta.env.PUBLIC_GA_TAG_URL || 'https://www.googletagmanager.com/gtag/js',
+    send_page_view: import.meta.env.PUBLIC_GA_SEND_PAGE_VIEW || 'true',
+    anonymize_ip: import.meta.env.PUBLIC_GA_ANONYMIZE_IP || 'false',
+    site_key: site.analytics.siteKey,
+  };
+} else if (import.meta.env.PUBLIC_MATOMO_BASE_URL && import.meta.env.PUBLIC_MATOMO_SITE_ID) {
+  provider = 'matomo';
+  config = {
+    base_url: import.meta.env.PUBLIC_MATOMO_BASE_URL,
+    site_id: import.meta.env.PUBLIC_MATOMO_SITE_ID,
+  };
+}
+
+const enabled = analyticsEnabled ? analyticsEnabled === 'true' : Boolean(provider);
 ---
 
-<LegacyAnalytics provider="gtag" />
+{
+  import.meta.env.PROD && enabled && provider === 'ga4' && (
+    <Ga4
+      measurementId={config.measurement_id}
+      tagUrl={config.tag_url}
+      sendPageView={config.send_page_view}
+      anonymizeIp={config.anonymize_ip}
+      siteKey={config.site_key || site.analytics.siteKey}
+      trackedLinks={site.analytics.trackedLinks}
+    />
+  )
+}
+{import.meta.env.PROD && enabled && provider === 'matomo' && <Matomo />}
 <BrainAnalytics />
-<Matomo />

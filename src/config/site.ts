@@ -8,6 +8,15 @@ export const site = {
     quote: 'https://quoting.cartransport.au/quote/vehicle',
     contact: 'https://quoting.cartransport.au/contact',
   },
+  analytics: {
+    siteKey: 'cartransport-au',
+    trackedLinks: [
+      {
+        href: 'https://quoting.cartransport.au/quote/vehicle',
+        eventName: 'quote_vehicle_click',
+      },
+    ],
+  },
   publicPages: [
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About' },

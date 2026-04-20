@@ -1,0 +1,58 @@
+---
+interface Props {
+  measurementId?: string;
+  tagUrl?: string;
+  sendPageView?: boolean | string;
+  anonymizeIp?: boolean | string;
+  siteKey?: string;
+  trackedLinks?: Array<{
+    href: string;
+    eventName: string;
+  }>;
+}
+
+const {
+  measurementId = '',
+  tagUrl = 'https://www.googletagmanager.com/gtag/js',
+  sendPageView = true,
+  anonymizeIp = false,
+  siteKey = '',
+  trackedLinks = [],
+} = Astro.props;
+
+const gaMeasurementId = measurementId.trim();
+const gaTagUrl = tagUrl.trim() || 'https://www.googletagmanager.com/gtag/js';
+const gaSendPageView =
+  typeof sendPageView === 'string' ? sendPageView !== 'false' : Boolean(sendPageView);
+const gaAnonymizeIp =
+  typeof anonymizeIp === 'string' ? anonymizeIp === 'true' : Boolean(anonymizeIp);
+
+const gaConfig: Record<string, boolean | string> = {};
+
+gaConfig.send_page_view = gaSendPageView;
+
+if (gaAnonymizeIp) {
+  gaConfig.anonymize_ip = true;
+}
+
+const normalizedTrackedLinks = trackedLinks
+  .filter((link) => link?.href && link?.eventName)
+  .map((link) => ({
+    href: link.href.replace(/\/$/, ''),
+    eventName: link.eventName,
+  }));
+---
+
+{
+  import.meta.env.PROD && gaMeasurementId && (
+    <>
+      <link rel="preconnect" href="https://www.googletagmanager.com" />
+      <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+      <script async src={`${gaTagUrl}?id=${gaMeasurementId}`} />
+      <script
+        is:inline
+        set:html={`window.dataLayer = window.dataLayer || []; window.gtag = function () { window.dataLayer.push(arguments); }; gtag('js', new Date()); gtag('config', '${gaMeasurementId}', ${JSON.stringify(gaConfig)}); window.mmTrack = function (eventName, params) { gtag('event', eventName, Object.assign({ site_key: '${siteKey}' }, params || {})); }; (function () { var trackedLinks = ${JSON.stringify(normalizedTrackedLinks)}; if (!trackedLinks.length) return; function normalizeUrl(url) { try { var parsed = new URL(url, window.location.origin); return (parsed.origin + parsed.pathname).replace(/\\/$/, ''); } catch (_) { return String(url || '').replace(/\\/$/, ''); } } document.addEventListener('click', function (event) { var target = event.target instanceof Element ? event.target.closest('a[href]') : null; if (!target) return; var href = target.getAttribute('href'); if (!href) return; var normalizedHref = normalizeUrl(href); for (var i = 0; i < trackedLinks.length; i += 1) { var item = trackedLinks[i]; if (normalizedHref === item.href) { window.mmTrack(item.eventName); break; } } }); })();`}
+      />
+    </>
+  )
+}
