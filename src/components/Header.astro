@@ -1,8 +1,10 @@
 ---
+import { site } from '../config/site';
+
 const links = [
   { href: '/', label: 'Home' },
   { href: '/blog', label: 'Transport Guide' },
-  { href: 'https://quoting.cartransport.au/contact', label: 'Contact' },
+  { href: site.destinations.contact, label: 'Contact' },
 ];
 ---
 
@@ -40,11 +42,12 @@ const links = [
           </a>
         ))
       }
-      <span
-        class="bg-brand-orange-500 text-white px-6 py-2.5 rounded-lg font-bold inline-flex items-center"
+      <a
+        href={site.destinations.quote}
+        class="bg-brand-orange-500 text-white px-6 py-2.5 rounded-lg font-bold inline-flex items-center hover:bg-brand-orange-400 transition-colors"
       >
         Get a Quote
-      </span>
+      </a>
     </nav>
 
     <!-- Mobile Menu Button (Placeholder) -->
