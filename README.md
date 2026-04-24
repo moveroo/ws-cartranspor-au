@@ -2,7 +2,9 @@
 
 Canonical Astro controller for `cartransport.au`.
 
-This repo contains the live `cartransport.au` Astro site: a route-heavy SEO-focused transport site with custom components, analysis scripts, and a broader content/application surface than the small fleet marketing repos.
+This repo contains the live `cartransport.au` Astro site: a route-heavy SEO-focused transport site
+with custom components, analysis scripts, and a broader content/application surface than the small
+fleet marketing repos.
 
 ## Current State
 
@@ -61,5 +63,7 @@ Copy `.env.example` to `.env` when needed:
 
 ## Notes
 
-- this repo had never been normalized after the folder rename, so it was still carrying the Astro starter README
-- the current standardization pass adds the fleet controller contract and fixes the canonical robots URL generation
+- this repo had never been normalized after the folder rename, so it was still carrying the Astro
+  starter README
+- the current standardization pass adds the fleet controller contract and fixes the canonical robots
+  URL generation
