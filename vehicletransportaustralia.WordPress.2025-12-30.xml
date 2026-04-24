@@ -2782,7 +2782,7 @@ Daily services are utilising Road and Rail and Ship. Multiple Options and choice
 
 		<h2>	
 	Contact Us</h2>	
-	<iframe src="https://www.google.com/maps/embed/v1/place?q=sydney&key=AIzaSyD09zQ9PNDNNy9TadMuzRV_UsPUoWKntt8" aria-hidden="true"></iframe>
+	<iframe src="https://www.google.com/maps/embed/v1/place?q=sydney&key=REDACTED_GOOGLE_MAPS_API_KEY" aria-hidden="true"></iframe>
 	<h1>Vehicle Transport Australia Contact</h1>
 
 <p>&nbsp;</p>
@@ -7301,4 +7301,3 @@ While there are multiple ways to collect a vehicle from an auction house in Aust
 							</item>
 				</channel>
 </rss>
-	

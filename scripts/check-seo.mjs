@@ -27,9 +27,14 @@ function walk(dir) {
   return total;
 }
 
-const packageJson = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const packageJson = JSON.parse(
+  fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8')
+);
 const robotsRoute = fs.readFileSync(new URL('../src/pages/robots.txt.ts', import.meta.url), 'utf8');
-const layoutSource = fs.readFileSync(new URL('../src/layouts/Layout.astro', import.meta.url), 'utf8');
+const layoutSource = fs.readFileSync(
+  new URL('../src/layouts/Layout.astro', import.meta.url),
+  'utf8'
+);
 const contentDocs = walk(new URL('../src/content', import.meta.url).pathname);
 
 assert(packageJson.scripts.check, 'package.json is missing the check script');

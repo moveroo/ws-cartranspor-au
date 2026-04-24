@@ -28,18 +28,36 @@ async function main() {
   const analyticsWrapper = await read('src/components/analytics/Analytics.astro');
 
   for (const scriptName of ['check', 'check:contract', 'check:seo']) {
-    checks.push([`package.json includes ${scriptName}`, Boolean(packageJson.scripts?.[scriptName])]);
+    checks.push([
+      `package.json includes ${scriptName}`,
+      Boolean(packageJson.scripts?.[scriptName]),
+    ]);
   }
 
   checks.push(['SEO component exists', await exists('src/components/SEO.astro')]);
-  checks.push(['BrainAnalytics component exists', await exists('src/components/BrainAnalytics.astro')]);
-  checks.push(['analytics wrapper exists', await exists('src/components/analytics/Analytics.astro')]);
+  checks.push([
+    'BrainAnalytics component exists',
+    await exists('src/components/BrainAnalytics.astro'),
+  ]);
+  checks.push([
+    'analytics wrapper exists',
+    await exists('src/components/analytics/Analytics.astro'),
+  ]);
   checks.push(['ga4 wrapper exists', await exists('src/components/analytics/Ga4.astro')]);
   checks.push(['matomo wrapper exists', await exists('src/components/analytics/Matomo.astro')]);
-  checks.push(['SEO imports analytics wrapper', seo.includes("import Analytics from './analytics/Analytics.astro';")]);
+  checks.push([
+    'SEO imports analytics wrapper',
+    seo.includes("import Analytics from './analytics/Analytics.astro';"),
+  ]);
   checks.push(['SEO renders analytics wrapper', seo.includes('<Analytics />')]);
-  checks.push(['analytics wrapper includes Ga4', analyticsWrapper.includes("import Ga4 from './Ga4.astro';")]);
-  checks.push(['analytics wrapper includes Matomo', analyticsWrapper.includes("import Matomo from './Matomo.astro';")]);
+  checks.push([
+    'analytics wrapper includes Ga4',
+    analyticsWrapper.includes("import Ga4 from './Ga4.astro';"),
+  ]);
+  checks.push([
+    'analytics wrapper includes Matomo',
+    analyticsWrapper.includes("import Matomo from './Matomo.astro';"),
+  ]);
   checks.push(['site config includes destinations', siteConfig.includes('destinations: {')]);
   checks.push(['SEO links RSS feed', seo.includes('application/rss+xml')]);
   for (const relativePath of [
@@ -59,10 +77,22 @@ async function main() {
   ]) {
     checks.push([`${relativePath} exists`, await exists(relativePath)]);
   }
-  checks.push(['.env.example includes PUBLIC_ANALYTICS_PROVIDER=', envExample.includes('PUBLIC_ANALYTICS_PROVIDER=')]);
-  checks.push(['.env.example includes PUBLIC_GA_MEASUREMENT_ID=', envExample.includes('PUBLIC_GA_MEASUREMENT_ID=')]);
-  checks.push(['.env.example includes PUBLIC_MATOMO_BASE_URL=', envExample.includes('PUBLIC_MATOMO_BASE_URL=')]);
-  checks.push(['.env.example includes PUBLIC_MATOMO_SITE_ID=', envExample.includes('PUBLIC_MATOMO_SITE_ID=')]);
+  checks.push([
+    '.env.example includes PUBLIC_ANALYTICS_PROVIDER=',
+    envExample.includes('PUBLIC_ANALYTICS_PROVIDER='),
+  ]);
+  checks.push([
+    '.env.example includes PUBLIC_GA_MEASUREMENT_ID=',
+    envExample.includes('PUBLIC_GA_MEASUREMENT_ID='),
+  ]);
+  checks.push([
+    '.env.example includes PUBLIC_MATOMO_BASE_URL=',
+    envExample.includes('PUBLIC_MATOMO_BASE_URL='),
+  ]);
+  checks.push([
+    '.env.example includes PUBLIC_MATOMO_SITE_ID=',
+    envExample.includes('PUBLIC_MATOMO_SITE_ID='),
+  ]);
 
   const failures = checks.filter(([, passed]) => !passed);
   for (const [label, passed] of checks) console.log(`${passed ? 'PASS' : 'FAIL'}: ${label}`);
