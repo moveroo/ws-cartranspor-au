@@ -5,14 +5,14 @@ export const site = {
     import.meta.env.PUBLIC_SITE_DESCRIPTION ||
     'Reliable car transport across Australia with interstate vehicle shipping, depot-to-depot, and door-to-door services.',
   destinations: {
-    quote: 'https://quoting.cartransport.au/quote/vehicle',
+    quote: 'https://quotes.moveroo.com.au/quote/vehicle',
     contact: 'https://quoting.cartransport.au/contact',
   },
   analytics: {
     siteKey: 'cartransport-au',
     trackedLinks: [
       {
-        href: 'https://quoting.cartransport.au/quote/vehicle',
+        href: 'https://quotes.moveroo.com.au/quote/vehicle',
         eventName: 'quote_vehicle_click',
       },
     ],
