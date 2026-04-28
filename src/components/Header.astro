@@ -10,11 +10,12 @@ const links = [
   class="bg-slate-900 border-b border-brand-orange-500/20 sticky top-0 z-50 backdrop-blur-md bg-opacity-90"
 >
   <div class="container mx-auto px-4 h-20 flex items-center justify-between">
-    <!-- Logo -->
     <a href="/" class="flex items-center gap-3 group">
       <img
         src="/logo.svg"
         alt="Vehicle Transport Australia"
+        width="40"
+        height="40"
         class="h-10 w-10 transition-transform group-hover:scale-105"
       />
       <div class="flex flex-col">
@@ -28,7 +29,6 @@ const links = [
       </div>
     </a>
 
-    <!-- Desktop Nav -->
     <nav class="hidden md:flex items-center gap-8">
       {
         links.map((link) => (
@@ -48,21 +48,47 @@ const links = [
       </a>
     </nav>
 
-    <!-- Mobile Menu Button (Placeholder) -->
-    <button class="md:hidden text-slate-300 p-2">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="h-6 w-6"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
+    <details class="relative md:hidden">
+      <summary
+        class="flex list-none items-center justify-center rounded-lg border border-slate-700 p-2 text-slate-200 marker:hidden"
+        aria-label="Open site navigation"
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 6h16M4 12h16M4 18h16"></path>
-      </svg>
-    </button>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </summary>
+      <nav
+        class="absolute right-0 top-full mt-3 w-64 rounded-2xl border border-slate-800 bg-slate-950 p-4 shadow-2xl shadow-slate-950/40"
+      >
+        <div class="flex flex-col gap-2">
+          {
+            links.map((link) => (
+              <a
+                href={link.href}
+                class="rounded-lg px-3 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-slate-900 hover:text-brand-orange-400"
+              >
+                {link.label}
+              </a>
+            ))
+          }
+          <a
+            href="https://quoting.cartransport.au/quote/vehicle"
+            class="mt-2 rounded-lg bg-brand-orange-500 px-3 py-3 text-center text-sm font-bold text-white"
+          >
+            Get a Quote
+          </a>
+        </div>
+      </nav>
+    </details>
   </div>
 </header>
