@@ -24,7 +24,7 @@ author: 'Vehicle Transport Australia'
 <ul>
 <li><strong>Safety</strong>: Professional transporters have the expertise to handle vehicles with care, reducing the risk of damage.</li>
 <li><strong>Convenience</strong>: No need to adjust your schedule. The company manages the pickup and delivery, saving you time and effort.</li>
-<li><strong>Long Distances</strong>: Especially if the auction house is interstate, <a href="https://movingcars.com.au/car-transport/">transport companies</a> have the infrastructure to deliver your vehicle without the wear and tear of a long drive.</li>
+<li><strong>Long Distances</strong>: Especially if the auction house is interstate, <a href="https://quoting.cartransport.au/quote/vehicle">transport companies</a> have the infrastructure to deliver your vehicle without the wear and tear of a long drive.</li>
 </ul>
 <h3>Insurance Considerations</h3>
 <p>Before your vehicle leaves the auction house, insurance is paramount. Transport companies often offer coverage options or partnerships with insurance providers, ensuring your vehicle is protected during transit.</p>
