@@ -10,13 +10,7 @@ export default defineConfig({
   redirects: {
     '/interstate-car-transport-with-personal-items': '/services/interstate/',
   },
-  integrations: [
-    tailwind(),
-    sitemap({
-      filter: (page) => !page.endsWith('/logo-preview/'),
-    }),
-    icon(),
-  ],
+  integrations: [tailwind(), sitemap(), icon()],
   // Optimize images automatically
   image: {
     service: {
