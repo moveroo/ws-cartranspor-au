@@ -1,0 +1,73 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+const services = await getCollection('services');
+
+const serviceCards = services
+  .map((service) => ({
+    title: service.data.title,
+    description: service.data.description,
+    icon: service.data.icon,
+    href: `/services/${service.id}/`,
+  }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+---
+
+<Layout
+  title="Car Transport Services | Vehicle Transport Australia"
+  description="Compare interstate, depot-to-depot, door-to-door, and commercial vehicle transport services across Australia."
+>
+  <section class="bg-slate-900 py-16 md:py-24 text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-brand-orange-500/5 opacity-20"></div>
+    <div class="container mx-auto px-4 relative z-10">
+      <p class="text-brand-orange-400 font-semibold uppercase tracking-wide mb-4">
+        Vehicle transport services
+      </p>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">Compare car transport options</h1>
+      <p class="text-xl text-slate-300 max-w-3xl mx-auto">
+        Choose the service that fits your route, access, timing, and budget before starting a live
+        vehicle quote.
+      </p>
+    </div>
+  </section>
+
+  <main class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {
+          serviceCards.map((service) => (
+            <a
+              href={service.href}
+              class="group p-8 rounded-2xl bg-slate-50 border border-slate-100 hover:border-brand-orange-200 hover:shadow-xl hover:shadow-brand-orange-500/5 transition-all duration-300"
+            >
+              <div class="text-4xl mb-6 bg-white w-16 h-16 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                {service.icon}
+              </div>
+              <h2 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-brand-orange-500 transition-colors">
+                {service.title}
+              </h2>
+              <p class="text-slate-600 leading-relaxed mb-6">{service.description}</p>
+              <span class="text-brand-orange-700 font-semibold text-sm flex items-center gap-2 group-hover:gap-3 group-hover:text-brand-orange-600 transition-all">
+                View service <span class="text-lg">→</span>
+              </span>
+            </a>
+          ))
+        }
+      </div>
+
+      <section class="mt-16 rounded-2xl bg-slate-900 px-6 py-10 text-center md:px-10">
+        <h2 class="text-3xl font-bold text-white mb-4">Ready to price your vehicle move?</h2>
+        <p class="text-slate-300 max-w-2xl mx-auto mb-8">
+          The quote tool checks your route and vehicle details against available transport options.
+        </p>
+        <a
+          href="https://quoting.cartransport.au/quote/vehicle"
+          class="inline-block bg-brand-orange-500 text-white font-bold py-4 px-10 rounded-full shadow-xl"
+        >
+          Get Instant Quote
+        </a>
+      </section>
+    </div>
+  </main>
+</Layout>

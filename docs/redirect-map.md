@@ -6,9 +6,17 @@ CarTransport.au does not currently expose a dedicated redirect inventory file in
 
 The current URL-governance pieces are:
 
+- `vercel.json`
 - `src/pages/robots.txt.ts`
 - canonical and schema handling in the shared layout/components
 - supporting analysis scripts in `scripts/`
+
+## Active Redirects
+
+| Source                                           | Destination             | Reason                                                                            |
+| ------------------------------------------------ | ----------------------- | --------------------------------------------------------------------------------- |
+| `/interstate-car-transport-with-personal-items`  | `/services/interstate/` | Legacy search-visible URL now consolidated into the live interstate service page. |
+| `/interstate-car-transport-with-personal-items/` | `/services/interstate/` | Trailing-slash variant of the same legacy URL.                                    |
 
 ## Current Reading
 

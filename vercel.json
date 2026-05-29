@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/interstate-car-transport-with-personal-items/:path*",
+      "destination": "/services/interstate/",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
