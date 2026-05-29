@@ -1,7 +1,7 @@
 ---
 title: 'Backloading Car Transport'
 pubDate: '2023-09-24'
-description: 'Migrated from WordPress'
+description: 'Backloading car transport can reduce interstate vehicle transport costs by using spare carrier space on routes already heading your way.'
 author: 'Vehicle Transport Australia'
 ---
 

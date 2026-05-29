@@ -9,17 +9,25 @@ interface Props {
 }
 
 import Analytics from './analytics/Analytics.astro';
+import { site } from '../config/site';
 
 const {
   title,
-  description = import.meta.env.PUBLIC_SITE_DESCRIPTION || '',
+  description: descriptionProp,
   image = import.meta.env.PUBLIC_SITE_IMAGE || '',
   type = 'website',
   canonical = Astro.url.href,
   noindex = false,
 } = Astro.props;
 
-const siteName = import.meta.env.PUBLIC_SITE_NAME || 'My Site';
+const envSiteName = import.meta.env.PUBLIC_SITE_NAME;
+const envDescription = import.meta.env.PUBLIC_SITE_DESCRIPTION;
+const siteName = envSiteName && envSiteName !== 'My Site' ? envSiteName : site.name;
+const description =
+  descriptionProp ||
+  (envDescription && envDescription !== 'Your site description'
+    ? envDescription
+    : site.description);
 const pageTitle = title ? `${title} | ${siteName}` : siteName;
 ---
 

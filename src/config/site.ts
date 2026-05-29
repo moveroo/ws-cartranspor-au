@@ -1,9 +1,16 @@
+const configuredSiteName = import.meta.env.PUBLIC_SITE_NAME;
+const configuredSiteDescription = import.meta.env.PUBLIC_SITE_DESCRIPTION;
+
 export const site = {
   url: import.meta.env.PUBLIC_SITE_URL || 'https://cartransport.au',
-  name: import.meta.env.PUBLIC_SITE_NAME || 'Vehicle Transport Australia',
+  name:
+    configuredSiteName && configuredSiteName !== 'My Site'
+      ? configuredSiteName
+      : 'Vehicle Transport Australia',
   description:
-    import.meta.env.PUBLIC_SITE_DESCRIPTION ||
-    'Reliable car transport across Australia with interstate vehicle shipping, depot-to-depot, and door-to-door services.',
+    configuredSiteDescription && configuredSiteDescription !== 'Your site description'
+      ? configuredSiteDescription
+      : 'Reliable car transport across Australia with interstate vehicle shipping, depot-to-depot, and door-to-door services.',
   destinations: {
     quote: 'https://quoting.cartransport.au/quote/vehicle',
     contact: 'https://quoting.cartransport.au/contact',

@@ -11,9 +11,12 @@ interface Props {
   data?: Record<string, unknown>;
 }
 
+import { site } from '../config/site';
+
 const { type, data = {} } = Astro.props;
 const siteUrl = import.meta.env.PUBLIC_SITE_URL || Astro.site?.href || '';
-const siteName = import.meta.env.PUBLIC_SITE_NAME || 'My Site';
+const envSiteName = import.meta.env.PUBLIC_SITE_NAME;
+const siteName = envSiteName && envSiteName !== 'My Site' ? envSiteName : site.name;
 
 interface SchemaData extends Record<string, unknown> {
   name?: string;
