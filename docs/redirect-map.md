@@ -13,10 +13,18 @@ The current URL-governance pieces are:
 
 ## Active Redirects
 
-| Source                                           | Destination             | Reason                                                                            |
-| ------------------------------------------------ | ----------------------- | --------------------------------------------------------------------------------- |
-| `/interstate-car-transport-with-personal-items`  | `/services/interstate/` | Legacy search-visible URL now consolidated into the live interstate service page. |
-| `/interstate-car-transport-with-personal-items/` | `/services/interstate/` | Trailing-slash variant of the same legacy URL.                                    |
+| Source                                                 | Destination             | Reason                                                                            |
+| ------------------------------------------------------ | ----------------------- | --------------------------------------------------------------------------------- |
+| `/interstate-car-transport-with-personal-items`        | `/services/interstate/` | Legacy search-visible URL now consolidated into the live interstate service page. |
+| `/interstate-car-transport-with-personal-items/`       | `/services/interstate/` | Trailing-slash variant of the same legacy URL.                                    |
+| `/interstate-car-transport-with-personal-items/:path*` | `/services/interstate/` | Defensive catch-all for any deep legacy variants under the same URL stem.         |
+
+## Current Sitemap Exclusions
+
+| URL         | Reason                                                                |
+| ----------- | --------------------------------------------------------------------- |
+| `/contact/` | Contact is an intentional handoff to the quoting app.                 |
+| `/sitemap/` | Human HTML sitemap page should stay live, but not in the XML sitemap. |
 
 ## Current Reading
 

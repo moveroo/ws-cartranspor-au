@@ -4,19 +4,57 @@ import Layout from '../../layouts/Layout.astro';
 
 const services = await getCollection('services');
 
+const serviceOrder = new Map([
+  ['interstate', 1],
+  ['door-to-door', 2],
+  ['depot-to-depot', 3],
+  ['commercial', 4],
+]);
+
 const serviceCards = services
   .map((service) => ({
+    id: service.id,
     title: service.data.title,
     description: service.data.description,
     icon: service.data.icon,
     href: `/services/${service.id}/`,
   }))
-  .sort((a, b) => a.title.localeCompare(b.title));
+  .sort((a, b) => (serviceOrder.get(a.id) ?? 99) - (serviceOrder.get(b.id) ?? 99));
+
+const optionGuides = [
+  {
+    title: 'Moving between states',
+    copy: 'Start with interstate transport if the vehicle is moving between capital cities, regional areas, or long-distance routes.',
+    href: '/services/interstate/',
+  },
+  {
+    title: 'Need pickup and delivery help',
+    copy: 'Door-to-door transport is usually the simplest choice when access is suitable and you want less depot handling.',
+    href: '/services/door-to-door/',
+  },
+  {
+    title: 'Trying to keep costs down',
+    copy: 'Depot-to-depot can suit flexible moves where dropping off and collecting the vehicle is practical.',
+    href: '/services/depot-to-depot/',
+  },
+  {
+    title: 'Moving business vehicles',
+    copy: 'Commercial transport is better for dealerships, fleet changes, repeat vehicle movements, and coordinated delivery windows.',
+    href: '/services/commercial/',
+  },
+];
+
+const bookingChecks = [
+  'Vehicle make, model, year, and whether it is running.',
+  'Pickup and delivery suburbs, including access limits for larger carriers.',
+  'Preferred timing, flexibility, and whether depot options are acceptable.',
+  'Personal item rules, vehicle condition notes, and insurance expectations.',
+];
 ---
 
 <Layout
-  title="Car Transport Services | Vehicle Transport Australia"
-  description="Compare interstate, depot-to-depot, door-to-door, and commercial vehicle transport services across Australia."
+  title="Car Transport Services Across Australia"
+  description="Compare interstate, door-to-door, depot-to-depot, and commercial car transport services before booking a vehicle move across Australia."
 >
   <section class="bg-slate-900 py-16 md:py-24 text-center relative overflow-hidden">
     <div class="absolute inset-0 bg-brand-orange-500/5 opacity-20"></div>
@@ -24,16 +62,27 @@ const serviceCards = services
       <p class="text-brand-orange-400 font-semibold uppercase tracking-wide mb-4">
         Vehicle transport services
       </p>
-      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">Compare car transport options</h1>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">
+        Car transport services across Australia
+      </h1>
       <p class="text-xl text-slate-300 max-w-3xl mx-auto">
-        Choose the service that fits your route, access, timing, and budget before starting a live
-        vehicle quote.
+        Compare interstate, door-to-door, depot-to-depot, and commercial vehicle transport options
+        before starting a live quote.
       </p>
     </div>
   </section>
 
   <main class="py-16 bg-white">
     <div class="container mx-auto px-4">
+      <section class="max-w-4xl mx-auto text-center mb-12">
+        <h2 class="text-3xl font-bold text-slate-900 mb-4">Choose the right transport option</h2>
+        <p class="text-lg text-slate-600 leading-relaxed">
+          The best service depends on the vehicle, route, access at each end, and how much
+          flexibility you have around pickup and delivery. These service pages explain the main
+          options so you can quote with clearer expectations.
+        </p>
+      </section>
+
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {
           serviceCards.map((service) => (
@@ -55,6 +104,55 @@ const serviceCards = services
           ))
         }
       </div>
+
+      <section class="mt-16">
+        <div class="max-w-4xl mx-auto text-center mb-10">
+          <p class="text-brand-orange-600 font-semibold uppercase tracking-wide mb-3">
+            Quick guide
+          </p>
+          <h2 class="text-3xl font-bold text-slate-900">Which car transport service fits?</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {
+            optionGuides.map((option) => (
+              <a
+                href={option.href}
+                class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover:border-brand-orange-200 hover:shadow-lg transition-all"
+              >
+                <h3 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-brand-orange-600 transition-colors">
+                  {option.title}
+                </h3>
+                <p class="text-slate-600 leading-relaxed mb-4">{option.copy}</p>
+                <span class="text-sm font-semibold text-brand-orange-700">View details</span>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="mt-16 rounded-2xl bg-slate-50 border border-slate-200 p-6 md:p-10">
+        <div class="grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-8 items-start">
+          <div>
+            <p class="text-brand-orange-600 font-semibold uppercase tracking-wide mb-3">
+              Before you quote
+            </p>
+            <h2 class="text-3xl font-bold text-slate-900 mb-4">Details that affect price</h2>
+            <p class="text-slate-600 leading-relaxed">
+              A more accurate quote starts with the practical details carriers need to assess the
+              route, handling, and timing.
+            </p>
+          </div>
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {
+              bookingChecks.map((check) => (
+                <li class="rounded-xl bg-white border border-slate-200 p-5 text-slate-700 leading-relaxed">
+                  {check}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </section>
 
       <section class="mt-16 rounded-2xl bg-slate-900 px-6 py-10 text-center md:px-10">
         <h2 class="text-3xl font-bold text-white mb-4">Ready to price your vehicle move?</h2>

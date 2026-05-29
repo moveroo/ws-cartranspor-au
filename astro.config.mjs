@@ -7,10 +7,13 @@ import icon from 'astro-icon';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://cartransport.au',
-  redirects: {
-    '/interstate-car-transport-with-personal-items': '/services/interstate/',
-  },
-  integrations: [tailwind(), sitemap(), icon()],
+  integrations: [
+    tailwind(),
+    sitemap({
+      filter: (page) => !page.endsWith('/contact/') && !page.endsWith('/sitemap/'),
+    }),
+    icon(),
+  ],
   // Optimize images automatically
   image: {
     service: {

@@ -28,7 +28,7 @@ export const site = {
     { href: '/', label: 'Home' },
     { href: '/about', label: 'About' },
     { href: '/blog', label: 'Transport Guide' },
-    { href: '/contact', label: 'Contact' },
+    { href: 'https://quoting.cartransport.au/contact', label: 'Contact' },
     { href: '/privacy', label: 'Privacy Policy' },
     { href: '/terms', label: 'Terms of Service' },
     { href: '/sitemap/', label: 'HTML Sitemap' },
