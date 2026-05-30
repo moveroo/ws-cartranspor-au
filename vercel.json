@@ -1,6 +1,16 @@
 {
   "redirects": [
     {
+      "source": "/sitemap_index.xml",
+      "destination": "/sitemap-index.xml",
+      "permanent": true
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap-index.xml",
+      "permanent": true
+    },
+    {
       "source": "/interstate-car-transport-with-personal-items",
       "destination": "/services/interstate/",
       "permanent": true
