@@ -41,6 +41,8 @@
     "@astrojs/sitemap": "^3.6.0",
     "@astrojs/tailwind": "^6.0.2",
     "@fontsource/roboto": "^5.2.9",
+    "@jdevalk/astro-seo-graph": "^1.4.1",
+    "@jdevalk/seo-graph-core": "^0.6.2",
     "@tailwindcss/typography": "^0.5.19",
     "astro": "^5.16.6",
     "astro-icon": "^1.1.5",
