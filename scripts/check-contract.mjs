@@ -5,6 +5,12 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, '..');
+const vehicleAssistantLoader =
+  'src="https://quotes.moveroo.com.au/embed/vehicle-assistant/v1/loader.js"';
+
+function countOccurrences(haystack, needle) {
+  return haystack.split(needle).length - 1;
+}
 
 async function read(relativePath) {
   return fs.readFile(path.join(root, relativePath), 'utf8');
@@ -26,6 +32,10 @@ async function main() {
   const envExample = await read('.env.example');
   const siteConfig = await read('src/config/site.ts');
   const analyticsWrapper = await read('src/components/analytics/Analytics.astro');
+  const layout = await read('src/layouts/Layout.astro');
+  const notFoundPage = await read('src/pages/404.astro');
+  const vercelConfig = await read('vercel.json');
+  const netlifyConfig = await read('netlify.toml');
 
   for (const scriptName of ['check', 'check:contract', 'check:seo']) {
     checks.push([
@@ -60,6 +70,43 @@ async function main() {
   ]);
   checks.push(['site config includes destinations', siteConfig.includes('destinations: {')]);
   checks.push(['SEO links RSS feed', seo.includes('application/rss+xml')]);
+  checks.push(['vehicle assistant uses central loader', layout.includes(vehicleAssistantLoader)]);
+  checks.push([
+    'vehicle assistant loads once in primary layout',
+    countOccurrences(layout, vehicleAssistantLoader) === 1,
+  ]);
+  checks.push([
+    'vehicle assistant channel is chatbot-widget',
+    layout.includes('data-channel="chatbot-widget"'),
+  ]);
+  checks.push([
+    'vehicle assistant surface is main-domain-sitewide',
+    layout.includes('data-surface="main-domain-sitewide"'),
+  ]);
+  checks.push([
+    'vehicle assistant loads on standalone 404',
+    notFoundPage.includes(vehicleAssistantLoader) &&
+      notFoundPage.includes('data-channel="chatbot-widget"') &&
+      notFoundPage.includes('data-surface="main-domain-sitewide"'),
+  ]);
+  checks.push([
+    'vehicle assistant loads once on standalone 404',
+    countOccurrences(notFoundPage, vehicleAssistantLoader) === 1,
+  ]);
+  for (const configText of [vercelConfig, netlifyConfig]) {
+    checks.push([
+      'vehicle assistant CSP allows central script',
+      configText.includes("script-src 'self' 'unsafe-inline' https://quotes.moveroo.com.au"),
+    ]);
+    checks.push([
+      'vehicle assistant CSP allows central connect',
+      configText.includes('connect-src') && configText.includes('https://quotes.moveroo.com.au'),
+    ]);
+    checks.push([
+      'vehicle assistant CSP allows central frame',
+      configText.includes('frame-src https://quotes.moveroo.com.au'),
+    ]);
+  }
   for (const relativePath of [
     'src/pages/rss.xml.ts',
     'src/pages/sitemap.astro',
