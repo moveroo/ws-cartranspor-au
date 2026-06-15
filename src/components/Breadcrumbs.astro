@@ -6,9 +6,10 @@ interface BreadcrumbItem {
 
 interface Props {
   items: BreadcrumbItem[];
+  class?: string;
 }
 
-const { items } = Astro.props;
+const { items, class: className = '' } = Astro.props;
 
 const schemaItems = items.map((item, index) => ({
   '@type': 'ListItem',
@@ -19,7 +20,7 @@ const schemaItems = items.map((item, index) => ({
 ---
 
 <!-- Visual Breadcrumbs -->
-<nav aria-label="Breadcrumb" class="text-sm text-gray-600 dark:text-gray-400">
+<nav aria-label="Breadcrumb" class:list={['text-sm text-gray-600 dark:text-gray-400', className]}>
   <ol class="flex items-center space-x-2">
     {
       items.map((item, index) => (

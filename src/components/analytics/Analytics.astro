@@ -4,7 +4,9 @@ import Ga4 from './Ga4.astro';
 import Matomo from './Matomo.astro';
 import { site } from '../../config/site';
 
-function parseJsonRecord(value) {
+type AnalyticsConfig = Record<string, string>;
+
+function parseJsonRecord(value: string | undefined): AnalyticsConfig | null {
   if (!value) return null;
   try {
     const parsed = JSON.parse(value);
@@ -21,8 +23,8 @@ const analyticsEnabled = import.meta.env.PUBLIC_ANALYTICS_ENABLED;
 const analyticsProvider = import.meta.env.PUBLIC_ANALYTICS_PROVIDER;
 const analyticsConfig = parseJsonRecord(import.meta.env.PUBLIC_ANALYTICS_CONFIG);
 
-let provider = null;
-let config = {};
+let provider: string | null = null;
+let config: AnalyticsConfig = {};
 
 if (analyticsProvider && analyticsConfig) {
   provider = analyticsProvider;
