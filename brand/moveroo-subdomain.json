@@ -1,0 +1,210 @@
+{
+  "source_system": "site-repo-moveroo-subdomain-handoff",
+  "contract_version": 1,
+  "hostnames": ["quoting.cartransport.au"],
+  "property_slug": "cartransport-au",
+  "surface_slug": "cartransport-au-quoting",
+  "surface_type": "quote",
+  "canonical_role": "primary",
+  "canonical_hostname": "quoting.cartransport.au",
+  "brand": {
+    "display_name": "Vehicle Transport Australia",
+    "brand_key": "cartransportau",
+    "mark_text": "VTA",
+    "tagline": "Reliable car transport across Australia."
+  },
+  "copy": {
+    "eyebrow": "Australia-wide vehicle transport quotes",
+    "headline": "Get a car transport quote across Australia",
+    "subheading": "Tell us about the vehicle and route, and we will help with secure transport options across Australia.",
+    "primary_cta_label": "Start vehicle quote",
+    "secondary_cta_label": "Contact us",
+    "footer_blurb": "Vehicle transport quotes and booking support across Australia.",
+    "contact_page": {
+      "hero_heading": "Talk to Vehicle Transport Australia",
+      "hero_subheading": "Send your vehicle transport details and the team will help you move forward.",
+      "quote_section_heading": "Need a vehicle transport price first?",
+      "quote_section_body": "Start with the vehicle quote path for the fastest route and vehicle details.",
+      "quote_primary_cta_label": "Start vehicle quote"
+    }
+  },
+  "theme": {
+    "theme_key": "cartransport-au",
+    "mode": "light",
+    "fonts": {
+      "body_family": "Roboto, Arial, Helvetica, sans-serif",
+      "heading_family": "Roboto, Arial, Helvetica, sans-serif"
+    },
+    "colors": {
+      "accent": "#f97316",
+      "accent_strong": "#ea580c",
+      "background": "#f8fafc",
+      "surface": "#ffffff",
+      "text": "#0f172a",
+      "muted_text": "#64748b",
+      "border": "#e2e8f0",
+      "header_background": "#0f172a",
+      "header_border": "#f97316",
+      "header_text": "#ffffff",
+      "header_muted_text": "#cbd5e1",
+      "header_link": "#ffffff",
+      "footer_background": "#020617",
+      "footer_border": "#f97316",
+      "footer_text": "#ffffff",
+      "footer_muted_text": "#cbd5e1",
+      "footer_link": "#ffffff",
+      "hero_gradient_start": "#020617",
+      "hero_gradient_mid": "#0f172a",
+      "hero_gradient_end": "#431407",
+      "hero_text": "#ffffff"
+    },
+    "radius_scale": "0.5rem",
+    "shadow_style": "warm_transport",
+    "exact_tokens": {
+      "primary_cta": {
+        "background": "#f97316",
+        "text": "#ffffff",
+        "border": "#f97316"
+      },
+      "secondary_cta": {
+        "background": "#ffffff",
+        "text": "#0f172a",
+        "border": "#e2e8f0"
+      },
+      "dark_card": {
+        "background": "#0f172a",
+        "text": "#ffffff",
+        "muted_text": "#cbd5e1",
+        "border": "#f97316"
+      },
+      "selected_choice": {
+        "background": "#fff7ed",
+        "text": "#0f172a",
+        "border": "#f97316"
+      },
+      "field_focus": {
+        "border": "#f97316",
+        "ring": "rgba(249, 115, 22, 0.22)"
+      },
+      "budget_vehicle_quote": {
+        "rail_background": "#0f172a",
+        "rail_text": "#ffffff",
+        "accent_band": "#f97316"
+      }
+    }
+  },
+  "visual_identity": {
+    "status": "approved",
+    "source_hostname": "cartransport.au",
+    "font_pairing": {
+      "heading": "roboto",
+      "body": "roboto"
+    },
+    "colors": {
+      "primary": "#0f172a",
+      "primary_deep": "#020617",
+      "accent": "#f97316",
+      "accent_strong": "#ea580c",
+      "highlight": "#f59e0b",
+      "background": "#f8fafc",
+      "surface": "#ffffff",
+      "text": "#0f172a",
+      "muted_text": "#64748b",
+      "hero_text": "#ffffff",
+      "border": "#e2e8f0"
+    },
+    "style": {
+      "visual_profile": "dark_slate_vehicle",
+      "hero_treatment": "compact_dark_transport_shell",
+      "button_treatment": "orange_primary_cta",
+      "secondary_button_treatment": "light_secondary_cta",
+      "card_treatment": "white_form_card_with_orange_cap",
+      "logo_treatment": "source_vta_mark_preferred"
+    },
+    "logo": {
+      "source": "public/logo.svg",
+      "alt": "Vehicle Transport Australia"
+    },
+    "motifs": ["route_lines", "vehicle_transport", "city_pair_coverage", "depot_markers"],
+    "motif_policy": "Use sparse route, depot, or vehicle motifs only outside form fields."
+  },
+  "surface_design": {
+    "status": "approved",
+    "preferred_mode": "light_form_dark_shell",
+    "composition_profile": "budget_vehicle_quote",
+    "surface_density": "compact",
+    "compatible_visual_profiles": ["dark_slate_vehicle"],
+    "mobile_priority": "first_form_step",
+    "evidence": [
+      {
+        "field": "canonical_hostname",
+        "value": "quoting.cartransport.au",
+        "source_url": "src/config/site.ts",
+        "source_type": "repo_config",
+        "confidence": "high"
+      },
+      {
+        "field": "primary_journey",
+        "value": "vehicle_quote",
+        "source_url": "src/components/Header.astro",
+        "source_type": "repo_site_review",
+        "confidence": "high"
+      },
+      {
+        "field": "visual_profile",
+        "value": "dark_slate_vehicle",
+        "source_url": "src/components/Hero.astro",
+        "source_type": "repo_site_review",
+        "confidence": "high"
+      }
+    ]
+  },
+  "navigation": {
+    "show_household_quote_link": true,
+    "show_vehicle_quote_link": true,
+    "show_booking_link": true,
+    "show_contact_link": true,
+    "show_customer_portal_link": true,
+    "show_customer_portal_in_header": false,
+    "show_provider_login_link": false,
+    "show_admin_link": false
+  },
+  "navigation_intent": {
+    "primary_journey": "vehicle_quote",
+    "secondary_journeys": ["household_quote", "booking", "contact", "customer_portal"],
+    "link_prominence": {
+      "vehicle_quote": "primary",
+      "household_quote": "secondary",
+      "booking": "secondary",
+      "contact": "secondary",
+      "customer_portal": "footer_only"
+    }
+  },
+  "behavior": {
+    "show_phone_publicly": true,
+    "show_email_publicly": true,
+    "prefer_contact_page_over_direct_contact": false,
+    "allow_customer_portal_links": true,
+    "allow_provider_login_links": false,
+    "allow_admin_links": false
+  },
+  "links": {
+    "primary_cta_route": "quote.vehicle.index",
+    "household_quote_url": "/quote/household",
+    "vehicle_quote_url": "/quote/vehicle",
+    "booking_url": "/booking/create",
+    "contact_url": "/contact",
+    "customer_portal_url": "/customer/login",
+    "support_url": "/contact"
+  },
+  "contact": {
+    "public_phone": "+61721432557",
+    "public_phone_display": "+61 7 2143 2557",
+    "public_phone_href": "tel:+61721432557",
+    "public_email": "removals@moveroo.com.au",
+    "public_email_href": "mailto:removals@moveroo.com.au"
+  },
+  "analytics": {
+    "status": "not_applicable"
+  }
+}
