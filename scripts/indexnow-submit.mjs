@@ -138,7 +138,54 @@ function sha256(value) {
   return crypto.createHash('sha256').update(value).digest('hex');
 }
 
-async function submit({ host, key, keyLocation, urls, dryRun }) {
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function submissionStatus(httpStatus) {
+  if (httpStatus === 200) return 'submitted';
+  if (httpStatus === 202) return 'accepted_pending_key_validation';
+  return 'failed';
+}
+
+function shouldRetryStatus(httpStatus) {
+  return [403, 429, 500, 502, 503, 504].includes(httpStatus);
+}
+
+async function postBatch(payload, retryFailed) {
+  const delays = retryFailed ? [3000, 10000] : [];
+  let attempts = 0;
+
+  for (const delay of [0, ...delays]) {
+    if (delay > 0) await sleep(delay);
+    attempts += 1;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json; charset=utf-8' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!retryFailed || !shouldRetryStatus(response.status) || attempts > delays.length) {
+        return { httpStatus: response.status, status: submissionStatus(response.status), attempts };
+      }
+    } catch (error) {
+      if (!retryFailed || attempts > delays.length) {
+        return {
+          httpStatus: null,
+          status: 'failed',
+          attempts,
+          error: error instanceof Error ? error.message : String(error),
+        };
+      }
+    }
+  }
+
+  return { httpStatus: null, status: 'failed', attempts };
+}
+
+async function submit({ host, key, keyLocation, urls, dryRun, retryFailed }) {
   const batches = chunk(urls, batchSize);
   const results = [];
 
@@ -146,21 +193,14 @@ async function submit({ host, key, keyLocation, urls, dryRun }) {
     const payload = { host, key, keyLocation, urlList };
 
     if (dryRun) {
-      results.push({ batch: index + 1, urlCount: urlList.length, httpStatus: null, status: 'dry_run' });
+      results.push({ batch: index + 1, urlCount: urlList.length, httpStatus: null, status: 'dry_run', attempts: 0 });
       continue;
     }
-
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json; charset=utf-8' },
-      body: JSON.stringify(payload),
-    });
 
     results.push({
       batch: index + 1,
       urlCount: urlList.length,
-      httpStatus: response.status,
-      status: response.status === 200 ? 'submitted' : response.status === 202 ? 'accepted_pending_key_validation' : 'failed',
+      ...await postBatch(payload, retryFailed),
     });
   }
 
@@ -191,7 +231,7 @@ async function main() {
     throw new Error('No same-host HTTPS sitemap URLs found for IndexNow submission.');
   }
 
-  const results = await submit({ host, key, keyLocation, urls, dryRun });
+  const results = await submit({ host, key, keyLocation, urls, dryRun, retryFailed: auto });
   const failed = results.filter(result => result.status === 'failed');
   const proof = {
     schema: 'indexnow-auto-submit-proof-v1',

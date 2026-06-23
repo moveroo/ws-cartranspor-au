@@ -31,7 +31,7 @@
     "submissionApproved": true,
     "submissionMode": "production_deploy_sitemap",
     "endpoint": "https://api.indexnow.org/indexnow",
-    "maxUrlsPerBatch": 10000,
+    "maxUrlsPerBatch": 5000,
     "key": "indexnow-cartransport-au-495f64519df3b2274076be59",
     "keyFile": "public/indexnow-cartransport-au-495f64519df3b2274076be59.txt",
     "keyFileUrl": "https://cartransport.au/indexnow-cartransport-au-495f64519df3b2274076be59.txt"
