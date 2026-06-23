@@ -13,7 +13,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node ./scripts/indexnow-submit.mjs --auto",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
@@ -35,7 +35,9 @@
     "suggest:content": "node scripts/suggest-content-improvements.mjs",
     "validate": "node scripts/validate-structure.mjs",
     "check:structure": "node scripts/analyze-heading-structure.mjs",
-    "check:links": "node scripts/analyze-internal-links.mjs"
+    "check:links": "node scripts/analyze-internal-links.mjs",
+    "indexnow:dry-run": "node ./scripts/indexnow-submit.mjs --dry-run",
+    "indexnow:submit": "node ./scripts/indexnow-submit.mjs --live --force"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.18",
