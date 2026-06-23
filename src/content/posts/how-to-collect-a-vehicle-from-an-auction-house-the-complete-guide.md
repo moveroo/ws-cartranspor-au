@@ -1,7 +1,7 @@
 ---
 title: 'How to Collect a Vehicle from an Auction House: The Complete Guide'
 pubDate: '2023-10-09'
-description: 'Migrated from WordPress'
+description: 'Learn how to collect a vehicle from an Australian auction house, from key documents and pickup timing to transport options, safety checks, and avoiding common delays.'
 author: 'Vehicle Transport Australia'
 ---
 
