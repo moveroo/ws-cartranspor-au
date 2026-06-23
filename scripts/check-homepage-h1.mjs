@@ -34,7 +34,9 @@ const visibleH1s = h1Elements.filter((h1) => {
 });
 
 if (visibleH1s.length !== 1) {
-  const labels = visibleH1s.map((h1, index) => `${index + 1}: ${h1.textContent.trim()}`).join('\n  - ');
+  const labels = visibleH1s
+    .map((h1, index) => `${index + 1}: ${h1.textContent.trim()}`)
+    .join('\n  - ');
   console.error(`Expected exactly 1 visible homepage H1, found ${visibleH1s.length}.`);
   if (labels) {
     console.error(`Detected H1s:\n  - ${labels}`);
