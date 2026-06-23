@@ -19,6 +19,7 @@
     "check": "astro check",
     "check:contract": "node ./scripts/check-contract.mjs",
     "check:seo": "node scripts/check-seo.mjs",
+    "check:homepage-h1": "node scripts/check-homepage-h1.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
