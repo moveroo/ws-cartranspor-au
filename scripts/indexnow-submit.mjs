@@ -211,7 +211,7 @@ async function main() {
 
   console.log(JSON.stringify(proof, null, 2));
 
-  if (failed.length > 0) {
+  if (failed.length > 0 && !auto) {
     process.exitCode = 1;
   }
 }
