@@ -63,18 +63,18 @@ const breadcrumbItems = hasBreadcrumb
         <nav class="container mx-auto px-4 pt-4 text-sm text-slate-600" aria-label="Breadcrumb">
           <ol class="flex flex-wrap gap-2">
             {breadcrumbItems.map((item, index) => (
-              <li class="flex items-center gap-2">
+              <li
+                class:list={[
+                  'flex items-center gap-2',
+                  index < breadcrumbItems.length - 1 && 'breadcrumb-link-item',
+                ]}
+              >
                 {index < breadcrumbItems.length - 1 ? (
                   <a class="hover:text-brand-orange-500 hover:underline" href={item.href}>
                     {item.name}
                   </a>
                 ) : (
                   <span aria-current="page">{item.name}</span>
-                )}
-                {index < breadcrumbItems.length - 1 && (
-                  <span class="text-slate-400" aria-hidden="true">
-                    /
-                  </span>
                 )}
               </li>
             ))}
@@ -94,6 +94,13 @@ const breadcrumbItems = hasBreadcrumb
     data-surface="main-domain-sitewide"
     async></script>
 </SEO>
+
+<style is:global>
+  .breadcrumb-link-item::after {
+    content: '/';
+    color: rgb(148 163 184);
+  }
+</style>
 
 <style is:global>
   .skip-link {
