@@ -5,10 +5,14 @@
   "productionUrl": "https://cartransport.au",
   "repo": "moveroo/ws-cartranspor-au",
   "platform": "astro",
-  "deployTarget": "Vercel",
+  "deployTarget": "Netlify",
   "localPath": "/Users/jasonhill/Projects/Business/websites/MM-cartransport.au",
   "owner": "site-repo",
-  "quoteTargets": ["https://quotes.moveroo.com.au/embed/vehicle-assistant/v1/loader.js"],
+  "quoteTargets": [
+    "https://quoting.cartransport.au/contact",
+    "https://quoting.cartransport.au/quote/household",
+    "https://quoting.cartransport.au/quote/vehicle"
+  ],
   "legalPages": ["/privacy/", "/terms/"],
   "search": {
     "status": "not-applicable"
@@ -25,7 +29,7 @@
     "brandTokens": "brand/tokens.json"
   },
   "notes": "Bossman site manifest for repo-owned implementation truth. Bossman imports this as evidence but does not overwrite accepted truth without review.",
-  "updatedAt": "2026-06-23",
+  "updatedAt": "2026-06-30",
   "indexNow": {
     "status": "auto",
     "submissionApproved": true,
