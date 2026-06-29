@@ -1,8 +1,10 @@
 const configuredSiteName = import.meta.env.PUBLIC_SITE_NAME;
 const configuredSiteDescription = import.meta.env.PUBLIC_SITE_DESCRIPTION;
+const configuredSiteUrl = import.meta.env.PUBLIC_SITE_URL;
+const hasRealConfiguredSiteUrl = configuredSiteUrl && !configuredSiteUrl.includes('example.com');
 
 export const site = {
-  url: import.meta.env.PUBLIC_SITE_URL || 'https://cartransport.au',
+  url: hasRealConfiguredSiteUrl ? configuredSiteUrl : 'https://cartransport.au',
   name:
     configuredSiteName && configuredSiteName !== 'My Site'
       ? configuredSiteName

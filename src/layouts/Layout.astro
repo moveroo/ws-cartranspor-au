@@ -10,12 +10,30 @@ interface Props {
   image?: string;
   type?: 'website' | 'article';
   noindex?: boolean;
+  breadcrumbLabel?: string;
 }
 
-const { title, description, image, type, noindex } = Astro.props;
+const { title, description, image, type, noindex, breadcrumbLabel } = Astro.props;
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Schema from '../components/Schema.astro';
+import { site } from '../config/site';
+
+const currentPath = Astro.url.pathname;
+const hasBreadcrumb = currentPath !== '/';
+const currentBreadcrumbLabel =
+  breadcrumbLabel ?? (title ? title.split('|')[0].trim() : 'Current page');
+const siteOrigin = site.url;
+const breadcrumbItems = hasBreadcrumb
+  ? [
+      { name: 'Home', url: new URL('/', siteOrigin).toString(), href: '/' },
+      {
+        name: currentBreadcrumbLabel,
+        url: new URL(currentPath, siteOrigin).toString(),
+        href: currentPath,
+      },
+    ]
+  : [];
 ---
 
 <SEO title={title} description={description} image={image} type={type} noindex={noindex}>
@@ -24,7 +42,7 @@ import Schema from '../components/Schema.astro';
     data={{
       name: 'Vehicle Transport Australia',
       logo: '/logo.svg',
-      url: import.meta.env.PUBLIC_SITE_URL,
+      url: site.url,
       contactPoint: {
         '@type': 'ContactPoint',
         telephone: '+61-123-456-789',
@@ -32,9 +50,38 @@ import Schema from '../components/Schema.astro';
       },
     }}
   />
+  {
+    breadcrumbItems.length >= 2 && (
+      <Schema type="BreadcrumbList" data={{ items: breadcrumbItems }} />
+    )
+  }
   <div class="font-sans antialiased text-slate-800 bg-slate-50 min-h-screen flex flex-col">
     <a class="skip-link" href="#main-content">Skip to main content</a>
     <Header />
+    {
+      breadcrumbItems.length >= 2 && (
+        <nav class="container mx-auto px-4 pt-4 text-sm text-slate-600" aria-label="Breadcrumb">
+          <ol class="flex flex-wrap gap-2">
+            {breadcrumbItems.map((item, index) => (
+              <li class="flex items-center gap-2">
+                {index < breadcrumbItems.length - 1 ? (
+                  <a class="hover:text-brand-orange-500 hover:underline" href={item.href}>
+                    {item.name}
+                  </a>
+                ) : (
+                  <span aria-current="page">{item.name}</span>
+                )}
+                {index < breadcrumbItems.length - 1 && (
+                  <span class="text-slate-400" aria-hidden="true">
+                    /
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
     <main class="flex-grow" id="main-content">
       <slot />
     </main>
