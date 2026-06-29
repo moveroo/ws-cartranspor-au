@@ -67,4 +67,10 @@ import Schema from '../components/Schema.astro';
   .skip-link:focus {
     transform: translateY(0);
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skip-link {
+      transition: none;
+    }
+  }
 </style>
