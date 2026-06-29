@@ -33,8 +33,9 @@ import Schema from '../components/Schema.astro';
     }}
   />
   <div class="font-sans antialiased text-slate-800 bg-slate-50 min-h-screen flex flex-col">
+    <a class="skip-link" href="#main-content">Skip to main content</a>
     <Header />
-    <main class="flex-grow">
+    <main class="flex-grow" id="main-content">
       <slot />
     </main>
     <Footer />
@@ -46,3 +47,24 @@ import Schema from '../components/Schema.astro';
     data-surface="main-domain-sitewide"
     async></script>
 </SEO>
+
+<style is:global>
+  .skip-link {
+    position: absolute;
+    top: 0;
+    left: 1rem;
+    z-index: 1000;
+    transform: translateY(-120%);
+    border-radius: 0 0 0.5rem 0.5rem;
+    background: #111827;
+    color: #ffffff;
+    font-weight: 700;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    transition: transform 150ms ease;
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+</style>
