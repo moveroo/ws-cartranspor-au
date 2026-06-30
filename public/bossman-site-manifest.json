@@ -39,5 +39,48 @@
     "key": "indexnow-cartransport-au-495f64519df3b2274076be59",
     "keyFile": "public/indexnow-cartransport-au-495f64519df3b2274076be59.txt",
     "keyFileUrl": "https://cartransport.au/indexnow-cartransport-au-495f64519df3b2274076be59.txt"
+  },
+  "metadata": {
+    "quoteTargets": [
+      "https://quoting.cartransport.au/contact",
+      "https://quoting.cartransport.au/quote/household",
+      "https://quoting.cartransport.au/quote/vehicle"
+    ],
+    "quoteCapability": {
+      "host": "https://quoting.cartransport.au",
+      "llmsTxt": "https://quoting.cartransport.au/llms.txt",
+      "aiCatalog": "https://quoting.cartransport.au/.well-known/ai-catalog.json",
+      "manifest": "https://quoting.cartransport.au/quote-capability.json",
+      "humanGuide": "https://quoting.cartransport.au/agents",
+      "householdPublicAgentApi": {
+        "method": "POST",
+        "url": "https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit",
+        "hostAware": true,
+        "requiresTenant": false,
+        "requiresCustomerConsent": true,
+        "ready": true
+      },
+      "vehiclePublicAgentApi": {
+        "ready": false,
+        "handoffUrl": "https://quoting.cartransport.au/quote/vehicle"
+      }
+    },
+    "agentCapabilities": {
+      "quote": {
+        "householdQuote": "https://quoting.cartransport.au/quote/household",
+        "vehicleQuote": "https://quoting.cartransport.au/quote/vehicle",
+        "contact": "https://quoting.cartransport.au/contact",
+        "capabilityManifest": "https://quoting.cartransport.au/quote-capability.json",
+        "humanGuide": "https://quoting.cartransport.au/agents",
+        "householdPublicAgentApi": "https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit",
+        "hostAware": true,
+        "tenantRequired": false
+      },
+      "siteIdentity": true,
+      "contentDiscovery": true,
+      "safeActions": true,
+      "bossmanRepairReady": true
+    },
+    "updatedAt": "2026-06-30"
   }
 }
