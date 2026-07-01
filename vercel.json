@@ -24,6 +24,26 @@
       "source": "/interstate-car-transport-with-personal-items/:path*",
       "destination": "/services/interstate/",
       "permanent": true
+    },
+    {
+      "source": "/openapi.json",
+      "destination": "https://quoting.cartransport.au/openapi.json",
+      "permanent": true
+    },
+    {
+      "source": "/.well-known/openapi.json",
+      "destination": "https://quoting.cartransport.au/.well-known/openapi.json",
+      "permanent": true
+    },
+    {
+      "source": "/quote-capability.json",
+      "destination": "https://quoting.cartransport.au/quote-capability.json",
+      "permanent": true
+    },
+    {
+      "source": "/.well-known/ai-plugin.json",
+      "destination": "https://quoting.cartransport.au/.well-known/ai-plugin.json",
+      "permanent": true
     }
   ],
   "headers": [
@@ -34,17 +54,48 @@
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://quotes.moveroo.com.au https://www.googletagmanager.com https://plausible.io https://stats.redirection.com.au; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://quotes.moveroo.com.au https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://region1.google-analytics.com https://plausible.io https://stats.redirection.com.au; frame-src https://quotes.moveroo.com.au; object-src 'none'; base-uri 'self'; frame-ancestors 'self';"
         },
-        { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "X-XSS-Protection", "value": "1; mode=block" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" }
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Link",
+          "value": "</agents/>; rel=\"help\"; type=\"text/html\"; title=\"Cartransport Agent/API documentation\", </index.md>; rel=\"alternate\"; type=\"text/markdown\"; title=\"Markdown homepage summary\", </llms.txt>; rel=\"alternate\"; type=\"text/plain\"; title=\"LLMs guidance\", </.well-known/llms.txt>; rel=\"alternate\"; type=\"text/plain\"; title=\"Well-known LLMs guidance\", </.well-known/ai-catalog.json>; rel=\"service-desc\"; type=\"application/json\"; title=\"Marketing site AI catalog\", </.well-known/agent-skills/index.json>; rel=\"service-desc\"; type=\"application/json\"; title=\"Agent skills discovery index\", </bossman-site-manifest.json>; rel=\"service-desc\"; type=\"application/json\"; title=\"Bossman site manifest\", </quote-capability.json>; rel=\"service-desc\"; type=\"application/json\"; title=\"Quote capability manifest\", </.well-known/ai-plugin.json>; rel=\"service-desc\"; type=\"application/json\"; title=\"Quote AI plugin compatibility manifest\", </openapi.json>; rel=\"service-desc\"; type=\"application/vnd.oai.openapi+json\"; title=\"Quote OpenAPI description\""
+        },
+        {
+          "key": "Vary",
+          "value": "Accept"
+        }
       ]
     },
     {
       "source": "/(.*)\\.(js|css|woff2|png|jpg|jpeg|gif|svg|ico|webp)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ]
 }

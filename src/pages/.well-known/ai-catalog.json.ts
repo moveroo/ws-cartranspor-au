@@ -1,73 +1,97 @@
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = () => {
-  const catalog = {
+  const payload = {
     specVersion: '1.0',
     host: {
-      displayName: 'Car Transport',
+      displayName: 'Cartransport',
       identifier: 'did:web:cartransport.au',
       url: 'https://cartransport.au/',
     },
+    canonicalQuoteHost: 'https://quoting.cartransport.au',
     entries: [
       {
         identifier: 'urn:ai:cartransport.au:web:home',
-        displayName: 'Car Transport Website',
+        displayName: 'Cartransport Website',
         type: 'text/html',
         url: 'https://cartransport.au/',
       },
       {
-        identifier: 'urn:ai:cartransport.au:okf:index',
-        displayName: 'Car Transport Open Knowledge Index',
+        identifier: 'urn:ai:cartransport.au:llms',
+        displayName: 'Cartransport LLM guidance',
+        type: 'text/plain',
+        url: 'https://cartransport.au/llms.txt',
+      },
+      {
+        identifier: 'urn:ai:cartransport.au:markdown:index',
+        displayName: 'Cartransport Markdown summary',
         type: 'text/markdown',
-        url: 'https://cartransport.au/okf/index.md',
+        url: 'https://cartransport.au/index.md',
+      },
+      {
+        identifier: 'urn:ai:cartransport.au:agent-skills:index',
+        displayName: 'Cartransport Agent Skills Index',
+        type: 'application/json',
+        url: 'https://cartransport.au/.well-known/agent-skills/index.json',
+      },
+      {
+        identifier: 'urn:ai:cartransport.au:agents:guide',
+        displayName: 'Cartransport Agent/API Guide',
+        type: 'text/html',
+        url: 'https://cartransport.au/agents/',
       },
       {
         identifier: 'urn:ai:cartransport.au:quote:household',
-        displayName: 'Car Transport Household Quote',
+        displayName: 'Household Quote',
         type: 'text/html',
         url: 'https://quoting.cartransport.au/quote/household',
       },
       {
         identifier: 'urn:ai:cartransport.au:quote:vehicle',
-        displayName: 'Car Transport Vehicle Quote',
+        displayName: 'Vehicle Quote',
         type: 'text/html',
         url: 'https://quoting.cartransport.au/quote/vehicle',
       },
       {
-        identifier: 'urn:ai:cartransport.au:quote:contact',
-        displayName: 'Car Transport Contact',
+        identifier: 'urn:ai:cartransport.au:contact',
+        displayName: 'Contact',
         type: 'text/html',
         url: 'https://quoting.cartransport.au/contact',
       },
       {
         identifier: 'urn:ai:cartransport.au:quote:capability',
-        displayName: 'Car Transport Quote Capability Manifest',
+        displayName: 'Quote Capability Manifest',
         type: 'application/json',
         url: 'https://quoting.cartransport.au/quote-capability.json',
       },
       {
-        identifier: 'urn:ai:cartransport.au:quote:ai-catalog',
-        displayName: 'Car Transport Quote Host AI Catalog',
-        type: 'application/json',
-        url: 'https://quoting.cartransport.au/.well-known/ai-catalog.json',
+        identifier: 'urn:ai:cartransport.au:quote:openapi',
+        displayName: 'Quote OpenAPI Schema',
+        type: 'application/vnd.oai.openapi+json',
+        url: 'https://quoting.cartransport.au/openapi.json',
       },
       {
-        identifier: 'urn:ai:cartransport.au:quote:human-guide',
-        displayName: 'Car Transport Human Guide For Agents',
-        type: 'text/html',
-        url: 'https://quoting.cartransport.au/agents',
-      },
-      {
-        identifier: 'urn:ai:cartransport.au:quote:household-api',
-        displayName: 'Car Transport Household Quote Public Agent API',
+        identifier: 'urn:ai:cartransport.au:quote:household-public-agent-api',
+        displayName: 'Household Quote Public Agent API',
         type: 'application/json',
-        method: 'POST',
         url: 'https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit',
+      },
+      {
+        identifier: 'urn:ai:cartransport.au:quote:vehicle-public-agent-api',
+        displayName: 'Vehicle Quote Public Agent API',
+        type: 'application/json',
+        url: 'https://quoting.cartransport.au/api/v1/vehicle-quotes/assistant/submit',
+      },
+      {
+        identifier: 'urn:ai:cartransport.au:quote:callback-public-agent-api',
+        displayName: 'Callback Public Agent API',
+        type: 'application/json',
+        url: 'https://quoting.cartransport.au/api/v1/callbacks/assistant/request',
       },
     ],
   };
 
-  return new Response(JSON.stringify(catalog, null, 2), {
+  return new Response(JSON.stringify(payload, null, 2), {
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Access-Control-Allow-Origin': '*',

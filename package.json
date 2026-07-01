@@ -17,7 +17,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
-    "check:contract": "node ./scripts/check-contract.mjs",
+    "check:contract": "node ./scripts/check-contract.mjs && node scripts/check-agent-discovery.mjs",
     "check:seo": "node scripts/check-seo.mjs && node scripts/check-homepage-h1.mjs",
     "check:homepage-h1": "node scripts/check-homepage-h1.mjs",
     "lint": "eslint .",
@@ -37,7 +37,8 @@
     "check:structure": "node scripts/analyze-heading-structure.mjs",
     "check:links": "node scripts/analyze-internal-links.mjs",
     "indexnow:dry-run": "node ./scripts/indexnow-submit.mjs --dry-run",
-    "indexnow:submit": "node ./scripts/indexnow-submit.mjs --live --force"
+    "indexnow:submit": "node ./scripts/indexnow-submit.mjs --live --force",
+    "check:agent-discovery": "node scripts/check-agent-discovery.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.18",

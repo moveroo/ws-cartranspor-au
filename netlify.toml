@@ -1,3 +1,27 @@
+[[redirects]]
+  from = "/.well-known/ai-plugin.json"
+  to = "https://quoting.cartransport.au/.well-known/ai-plugin.json"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/quote-capability.json"
+  to = "https://quoting.cartransport.au/quote-capability.json"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/.well-known/openapi.json"
+  to = "https://quoting.cartransport.au/.well-known/openapi.json"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/openapi.json"
+  to = "https://quoting.cartransport.au/openapi.json"
+  status = 301
+  force = true
+
 [build]
   command = "npm run build"
   publish = "dist"
@@ -83,6 +107,8 @@
 [[headers]]
   for = "/*"
   [headers.values]
+    Link = "</agents/>; rel=\"help\"; type=\"text/html\"; title=\"Cartransport Agent/API documentation\", </index.md>; rel=\"alternate\"; type=\"text/markdown\"; title=\"Markdown homepage summary\", </llms.txt>; rel=\"alternate\"; type=\"text/plain\"; title=\"LLMs guidance\", </.well-known/llms.txt>; rel=\"alternate\"; type=\"text/plain\"; title=\"Well-known LLMs guidance\", </.well-known/ai-catalog.json>; rel=\"service-desc\"; type=\"application/json\"; title=\"Marketing site AI catalog\", </.well-known/agent-skills/index.json>; rel=\"service-desc\"; type=\"application/json\"; title=\"Agent skills discovery index\", </bossman-site-manifest.json>; rel=\"service-desc\"; type=\"application/json\"; title=\"Bossman site manifest\", </quote-capability.json>; rel=\"service-desc\"; type=\"application/json\"; title=\"Quote capability manifest\", </.well-known/ai-plugin.json>; rel=\"service-desc\"; type=\"application/json\"; title=\"Quote AI plugin compatibility manifest\", </openapi.json>; rel=\"service-desc\"; type=\"application/vnd.oai.openapi+json\"; title=\"Quote OpenAPI description\""
+    Vary = "Accept"
     Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://quotes.moveroo.com.au https://www.googletagmanager.com https://plausible.io https://stats.redirection.com.au; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://quotes.moveroo.com.au https://www.google-analytics.com https://analytics.google.com https://*.google-analytics.com https://region1.google-analytics.com https://plausible.io https://stats.redirection.com.au; frame-src https://quotes.moveroo.com.au; object-src 'none'; base-uri 'self'; frame-ancestors 'self';"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains"
     X-Content-Type-Options = "nosniff"
