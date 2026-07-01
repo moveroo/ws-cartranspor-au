@@ -3,17 +3,18 @@ import path from 'node:path';
 
 const root = process.cwd();
 const required = {
-  "domain": "cartransport.au",
-  "siteUrl": "https://cartransport.au/",
-  "quoteRoot": "https://quoting.cartransport.au/",
-  "contact": "https://quoting.cartransport.au/contact",
-  "householdQuote": "https://quoting.cartransport.au/quote/household",
-  "vehicleQuote": "https://quoting.cartransport.au/quote/vehicle",
-  "openApi": "https://quoting.cartransport.au/openapi.json",
-  "quoteCapability": "https://quoting.cartransport.au/quote-capability.json",
-  "householdPublicAgentApi": "https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit",
-  "vehiclePublicAgentApi": "https://quoting.cartransport.au/api/v1/vehicle-quotes/assistant/submit",
-  "callbackPublicAgentApi": "https://quoting.cartransport.au/api/v1/callbacks/assistant/request"
+  domain: 'cartransport.au',
+  siteUrl: 'https://cartransport.au/',
+  quoteRoot: 'https://quoting.cartransport.au/',
+  contact: 'https://quoting.cartransport.au/contact',
+  householdQuote: 'https://quoting.cartransport.au/quote/household',
+  vehicleQuote: 'https://quoting.cartransport.au/quote/vehicle',
+  openApi: 'https://quoting.cartransport.au/openapi.json',
+  quoteCapability: 'https://quoting.cartransport.au/quote-capability.json',
+  householdPublicAgentApi:
+    'https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit',
+  vehiclePublicAgentApi: 'https://quoting.cartransport.au/api/v1/vehicle-quotes/assistant/submit',
+  callbackPublicAgentApi: 'https://quoting.cartransport.au/api/v1/callbacks/assistant/request',
 };
 const requiredFiles = [
   'src/pages/agents.astro',
@@ -34,7 +35,9 @@ for (const file of requiredFiles) {
 }
 
 const searchableFiles = requiredFiles.filter((file) => fs.existsSync(path.join(root, file)));
-const haystack = searchableFiles.map((file) => fs.readFileSync(path.join(root, file), 'utf8')).join('\n');
+const haystack = searchableFiles
+  .map((file) => fs.readFileSync(path.join(root, file), 'utf8'))
+  .join('\n');
 
 for (const [label, value] of Object.entries(required)) {
   if (!haystack.includes(value)) {
@@ -45,7 +48,13 @@ for (const [label, value] of Object.entries(required)) {
 
 if (fs.existsSync(path.join(root, 'vercel.json'))) {
   const vercel = fs.readFileSync(path.join(root, 'vercel.json'), 'utf8');
-  for (const value of ['/openapi.json', '/quote-capability.json', '/.well-known/ai-plugin.json', '/.well-known/agent-skills/index.json', '/.well-known/llms.txt']) {
+  for (const value of [
+    '/openapi.json',
+    '/quote-capability.json',
+    '/.well-known/ai-plugin.json',
+    '/.well-known/agent-skills/index.json',
+    '/.well-known/llms.txt',
+  ]) {
     if (!vercel.includes(value)) {
       console.error(`Vercel discovery header/redirect missing ${value}`);
       failed = true;
