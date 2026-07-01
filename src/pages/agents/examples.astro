@@ -1,0 +1,82 @@
+---
+const brand = 'Cartransport';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{brand} Agent/API Examples</title>
+    <meta
+      name="description"
+      content={`Example customer-consented API requests for Cartransport quote agents.`}
+    />
+    <style>
+      body {
+        margin: 0;
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        color: #17202a;
+        background: #f7f4ee;
+      }
+      main {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 48px 20px 64px;
+      }
+      h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        line-height: 1;
+        margin: 0 0 18px;
+      }
+      p,
+      li {
+        line-height: 1.65;
+      }
+      a {
+        color: #0b5cad;
+        text-underline-offset: 3px;
+      }
+      pre {
+        overflow-x: auto;
+        background: #111827;
+        color: #f9fafb;
+        padding: 16px;
+        border-radius: 8px;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>{brand} Agent/API Examples</h1>
+      <p>
+        These examples point agents to the canonical quote host at <a
+          href="https://quoting.cartransport.au/">https://quoting.cartransport.au/</a
+        >. Use the live OpenAPI schema and capability manifest before submitting production
+        requests.
+      </p>
+      <h2>Household Quote</h2>
+      <pre><code>curl -X POST https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit \
+  -H 'Content-Type: application/json' \
+  -d '&#123;"customer_consent":&#123;"confirmed":true&#125;,"customer":&#123;"name":"Example Customer","email":"customer@example.com","phone":"0400000000"&#125;,"move":&#123;"pickup":&#123;"suburb":"Sydney","state":"NSW"&#125;,"delivery":&#123;"suburb":"Brisbane","state":"QLD"&#125;,"inventory":&#123;"method":"m3","cubic_meters":20&#125;&#125;&#125;'</code></pre>
+      <h2>Vehicle Quote</h2>
+      <pre><code>curl -X POST https://quoting.cartransport.au/api/v1/vehicle-quotes/assistant/submit \
+  -H 'Content-Type: application/json' \
+  -d '&#123;"customer_consent":&#123;"confirmed":true&#125;,"customer":&#123;"name":"Example Customer","email":"customer@example.com","phone":"0400000000"&#125;,"vehicle":&#123;"make":"Toyota","model":"Corolla","drivable":true&#125;,"route":&#123;"pickup":&#123;"suburb":"Melbourne","state":"VIC"&#125;,"delivery":&#123;"suburb":"Perth","state":"WA"&#125;&#125;&#125;'</code></pre>
+      <h2>Callback Request</h2>
+      <pre><code>curl -X POST https://quoting.cartransport.au/api/v1/callbacks/assistant/request \
+  -H 'Content-Type: application/json' \
+  -d '&#123;"customer_consent":&#123;"confirmed":true&#125;,"customer":&#123;"name":"Example Customer","email":"customer@example.com","phone":"0400000000"&#125;,"message":"Please call me about my move."&#125;'</code></pre>
+    </main>
+  </body>
+</html>
