@@ -13,7 +13,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node ./scripts/indexnow-submit.mjs --auto",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
