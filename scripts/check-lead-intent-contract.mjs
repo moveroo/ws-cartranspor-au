@@ -183,6 +183,10 @@ async function main() {
   const checks = [];
   const manifest = JSON.parse(await read('bossman-site-manifest.json'));
   const siteConfig = await read('src/config/site.ts');
+  const leadAttributionRuntime = [
+    await read('src/components/analytics/Ga4.astro'),
+    await fs.readFile(path.join(root, 'public/ga4-loader.js'), 'utf8').catch(() => ''),
+  ].join('\n');
   const quoteTargets = quoteTargetsFromManifest(manifest);
   const trackedLinks = trackedLinksFromSiteConfig(siteConfig);
 
@@ -202,6 +206,19 @@ async function main() {
         .every((link) => link.href === href)
     );
   }
+	for (const token of [
+		"lead_intent_id",
+		"source_site",
+		"source_path",
+		"intent_type",
+		"quote_household",
+		"quote_vehicle",
+		"booking_household",
+		"contact",
+	]) {
+		addCheck(checks, `Lead attribution runtime decorates outbound Lead Intent links with ${token}`, leadAttributionRuntime.includes(token));
+	}
+
 
   for (const deprecatedEvent of deprecatedLeadIntentEvents) {
     addCheck(
