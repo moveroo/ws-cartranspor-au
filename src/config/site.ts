@@ -16,13 +16,56 @@ export const site = {
   destinations: {
     quote: 'https://quoting.cartransport.au/quote/vehicle',
     contact: 'https://quoting.cartransport.au/contact',
+    householdQuote: 'https://quoting.cartransport.au/quote/household',
+    vehicleQuote: 'https://quoting.cartransport.au/quote/vehicle',
+    contactPage: 'https://quoting.cartransport.au/contact',
+    bookingPage: 'https://quoting.cartransport.au/booking/create',
   },
   analytics: {
     siteKey: 'cartransport-au',
     trackedLinks: [
       {
+        href: 'https://quoting.cartransport.au/quote/household',
+        eventName: 'quote_household_click',
+        params: {
+          interaction_type: 'quote',
+          lead_type: 'household_quote',
+          quote_type: 'household',
+          quote_host: 'quoting.cartransport.au',
+          handoff_event_name: 'quote_household_click',
+        },
+      },
+      {
         href: 'https://quoting.cartransport.au/quote/vehicle',
         eventName: 'quote_vehicle_click',
+        params: {
+          interaction_type: 'quote',
+          lead_type: 'vehicle_quote',
+          quote_type: 'vehicle',
+          quote_host: 'quoting.cartransport.au',
+          handoff_event_name: 'quote_vehicle_click',
+        },
+      },
+      {
+        href: 'https://quoting.cartransport.au/booking/create',
+        eventName: 'booking_household_click',
+        params: {
+          interaction_type: 'booking',
+          lead_type: 'booking',
+          quote_type: 'household',
+          quote_host: 'quoting.cartransport.au',
+          handoff_event_name: 'booking_household_click',
+        },
+      },
+      {
+        href: 'https://quoting.cartransport.au/contact',
+        eventName: 'contact_intent_click',
+        params: {
+          interaction_type: 'contact',
+          lead_type: 'contact',
+          quote_host: 'quoting.cartransport.au',
+          handoff_event_name: 'contact_intent_click',
+        },
       },
     ],
   },
