@@ -17,7 +17,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
-    "check:contract": "node ./scripts/check-contract.mjs && node scripts/check-agent-discovery.mjs",
+    "check:contract": "node ./scripts/check-contract.mjs && node scripts/check-agent-discovery.mjs && node scripts/check-lead-intent-contract.mjs",
     "check:seo": "node scripts/check-seo.mjs && node scripts/check-homepage-h1.mjs",
     "check:homepage-h1": "node scripts/check-homepage-h1.mjs",
     "lint": "eslint .",
