@@ -206,19 +206,22 @@ async function main() {
         .every((link) => link.href === href)
     );
   }
-	for (const token of [
-		"lead_intent_id",
-		"source_site",
-		"source_path",
-		"intent_type",
-		"quote_household",
-		"quote_vehicle",
-		"booking_household",
-		"contact",
-	]) {
-		addCheck(checks, `Lead attribution runtime decorates outbound Lead Intent links with ${token}`, leadAttributionRuntime.includes(token));
-	}
-
+  for (const token of [
+    'lead_intent_id',
+    'source_site',
+    'source_path',
+    'intent_type',
+    'quote_household',
+    'quote_vehicle',
+    'booking_household',
+    'contact',
+  ]) {
+    addCheck(
+      checks,
+      `Lead attribution runtime decorates outbound Lead Intent links with ${token}`,
+      leadAttributionRuntime.includes(token)
+    );
+  }
 
   for (const deprecatedEvent of deprecatedLeadIntentEvents) {
     addCheck(
