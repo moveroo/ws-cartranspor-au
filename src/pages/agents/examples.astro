@@ -1,5 +1,20 @@
 ---
 const brand = 'Cartransport';
+const breadcrumbItems = [
+  { name: 'Home', url: 'https://cartransport.au/' },
+  { name: 'Agents', url: 'https://cartransport.au/agents/' },
+  { name: 'Examples', url: 'https://cartransport.au/agents/examples/' },
+];
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbItems.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: item.url,
+  })),
+};
 ---
 
 <!doctype html>
@@ -12,6 +27,7 @@ const brand = 'Cartransport';
       name="description"
       content={`Example customer-consented API requests for Cartransport quote agents.`}
     />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
     <style>
       body {
         margin: 0;
@@ -58,6 +74,13 @@ const brand = 'Cartransport';
   </head>
   <body>
     <main>
+      <nav aria-label="Breadcrumb" class="breadcrumbs">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><a href="/agents/">Agents</a></li>
+          <li><span aria-current="page">Examples</span></li>
+        </ol>
+      </nav>
       <h1>{brand} Agent/API Examples</h1>
       <p>
         These examples point agents to the canonical quote host at <a

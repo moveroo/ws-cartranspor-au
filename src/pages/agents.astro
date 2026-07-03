@@ -2,6 +2,20 @@
 const title = 'Cartransport Agent/API';
 const description =
   'Cartransport publishes agent-readable discovery resources for customer-authorised household moving quotes, vehicle transport quotes, callbacks, and quote API documentation.';
+const breadcrumbItems = [
+  { name: 'Home', url: 'https://cartransport.au/' },
+  { name: 'Agents', url: 'https://cartransport.au/agents/' },
+];
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbItems.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    item: item.url,
+  })),
+};
 ---
 
 <!doctype html>
@@ -12,6 +26,7 @@ const description =
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={Astro.url.href} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
     <style>
       :root {
         color-scheme: light;
@@ -87,6 +102,12 @@ const description =
   </head>
   <body>
     <main>
+      <nav aria-label="Breadcrumb" class="breadcrumbs">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li><span aria-current="page">Agents</span></li>
+        </ol>
+      </nav>
       <h1>{title}</h1>
       <p class="lede">{description}</p>
       <h2>Supported Agent Actions</h2>
