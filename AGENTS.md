@@ -7,7 +7,7 @@ First step: ask Bossman for current site truth, standards, Fleet Guards, evidenc
 Run this before touching controlled site files:
 
 ```sh
-/Users/jasonhill/Projects/Systems/bossman-laravel-v2/scripts/bossman-site-context
+./scripts/bossman-site-context
 ```
 
 If Bossman cannot resolve the site, evidence, standards, Fleet Guards, and repo mapping, stop and fix the Bossman record or manifest before editing this repo.
