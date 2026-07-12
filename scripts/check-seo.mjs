@@ -35,6 +35,7 @@ const layoutSource = fs.readFileSync(
   new URL('../src/layouts/Layout.astro', import.meta.url),
   'utf8'
 );
+const seoSource = fs.readFileSync(new URL('../src/components/SEO.astro', import.meta.url), 'utf8');
 const contentDocs = walk(new URL('../src/content', import.meta.url).pathname);
 
 assert(packageJson.scripts.check, 'package.json is missing the check script');
@@ -50,6 +51,14 @@ assert(
 assert(
   layoutSource.includes('Vehicle Transport Australia'),
   'layout no longer identifies the Vehicle Transport Australia brand'
+);
+assert(
+  seoSource.includes('rel="manifest" href="/manifest.json"'),
+  'SEO component must expose the PWA manifest'
+);
+assert(
+  seoSource.includes('rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"'),
+  'SEO component must expose the Apple touch icon'
 );
 assert(contentDocs >= 1, 'expected at least some markdown content under src/content');
 
