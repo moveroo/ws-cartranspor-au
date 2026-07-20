@@ -2,7 +2,6 @@
  * Check all pages for schema issues
  *
  * Checks for:
- * - Missing telephone in LocalBusiness schema
  * - Missing FAQPage schema where FAQs exist
  * - Missing BreadcrumbList schema
  * - Missing aggregateRating where applicable
@@ -56,15 +55,6 @@ function analyzeSchema(filePath) {
 
   // CHECK: LocalBusiness
   const hasLocalBusiness = allSchemaText.includes('LocalBusiness');
-  if (hasLocalBusiness) {
-    if (!allSchemaText.includes('telephone')) {
-      issues.push({
-        type: 'missing-telephone',
-        severity: 'high',
-        message: 'LocalBusiness schema missing telephone field',
-      });
-    }
-  }
 
   // CHECK: FAQ Content matching
   const detailsTags = doc.querySelectorAll('details');
@@ -133,7 +123,6 @@ async function main() {
 
   // Group issues by type
   const issuesByType = {
-    'missing-telephone': [],
     'missing-faq-schema': [],
     'missing-breadcrumb': [],
     'missing-rating': [],
@@ -152,17 +141,6 @@ async function main() {
 
   // Report results
   let totalIssues = 0;
-
-  // High priority: Missing telephone
-  if (issuesByType['missing-telephone'].length > 0) {
-    console.log('\n🔴 HIGH PRIORITY: Missing Telephone in LocalBusiness Schema');
-    console.log('─'.repeat(70));
-    issuesByType['missing-telephone'].forEach((issue) => {
-      console.log(`  ❌ ${issue.file}`);
-      console.log(`     ${issue.message}`);
-    });
-    totalIssues += issuesByType['missing-telephone'].length;
-  }
 
   // Medium priority: Missing FAQ schema
   if (issuesByType['missing-faq-schema'].length > 0) {
@@ -192,7 +170,6 @@ async function main() {
   console.log(`Total Pages Analyzed: ${files.length}`);
   console.log(`Pages with Issues: ${results.filter((r) => r.issues.length > 0).length}`);
   console.log(`\nIssue Breakdown:`);
-  console.log(`  🔴 Missing Telephone: ${issuesByType['missing-telephone'].length}`);
   console.log(`  🟡 Missing FAQ Schema: ${issuesByType['missing-faq-schema'].length}`);
   console.log(`  🔵 Missing Breadcrumbs: ${issuesByType['missing-breadcrumb'].length}`);
 

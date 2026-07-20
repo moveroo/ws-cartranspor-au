@@ -28,5 +28,5 @@ house, we have the capacity to help.
 
 ## Open an Account
 
-Contact our commercial team today on **1300 XXX XXX** to discuss your
-requirements and set up a trade account.
+Use our [official contact page](https://quoting.cartransport.au/contact) to discuss
+your requirements and set up a trade account.
