@@ -46,7 +46,7 @@ flow fast, readable, and mobile-first.
 - Do not put route patterns, truck imagery, or map motifs behind form controls.
 - Do not make household removals the primary journey for this brand.
 - Do not show admin or provider links on public customer surfaces.
-- Do not use placeholder phone values such as `1300 XXX XXX`.
+- Do not expose direct or placeholder phone values.
 
 ## Reusable Asset Families
 

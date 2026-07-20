@@ -218,16 +218,11 @@ and bounded theme/profile settings. It should not accept arbitrary CSS, raw
 Tailwind class strings, remote layout instructions, or unreviewed image URLs
 from a brand payload.
 
-## Contact Details
+## Contact Routing
 
-The repo currently contains `1300 XXX XXX`, which is a placeholder, and a
-site-specific `info@cartransport.au` email. For quote-subdomain contact buttons,
-use the Moveroo global support pair until a complete site-specific support set
-is confirmed:
-
-- phone: `+61 7 2143 2557`
-- tel href: `tel:+61721432557`
-- email: `removals@moveroo.com.au`
+Do not expose a public phone number or email address for this Moveroo marketing
+site. Every contact action must point to the site-owned contact page at
+`https://quoting.cartransport.au/contact`.
 
 ## Failure Modes To Avoid
 

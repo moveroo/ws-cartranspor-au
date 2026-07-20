@@ -31,7 +31,6 @@ interface SchemaData extends Record<string, unknown> {
   headline?: string;
   logo?: string;
   address?: Record<string, unknown>;
-  telephone?: string;
   openingHours?: string;
   price?: string;
   currency?: string;
@@ -69,7 +68,6 @@ function generateSchema(type: string, data: SchemaData) {
         name: data.name || siteName,
         url: siteUrl,
         address: data.address || {},
-        telephone: data.telephone || '',
         openingHours: data.openingHours || '',
         ...data,
       };
