@@ -1,5 +1,6 @@
 ---
 const brand = 'Cartransport';
+const canonical = 'https://cartransport.au/agents/examples/';
 const breadcrumbItems = [
   { name: 'Home', url: 'https://cartransport.au/' },
   { name: 'Agents', url: 'https://cartransport.au/agents/' },
@@ -27,6 +28,7 @@ const breadcrumbSchema = {
       name="description"
       content={`Example customer-consented API requests for Cartransport quote agents.`}
     />
+    <link rel="canonical" href={canonical} />
     <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
     <style>
       body {

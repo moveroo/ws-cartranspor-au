@@ -25,6 +25,18 @@ const requiredFiles = [
   'src/pages/.well-known/ai-catalog.json.ts',
   'src/pages/.well-known/agent-skills/index.json.ts',
 ];
+const requiredAgentAllows = [
+  '/agents/',
+  '/agents/examples/',
+  '/llms.txt',
+  '/.well-known/llms.txt',
+  '/index.md',
+  '/openapi.json',
+  '/quote-capability.json',
+  '/.well-known/ai-catalog.json',
+  '/.well-known/agent-skills/index.json',
+  '/.well-known/ai-plugin.json',
+];
 
 let failed = false;
 for (const file of requiredFiles) {
@@ -44,6 +56,39 @@ for (const [label, value] of Object.entries(required)) {
     console.error(`Agent discovery missing ${label}: ${value}`);
     failed = true;
   }
+}
+
+const robotsRoute = fs.readFileSync(path.join(root, 'src/pages/robots.txt.ts'), 'utf8');
+const sitemapDeclarations = [...robotsRoute.matchAll(/Sitemap:\s+(https?:\/\/.*?)(?=\\n)/g)].map(
+  (match) => match[1]
+);
+
+if (sitemapDeclarations.length === 0) {
+  console.error('robots.txt must declare at least one sitemap');
+  failed = true;
+}
+
+for (const sitemapUrl of sitemapDeclarations) {
+  if (!new URL(sitemapUrl).pathname.endsWith('.xml')) {
+    console.error(`robots.txt declares a non-XML sitemap: ${sitemapUrl}`);
+    failed = true;
+  }
+}
+
+for (const resource of requiredAgentAllows) {
+  if (!robotsRoute.includes(`Allow: ${resource}`)) {
+    console.error(`robots.txt missing agent resource Allow: ${resource}`);
+    failed = true;
+  }
+}
+
+const examplesPage = fs.readFileSync(path.join(root, 'src/pages/agents/examples.astro'), 'utf8');
+if (
+  !examplesPage.includes("const canonical = 'https://cartransport.au/agents/examples/';") ||
+  !examplesPage.includes('<link rel="canonical" href={canonical} />')
+) {
+  console.error('/agents/examples/ must declare its production self-canonical');
+  failed = true;
 }
 
 if (fs.existsSync(path.join(root, 'vercel.json'))) {
