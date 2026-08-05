@@ -82,5 +82,8 @@
       "bossmanRepairReady": true
     },
     "updatedAt": "2026-06-30"
+  },
+  "verification": {
+    "commands": ["./scripts/bossman-site-context", "npm run check", "npm run build"]
   }
 }
