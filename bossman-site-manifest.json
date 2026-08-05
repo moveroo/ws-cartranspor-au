@@ -17,6 +17,13 @@
   "search": {
     "status": "not-applicable"
   },
+  "verification": {
+    "commands": [
+      "./scripts/bossman-site-context",
+      "npm run check",
+      "npm run build"
+    ]
+  },
   "standards": {
     "legalPages": "moveroo-aligned",
     "imageQuality": "brand-pass-required",
