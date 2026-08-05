@@ -1,87 +1,103 @@
 {
-  "schema": "bossman-site-manifest.v1",
-  "domain": "cartransport.au",
-  "brandName": "Cartransport",
-  "productionUrl": "https://cartransport.au",
-  "repo": "moveroo/ws-cartranspor-au",
-  "platform": "astro",
-  "deployTarget": "Netlify",
-  "localPath": "/Users/jasonhill/Projects/Business/websites/MM-cartransport.au",
-  "owner": "site-repo",
-  "quoteTargets": [
-    "https://quoting.cartransport.au/contact",
-    "https://quoting.cartransport.au/quote/household",
-    "https://quoting.cartransport.au/quote/vehicle"
+  "schemaVersion": "bossman.site-manifest.v1",
+  "site": {
+    "name": "Cartransport",
+    "canonicalUrl": "https://cartransport.au",
+    "domain": "cartransport.au",
+    "siteRole": "marketing",
+    "lifecycleStatus": "active",
+    "repositoryUrl": "https://github.com/moveroo/ws-cartranspor-au"
+  },
+  "standards": [
+    "legalPages",
+    "imageQuality",
+    "languageQuality",
+    "search",
+    "quoteLinkSecurity",
+    "astroBuild"
   ],
-  "legalPages": ["/privacy/", "/terms/"],
-  "search": {
-    "status": "not-applicable"
-  },
-  "standards": {
-    "legalPages": "moveroo-aligned",
-    "imageQuality": "brand-pass-required",
-    "languageQuality": "basic-hygiene-required",
-    "search": "not-applicable",
-    "quoteLinkSecurity": "quote-subdomain-required",
-    "astroBuild": "static-astro"
-  },
-  "evidence": {
-    "brandTokens": "brand/tokens.json"
-  },
-  "notes": "Bossman site manifest for repo-owned implementation truth. Bossman imports this as evidence but does not overwrite accepted truth without review.",
-  "updatedAt": "2026-06-30",
-  "indexNow": {
-    "status": "auto",
-    "submissionApproved": true,
-    "submissionMode": "production_deploy_sitemap",
-    "endpoint": "https://api.indexnow.org/indexnow",
-    "maxUrlsPerBatch": 5000,
-    "key": "indexnow-cartransport-au-495f64519df3b2274076be59",
-    "keyFile": "public/indexnow-cartransport-au-495f64519df3b2274076be59.txt",
-    "keyFileUrl": "https://cartransport.au/indexnow-cartransport-au-495f64519df3b2274076be59.txt"
-  },
   "metadata": {
+    "localPath": "/Users/jasonhill/Projects/Business/websites/MM-cartransport.au",
+    "owner": "site-repo",
     "quoteTargets": [
       "https://quoting.cartransport.au/contact",
       "https://quoting.cartransport.au/quote/household",
       "https://quoting.cartransport.au/quote/vehicle"
     ],
-    "quoteCapability": {
-      "host": "https://quoting.cartransport.au",
-      "llmsTxt": "https://quoting.cartransport.au/llms.txt",
-      "aiCatalog": "https://quoting.cartransport.au/.well-known/ai-catalog.json",
-      "manifest": "https://quoting.cartransport.au/quote-capability.json",
-      "humanGuide": "https://quoting.cartransport.au/agents",
-      "householdPublicAgentApi": {
-        "method": "POST",
-        "url": "https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit",
-        "hostAware": true,
-        "requiresTenant": false,
-        "requiresCustomerConsent": true,
-        "ready": true
-      },
-      "vehiclePublicAgentApi": {
-        "ready": false,
-        "handoffUrl": "https://quoting.cartransport.au/quote/vehicle"
-      }
+    "legalPages": ["/privacy/", "/terms/"],
+    "search": {
+      "status": "not-applicable"
     },
-    "agentCapabilities": {
-      "quote": {
-        "householdQuote": "https://quoting.cartransport.au/quote/household",
-        "vehicleQuote": "https://quoting.cartransport.au/quote/vehicle",
-        "contact": "https://quoting.cartransport.au/contact",
-        "capabilityManifest": "https://quoting.cartransport.au/quote-capability.json",
+    "evidence": {
+      "brandTokens": "brand/tokens.json"
+    },
+    "notes": "Bossman site manifest for repo-owned implementation truth. Bossman imports this as evidence but does not overwrite accepted truth without review.",
+    "updatedAt": "2026-06-30",
+    "indexNow": {
+      "status": "auto",
+      "submissionApproved": true,
+      "submissionMode": "production_deploy_sitemap",
+      "endpoint": "https://api.indexnow.org/indexnow",
+      "maxUrlsPerBatch": 5000,
+      "key": "indexnow-cartransport-au-495f64519df3b2274076be59",
+      "keyFile": "public/indexnow-cartransport-au-495f64519df3b2274076be59.txt",
+      "keyFileUrl": "https://cartransport.au/indexnow-cartransport-au-495f64519df3b2274076be59.txt"
+    },
+    "metadata": {
+      "quoteTargets": [
+        "https://quoting.cartransport.au/contact",
+        "https://quoting.cartransport.au/quote/household",
+        "https://quoting.cartransport.au/quote/vehicle"
+      ],
+      "quoteCapability": {
+        "host": "https://quoting.cartransport.au",
+        "llmsTxt": "https://quoting.cartransport.au/llms.txt",
+        "aiCatalog": "https://quoting.cartransport.au/.well-known/ai-catalog.json",
+        "manifest": "https://quoting.cartransport.au/quote-capability.json",
         "humanGuide": "https://quoting.cartransport.au/agents",
-        "householdPublicAgentApi": "https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit",
-        "hostAware": true,
-        "tenantRequired": false
+        "householdPublicAgentApi": {
+          "method": "POST",
+          "url": "https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit",
+          "hostAware": true,
+          "requiresTenant": false,
+          "requiresCustomerConsent": true,
+          "ready": true
+        },
+        "vehiclePublicAgentApi": {
+          "ready": false,
+          "handoffUrl": "https://quoting.cartransport.au/quote/vehicle"
+        }
       },
-      "siteIdentity": true,
-      "contentDiscovery": true,
-      "safeActions": true,
-      "bossmanRepairReady": true
+      "agentCapabilities": {
+        "quote": {
+          "householdQuote": "https://quoting.cartransport.au/quote/household",
+          "vehicleQuote": "https://quoting.cartransport.au/quote/vehicle",
+          "contact": "https://quoting.cartransport.au/contact",
+          "capabilityManifest": "https://quoting.cartransport.au/quote-capability.json",
+          "humanGuide": "https://quoting.cartransport.au/agents",
+          "householdPublicAgentApi": "https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit",
+          "hostAware": true,
+          "tenantRequired": false
+        },
+        "siteIdentity": true,
+        "contentDiscovery": true,
+        "safeActions": true,
+        "bossmanRepairReady": true
+      },
+      "updatedAt": "2026-06-30"
     },
-    "updatedAt": "2026-06-30"
+    "standardDetails": {
+      "legalPages": "moveroo-aligned",
+      "imageQuality": "brand-pass-required",
+      "languageQuality": "basic-hygiene-required",
+      "search": "not-applicable",
+      "quoteLinkSecurity": "quote-subdomain-required",
+      "astroBuild": "static-astro"
+    },
+    "brandName": "Cartransport",
+    "productionUrl": "https://cartransport.au",
+    "platform": "astro",
+    "deployTarget": "Netlify"
   },
   "verification": {
     "commands": ["./scripts/bossman-site-context", "npm run check", "npm run build"]
