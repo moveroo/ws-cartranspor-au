@@ -18,7 +18,7 @@ export const GET: APIRoute = () => {
         type: 'quote_request',
         description:
           'Collect a customer-authorised household removal quote request through the official Cartransport quote API.',
-        url: 'https://cartransport.au/agents/',
+        url: 'https://cartransport.au/.well-known/agent-skills/household-quote/SKILL.md',
         openApi: 'https://cartransport.au/openapi.json',
         capabilityManifest: 'https://cartransport.au/quote-capability.json',
         examples: 'https://cartransport.au/agents/examples/',
@@ -32,7 +32,7 @@ export const GET: APIRoute = () => {
         type: 'quote_request',
         description:
           'Collect a customer-authorised vehicle transport quote request through the official Cartransport quote API.',
-        url: 'https://cartransport.au/agents/',
+        url: 'https://cartransport.au/.well-known/agent-skills/vehicle-quote/SKILL.md',
         openApi: 'https://cartransport.au/openapi.json',
         capabilityManifest: 'https://cartransport.au/quote-capability.json',
         examples: 'https://cartransport.au/agents/examples/',
@@ -46,7 +46,7 @@ export const GET: APIRoute = () => {
         type: 'contact_request',
         description:
           'Request a customer-authorised Cartransport callback through the official quote host contact API.',
-        url: 'https://cartransport.au/agents/',
+        url: 'https://cartransport.au/.well-known/agent-skills/callback-request/SKILL.md',
         openApi: 'https://cartransport.au/openapi.json',
         capabilityManifest: 'https://cartransport.au/quote-capability.json',
         examples: 'https://cartransport.au/agents/examples/',
@@ -60,7 +60,7 @@ export const GET: APIRoute = () => {
         type: 'documentation',
         description:
           'Read public Cartransport agent guidance, capability metadata, OpenAPI aliases, and integration examples.',
-        url: 'https://cartransport.au/agents/',
+        url: 'https://cartransport.au/.well-known/agent-skills/agent-discovery/SKILL.md',
         openApi: 'https://cartransport.au/openapi.json',
         capabilityManifest: 'https://cartransport.au/quote-capability.json',
         examples: 'https://cartransport.au/agents/examples/',

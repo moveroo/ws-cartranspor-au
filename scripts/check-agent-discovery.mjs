@@ -107,5 +107,42 @@ if (fs.existsSync(path.join(root, 'vercel.json'))) {
   }
 }
 
+const agentSkillResources = [
+  'src/pages/.well-known/agent-skills/household-quote/SKILL.md.ts',
+  'src/pages/.well-known/agent-skills/vehicle-quote/SKILL.md.ts',
+  'src/pages/.well-known/agent-skills/callback-request/SKILL.md.ts',
+  'src/pages/.well-known/agent-skills/agent-discovery/SKILL.md.ts',
+];
+const agentSkillUrls = [
+  'https://cartransport.au/.well-known/agent-skills/household-quote/SKILL.md',
+  'https://cartransport.au/.well-known/agent-skills/vehicle-quote/SKILL.md',
+  'https://cartransport.au/.well-known/agent-skills/callback-request/SKILL.md',
+  'https://cartransport.au/.well-known/agent-skills/agent-discovery/SKILL.md',
+];
+const agentSkillIndexPath = path.join(
+  process.cwd(),
+  'src/pages/.well-known/agent-skills/index.json.ts'
+);
+
+for (const file of ['src/lib/agentSkillDocument.ts', ...agentSkillResources]) {
+  if (!fs.existsSync(path.join(process.cwd(), file))) {
+    console.error(`Missing bounded Agent Skill file: ${file}`);
+    failed = true;
+  }
+}
+
+if (fs.existsSync(agentSkillIndexPath)) {
+  const agentSkillIndex = fs.readFileSync(agentSkillIndexPath, 'utf8');
+  const declaredUrls = agentSkillUrls.filter((url) => agentSkillIndex.includes(url));
+
+  if (
+    declaredUrls.length !== agentSkillUrls.length ||
+    new Set(declaredUrls).size !== agentSkillUrls.length
+  ) {
+    console.error('Agent Skills index must advertise one distinct URL for every bounded skill.');
+    failed = true;
+  }
+}
+
 if (failed) process.exit(1);
 console.log(`Agent discovery contract OK for ${required.domain}`);
