@@ -160,6 +160,14 @@ if (fs.existsSync(agentSkillIndexPath)) {
   for (const [index, url] of agentSkillUrls.entries()) {
     const resource = agentSkillResources[index];
     const slug = path.basename(path.dirname(resource));
+    const resourceSource = fs.readFileSync(path.join(process.cwd(), resource), 'utf8');
+    const declaredName = resourceSource.match(/\bname:\s*["']([^"']+)["']/)?.[1];
+    if (declaredName !== slug) {
+      console.error(
+        `Agent Skill ${resource} declares name ${declaredName ?? 'none'}; expected ${slug}.`
+      );
+      failed = true;
+    }
     const expectedId = agentSkillIds[index];
     const declaredUrl = indexedSkillUrl(agentSkillIndex, expectedId);
     if (indexedSkillIdCount(agentSkillIndex, expectedId) !== 1) {

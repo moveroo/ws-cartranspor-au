@@ -2,6 +2,7 @@ const DOCUMENT_HEAD = /<head\b[^>]*>[\s\S]*?<\/head\s*>/gi;
 const BLOCK_END_TAG =
   /<\/(?:address|article|aside|blockquote|div|dl|dt|dd|fieldset|figcaption|figure|footer|form|header|main|nav|ol|p|pre|section|table|tbody|td|tfoot|th|thead|tr|ul)>/gi;
 const LINE_BREAK_TAG = /<(?:br|hr)\b[^>]*>/gi;
+const HTML_TAG = /<\/?[a-z][\w:-]*\b(?:"[^"]*"|'[^']*'|[^'">])*?>/gi;
 const NON_CONTENT_TAGS = new Set(['script', 'style', 'svg', 'template', 'noscript']);
 const VOID_TAGS = new Set([
   'area',
@@ -64,11 +65,15 @@ function isHiddenOpeningTag(tag: string, name: string) {
   const classes = tag.match(/\sclass\s*=\s*["']([^"']*)["']/i)?.[1] ?? '';
   return classes
     .split(/\s+/)
-    .some((className) => ['fl-visible-mobile', 'sr-only'].includes(className));
+    .some((className) =>
+      ['fl-visible-mobile', 'mobile-menu', 'mobile-nav', 'nav-logo-short', 'sr-only'].includes(
+        className
+      )
+    );
 }
 
 function removeHiddenSubtrees(html: string) {
-  const tagPattern = /<\/?([a-z][\w:-]*)\b[^>]*>/gi;
+  const tagPattern = /<\/?([a-z][\w:-]*)\b(?:"[^"]*"|'[^']*'|[^'">])*?>/gi;
   const hiddenStack: string[] = [];
   let output = '';
   let cursor = 0;
@@ -164,7 +169,7 @@ function encodeHtmlAttribute(value: string) {
 
 function preserveAccessibleLinkNames(html: string) {
   return html.replace(
-    /<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi,
+    /<a\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/a\s*>/gi,
     (anchor, attributes: string, innerHtml: string) => {
       if (
         attributeValue(attributes, 'aria-label') ||
@@ -173,12 +178,12 @@ function preserveAccessibleLinkNames(html: string) {
         return anchor;
       }
 
-      const screenReaderText = [
-        ...innerHtml.matchAll(
-          /<(?:span|span\b[^>]*\bclass\s*=\s*["'][^"']*\b(?:sr-only|visually-hidden)\b[^"']*["'][^>]*)>([\s\S]*?)<\/span\s*>/gi
-        ),
-      ]
-        .map((match) => plainText(match[1]))
+      const screenReaderText = [...innerHtml.matchAll(/<span\b([^>]*)>([\s\S]*?)<\/span\s*>/gi)]
+        .filter((match) => {
+          const classes = attributeValue(match[1], 'class').split(/\s+/);
+          return classes.some((name) => ['sr-only', 'visually-hidden'].includes(name));
+        })
+        .map((match) => plainText(match[2]))
         .filter(Boolean)
         .join(' ');
       const svgAttributes = innerHtml.match(/<svg\b([^>]*)>/i)?.[1] ?? '';
@@ -203,7 +208,8 @@ function spanValue(attributes: string, name: 'colspan' | 'rowspan') {
 
 function safeHref(value: string) {
   const href = decodeHtmlEntities(value).trim();
-  if (!href || /[\u0000-\u001F\u007F]/.test(href) || /\\/.test(href)) return '';
+  if (!href || /&(?:#|[a-z])/i.test(href) || /[\u0000-\u001F\u007F]/.test(href) || /\\/.test(href))
+    return '';
 
   const scheme = href.match(/^([a-z][a-z\d+.-]*):/i)?.[1]?.toLowerCase();
   if (scheme && !['http', 'https'].includes(scheme)) return '';
@@ -221,7 +227,7 @@ function safeHref(value: string) {
 function inlineMarkdown(html: string) {
   const links: string[] = [];
   const linked = html.replace(
-    /<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi,
+    /<a\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/a\s*>/gi,
     (_match, attributes: string, innerHtml: string) => {
       const label = accessibleLinkLabel(attributes, innerHtml);
       const href = safeHref(attributeValue(attributes, 'href'));
@@ -389,10 +395,13 @@ function markdownTable(tableHtml: string) {
 }
 
 function visibleMarkdown(html: string) {
-  const body = html.match(/<body\b[^>]*>([\s\S]*?)<\/body\s*>/i)?.[1];
-  let content = removeHiddenSubtrees(
-    preserveAccessibleLinkNames(body ?? html.replace(DOCUMENT_HEAD, ' '))
+  const body = html.match(/<body\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/body\s*>/i)?.[1];
+  const uncommented = (body ?? html.replace(DOCUMENT_HEAD, ' ')).replace(/<!--[\s\S]*?-->/g, ' ');
+  const withoutRawText = uncommented.replace(
+    /<(script|style|template|noscript)\b[^>]*>[\s\S]*?<\/\1\s*>/gi,
+    ' '
   );
+  let content = removeHiddenSubtrees(preserveAccessibleLinkNames(withoutRawText));
   const markdownTokens: string[] = [];
   const markdownTokenKinds: Array<'inline' | 'block' | 'list'> = [];
   const preserveMarkdown = (markdown: string, kind: 'inline' | 'block' | 'list' = 'inline') => {
@@ -402,13 +411,23 @@ function visibleMarkdown(html: string) {
   };
 
   content = content
-    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<pre\b[^>]*>([\s\S]*?)<\/pre\s*>/gi, (_match, inner: string) => {
+      const preformatted = decodeHtmlEntities(
+        inner.replace(/^\s*<code\b[^>]*>/i, '').replace(/<\/code\s*>\s*$/i, '')
+      ).replace(/\r\n?/g, '\n');
+      const longestFence = Math.max(
+        2,
+        ...[...preformatted.matchAll(/`+/g)].map((match) => match[0].length)
+      );
+      const fence = '`'.repeat(longestFence + 1);
+      return `\n${preserveMarkdown(`${fence}\n${preformatted.trimEnd()}\n${fence}`, 'block')}\n`;
+    })
     .replace(
       /<table\b[^>]*>([\s\S]*?)<\/table\s*>/gi,
       (_match, tableHtml: string) => `\n${preserveMarkdown(markdownTable(tableHtml), 'block')}\n`
     )
     .replace(
-      /<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi,
+      /<a\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/a\s*>/gi,
       (_match, attributes: string, innerHtml: string) => {
         const href = safeHref(attributeValue(attributes, 'href'));
         if (href && /<h[1-6]\b/i.test(innerHtml)) {
@@ -424,6 +443,9 @@ function visibleMarkdown(html: string) {
         }
 
         const label = accessibleLinkLabel(attributes, innerHtml);
+        if (href.startsWith('#') && /^skip\s+to\b/i.test(plainText(innerHtml))) {
+          return ' ';
+        }
         return label && href ? ` ${preserveMarkdown(`[${label}](${href})`)} ` : label;
       }
     )
@@ -439,6 +461,10 @@ function visibleMarkdown(html: string) {
       return heading
         ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} ${heading}`, 'block')}\n`
         : '\n';
+    })
+    .replace(/<blockquote\b[^>]*>([\s\S]*?)<\/blockquote\s*>/gi, (_match, inner: string) => {
+      const quotation = generatedText(inner);
+      return quotation ? `\n${preserveMarkdown(`> ${quotation}`, 'block')}\n` : '\n';
     });
 
   const innermostList = /<(ol|ul)\b([^>]*)>((?:(?!<(?:ol|ul)\b)[\s\S])*?)<\/\1\s*>/gi;
@@ -451,9 +477,13 @@ function visibleMarkdown(html: string) {
         const ordered = type.toLowerCase() === 'ol';
         const items = [...listHtml.matchAll(/<li\b([^>]*)>([\s\S]*?)<\/li\s*>/gi)];
         const reversed = ordered && hasAttribute(attributes, 'reversed');
+        const declaredStart = Number.parseInt(attributeValue(attributes, 'start'), 10);
         const preservesExplicitCounters =
-          reversed || items.some((item) => hasAttribute(item[1], 'value'));
-        let counter = Number.parseInt(attributeValue(attributes, 'start'), 10);
+          reversed ||
+          (Number.isFinite(declaredStart) &&
+            (declaredStart < 0 || declaredStart + Math.max(0, items.length - 1) > 999999999)) ||
+          items.some((item) => hasAttribute(item[1], 'value'));
+        let counter = declaredStart;
         if (!Number.isFinite(counter)) counter = reversed ? items.length : 1;
         const step = reversed ? -1 : 1;
 
@@ -520,9 +550,9 @@ function visibleMarkdown(html: string) {
       const item = generatedText(inner);
       return item ? `\n${preserveMarkdown(`- ${item}`)}` : '\n';
     })
-    .replace(BLOCK_END_TAG, '\n')
+    .replace(BLOCK_END_TAG, '\n\n')
     .replace(LINE_BREAK_TAG, '\n')
-    .replace(/<[^>]+>/g, ' ');
+    .replace(HTML_TAG, ' ');
 
   const markdown = escapeMarkdownText(decodeHtmlEntities(content))
     .replace(/[\t\f\v ]+/g, ' ')
