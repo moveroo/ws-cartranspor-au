@@ -113,12 +113,29 @@ function generatedText(html: string) {
   return escapeMarkdownText(plainText(html));
 }
 
+function accessibleLinkLabel(attributes: string, innerHtml: string) {
+  const visible = generatedText(innerHtml);
+  if (visible) return visible;
+
+  const imageAttributes = innerHtml.match(/<img\b([^>]*)>/i)?.[1] ?? '';
+  const fallback =
+    attributeValue(attributes, 'aria-label') ||
+    attributeValue(imageAttributes, 'alt') ||
+    attributeValue(attributes, 'title');
+
+  return escapeMarkdownText(decodeHtmlEntities(fallback).trim());
+}
+
 function attributeValue(attributes: string, name: string) {
   const match = attributes.match(
     new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>]+))`, 'i')
   );
 
   return match?.[1] ?? match?.[2] ?? match?.[3] ?? '';
+}
+
+function hasAttribute(attributes: string, name: string) {
+  return new RegExp(`(?:^|\\s)${name}(?=\\s|=|$)`, 'i').test(attributes);
 }
 
 function spanValue(attributes: string, name: 'colspan' | 'rowspan') {
@@ -138,9 +155,9 @@ function safeHref(value: string) {
 function inlineMarkdown(html: string) {
   const links: string[] = [];
   const linked = html.replace(
-    /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a\s*>/gi,
-    (_match, _quote: string, rawHref: string, innerHtml: string) => {
-      const label = generatedText(innerHtml);
+    /<a\b([^>]*\bhref\s*=\s*(["'])(.*?)\2[^>]*)>([\s\S]*?)<\/a\s*>/gi,
+    (_match, attributes: string, _quote: string, rawHref: string, innerHtml: string) => {
+      const label = accessibleLinkLabel(attributes, innerHtml);
       const href = safeHref(rawHref);
       if (!label || !href) return label;
 
@@ -182,7 +199,7 @@ function rowGroupKey(tableHtml: string, rowIndex: number) {
 }
 
 function markdownTable(tableHtml: string) {
-  const caption = generatedText(
+  const caption = inlineMarkdown(
     tableHtml.match(/<caption\b[^>]*>([\s\S]*?)<\/caption\s*>/i)?.[1] ?? ''
   );
   const carried = new Map<number, { cell: TableCell; group: string; remainingRows: number }>();
@@ -309,8 +326,10 @@ function visibleMarkdown(html: string) {
   const body = html.match(/<body\b[^>]*>([\s\S]*?)<\/body\s*>/i)?.[1];
   let content = removeHiddenSubtrees(body ?? html.replace(DOCUMENT_HEAD, ' '));
   const markdownTokens: string[] = [];
-  const preserveMarkdown = (markdown: string) => {
+  const markdownTokenKinds: Array<'inline' | 'block' | 'list'> = [];
+  const preserveMarkdown = (markdown: string, kind: 'inline' | 'block' | 'list' = 'inline') => {
     const index = markdownTokens.push(markdown) - 1;
+    markdownTokenKinds[index] = kind;
     return `\uE000${index}\uE001`;
   };
 
@@ -318,51 +337,82 @@ function visibleMarkdown(html: string) {
     .replace(/<!--[\s\S]*?-->/g, ' ')
     .replace(
       /<table\b[^>]*>([\s\S]*?)<\/table\s*>/gi,
-      (_match, tableHtml: string) => `\n${preserveMarkdown(markdownTable(tableHtml))}\n`
+      (_match, tableHtml: string) => `\n${preserveMarkdown(markdownTable(tableHtml), 'block')}\n`
     )
     .replace(
-      /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a\s*>/gi,
-      (_match, _quote: string, rawHref: string, innerHtml: string) => {
+      /<a\b([^>]*\bhref\s*=\s*(["'])(.*?)\2[^>]*)>([\s\S]*?)<\/a\s*>/gi,
+      (_match, attributes: string, _quote: string, rawHref: string, innerHtml: string) => {
         const href = safeHref(rawHref);
         if (href && /<h[1-6]\b/i.test(innerHtml)) {
           return innerHtml.replace(
             /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi,
             (_heading, level: string, headingHtml: string) => {
-              const heading = generatedText(headingHtml);
+              const heading = accessibleLinkLabel(attributes, headingHtml);
               return heading
-                ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} [${heading}](${href})`)}\n`
+                ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} [${heading}](${href})`, 'block')}\n`
                 : '\n';
             }
           );
         }
 
-        const label = generatedText(innerHtml);
+        const label = accessibleLinkLabel(attributes, innerHtml);
         return label && href ? ` ${preserveMarkdown(`[${label}](${href})`)} ` : label;
       }
     )
     .replace(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi, (_match, level: string, inner: string) => {
       const heading = generatedText(inner);
-      return heading ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} ${heading}`)}\n` : '\n';
-    })
-    .replace(
-      /<ol\b([^>]*)>([\s\S]*?)<\/ol\s*>/gi,
-      (_match, attributes: string, listHtml: string) => {
-        let counter = Number.parseInt(attributeValue(attributes, 'start'), 10);
-        if (!Number.isFinite(counter)) counter = 1;
+      return heading
+        ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} ${heading}`, 'block')}\n`
+        : '\n';
+    });
 
-        return listHtml.replace(
-          /<li\b([^>]*)>([\s\S]*?)<\/li\s*>/gi,
-          (_item, itemAttributes: string, inner: string) => {
-            const explicitValue = Number.parseInt(attributeValue(itemAttributes, 'value'), 10);
-            if (Number.isFinite(explicitValue)) counter = explicitValue;
-            const item = generatedText(inner);
-            const marker = `${counter}.`;
-            counter += 1;
-            return item ? `\n${preserveMarkdown(`${marker} ${item}`)}` : '\n';
-          }
-        );
+  const innermostList = /<(ol|ul)\b([^>]*)>((?:(?!<(?:ol|ul)\b)[\s\S])*?)<\/\1\s*>/gi;
+  for (let pass = 0; pass < 1000; pass += 1) {
+    let converted = false;
+    content = content.replace(
+      innermostList,
+      (_match, type: string, attributes: string, listHtml: string) => {
+        converted = true;
+        const ordered = type.toLowerCase() === 'ol';
+        const items = [...listHtml.matchAll(/<li\b([^>]*)>([\s\S]*?)<\/li\s*>/gi)];
+        const reversed = ordered && hasAttribute(attributes, 'reversed');
+        let counter = Number.parseInt(attributeValue(attributes, 'start'), 10);
+        if (!Number.isFinite(counter)) counter = reversed ? items.length : 1;
+        const step = reversed ? -1 : 1;
+
+        const lines = items.map((itemMatch) => {
+          const itemAttributes = itemMatch[1];
+          const inner = itemMatch[2];
+          const explicitValue = Number.parseInt(attributeValue(itemAttributes, 'value'), 10);
+          if (ordered && Number.isFinite(explicitValue)) counter = explicitValue;
+
+          const nestedLists: number[] = [];
+          const labelHtml = inner.replace(/\uE000(\d+)\uE001/g, (token, index: string) => {
+            const numericIndex = Number(index);
+            if (markdownTokenKinds[numericIndex] !== 'list') return token;
+            nestedLists.push(numericIndex);
+            return ' ';
+          });
+          const label = generatedText(labelHtml);
+          const marker = ordered ? `${counter}.` : '-';
+          if (ordered) counter += step;
+
+          const nestedMarkdown = nestedLists.map((index) =>
+            markdownTokens[index]
+              .split('\n')
+              .map((line) => `    ${line}`)
+              .join('\n')
+          );
+          return [`${marker}${label ? ` ${label}` : ''}`, ...nestedMarkdown].join('\n');
+        });
+
+        return `\n${preserveMarkdown(lines.join('\n'), 'list')}\n`;
       }
-    )
+    );
+    if (!converted) break;
+  }
+
+  content = content
     .replace(/<li\b[^>]*>([\s\S]*?)<\/li\s*>/gi, (_match, inner: string) => {
       const item = generatedText(inner);
       return item ? `\n${preserveMarkdown(`- ${item}`)}` : '\n';
