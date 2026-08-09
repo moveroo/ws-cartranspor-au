@@ -5,8 +5,6 @@ icon: '🏢'
 heroImage: '/images/commercial-fleet.jpg'
 ---
 
-# Commercial Vehicle Logistics
-
 We provide tailored transport solutions for businesses moving volume. Whether
 you are a car dealership, a rental company re-balancing fleet, or an auction
 house, we have the capacity to help.

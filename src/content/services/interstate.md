@@ -5,8 +5,6 @@ icon: '🚛'
 heroImage: '/images/interstate-transport.jpg'
 ---
 
-# Interstate Car Transport
-
 Moving your car interstate doesn't have to be stressful. At Vehicle Transport
 Australia, we specialize in long-distance vehicle logistics, connecting every
 major capital city and regional center across the country.

@@ -5,8 +5,6 @@ icon: '🏢'
 heroImage: '/images/depot-transport.jpg'
 ---
 
-# Depot to Depot Car Transport
-
 Looking for the most affordable way to move your vehicle? Our **Depot-to-Depot**
 service is the budget-friendly choice for savvy customers.
 
