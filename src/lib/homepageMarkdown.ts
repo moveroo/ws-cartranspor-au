@@ -31,11 +31,24 @@ function decodeHtmlEntities(value: string) {
   };
 
   return value.replace(/&(#(?:x[0-9a-f]+|\d+)|[a-z]+);/gi, (entity, key: string) => {
+    const decodedCodePoint = (raw: string, radix: number) => {
+      const codePoint = Number.parseInt(raw, radix);
+      if (
+        !Number.isFinite(codePoint) ||
+        codePoint <= 0 ||
+        codePoint > 0x10ffff ||
+        (codePoint >= 0xd800 && codePoint <= 0xdfff)
+      ) {
+        return '\uFFFD';
+      }
+      return String.fromCodePoint(codePoint);
+    };
+
     if (key.startsWith('#x') || key.startsWith('#X')) {
-      return String.fromCodePoint(Number.parseInt(key.slice(2), 16));
+      return decodedCodePoint(key.slice(2), 16);
     }
     if (key.startsWith('#')) {
-      return String.fromCodePoint(Number.parseInt(key.slice(1), 10));
+      return decodedCodePoint(key.slice(1), 10);
     }
     return named[key.toLowerCase()] ?? entity;
   });
@@ -208,10 +221,10 @@ function safeHref(value: string) {
 function inlineMarkdown(html: string) {
   const links: string[] = [];
   const linked = html.replace(
-    /<a\b([^>]*\bhref\s*=\s*(["'])(.*?)\2[^>]*)>([\s\S]*?)<\/a\s*>/gi,
-    (_match, attributes: string, _quote: string, rawHref: string, innerHtml: string) => {
+    /<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi,
+    (_match, attributes: string, innerHtml: string) => {
       const label = accessibleLinkLabel(attributes, innerHtml);
-      const href = safeHref(rawHref);
+      const href = safeHref(attributeValue(attributes, 'href'));
       if (!label || !href) return label;
 
       const index = links.push(`[${label}](${href})`) - 1;
@@ -395,9 +408,9 @@ function visibleMarkdown(html: string) {
       (_match, tableHtml: string) => `\n${preserveMarkdown(markdownTable(tableHtml), 'block')}\n`
     )
     .replace(
-      /<a\b([^>]*\bhref\s*=\s*(["'])(.*?)\2[^>]*)>([\s\S]*?)<\/a\s*>/gi,
-      (_match, attributes: string, _quote: string, rawHref: string, innerHtml: string) => {
-        const href = safeHref(rawHref);
+      /<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi,
+      (_match, attributes: string, innerHtml: string) => {
+        const href = safeHref(attributeValue(attributes, 'href'));
         if (href && /<h[1-6]\b/i.test(innerHtml)) {
           return innerHtml.replace(
             /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi,
@@ -414,6 +427,13 @@ function visibleMarkdown(html: string) {
         return label && href ? ` ${preserveMarkdown(`[${label}](${href})`)} ` : label;
       }
     )
+    .replace(/<img\b([^>]*)>/gi, (_match, attributes: string) => {
+      const alt = escapeMarkdownText(decodeHtmlEntities(attributeValue(attributes, 'alt')).trim());
+      if (!alt) return ' ';
+
+      const src = safeHref(attributeValue(attributes, 'src'));
+      return src ? ` ${preserveMarkdown(`![${alt}](${src})`)} ` : ` ${alt} `;
+    })
     .replace(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi, (_match, level: string, inner: string) => {
       const heading = generatedText(inner);
       return heading
@@ -491,6 +511,11 @@ function visibleMarkdown(html: string) {
   }
 
   content = content
+    .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary\s*>/gi, (_match, inner: string) => {
+      const question = generatedText(inner);
+      return question ? `\n${preserveMarkdown(`### ${question}`, 'block')}\n` : '\n';
+    })
+    .replace(/<\/?details\b[^>]*>/gi, '\n')
     .replace(/<li\b[^>]*>([\s\S]*?)<\/li\s*>/gi, (_match, inner: string) => {
       const item = generatedText(inner);
       return item ? `\n${preserveMarkdown(`- ${item}`)}` : '\n';
