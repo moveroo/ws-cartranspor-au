@@ -13,7 +13,6 @@ const required = {
   quoteCapability: 'https://quoting.cartransport.au/quote-capability.json',
   householdPublicAgentApi:
     'https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit',
-  vehiclePublicAgentApi: 'https://quoting.cartransport.au/api/v1/vehicle-quotes/assistant/submit',
   callbackPublicAgentApi: 'https://quoting.cartransport.au/api/v1/callbacks/assistant/request',
 };
 const requiredFiles = [
@@ -133,14 +132,15 @@ for (const file of ['src/lib/agentSkillDocument.ts', ...agentSkillResources]) {
 
 if (fs.existsSync(agentSkillIndexPath)) {
   const agentSkillIndex = fs.readFileSync(agentSkillIndexPath, 'utf8');
-  const declaredUrls = agentSkillUrls.filter((url) => agentSkillIndex.includes(url));
 
-  if (
-    declaredUrls.length !== agentSkillUrls.length ||
-    new Set(declaredUrls).size !== agentSkillUrls.length
-  ) {
-    console.error('Agent Skills index must advertise one distinct URL for every bounded skill.');
-    failed = true;
+  for (const url of agentSkillUrls) {
+    const occurrenceCount = agentSkillIndex.split(url).length - 1;
+    if (occurrenceCount !== 1) {
+      console.error(
+        `Agent Skills index must advertise ${url} exactly once; found ${occurrenceCount}.`
+      );
+      failed = true;
+    }
   }
 }
 

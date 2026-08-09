@@ -1,5 +1,6 @@
 export interface AgentSkillDocument {
   name: string;
+  title: string;
   description: string;
   canonical: string;
   consentRequired: boolean;
@@ -15,13 +16,14 @@ function yamlString(value: string) {
 export function agentSkillResponse(skill: AgentSkillDocument) {
   const body = [
     '---',
-    `name: ${yamlString(skill.name)}`,
+    `name: ${skill.name}`,
     `description: ${yamlString(skill.description)}`,
-    `canonical: ${yamlString(skill.canonical)}`,
-    `consent_required: ${skill.consentRequired}`,
+    'metadata:',
+    `  moveroo-canonical: ${yamlString(skill.canonical)}`,
+    `  moveroo-consent-required: ${yamlString(String(skill.consentRequired))}`,
     '---',
     '',
-    `# ${skill.name}`,
+    `# ${skill.title}`,
     '',
     skill.purpose,
     '',

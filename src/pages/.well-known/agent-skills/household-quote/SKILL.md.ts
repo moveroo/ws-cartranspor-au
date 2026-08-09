@@ -5,7 +5,8 @@ const canonical = 'https://cartransport.au/.well-known/agent-skills/household-qu
 
 export const GET: APIRoute = () =>
   agentSkillResponse({
-    name: 'Household removal quote',
+    name: 'household-quote',
+    title: 'Household removal quote',
     description:
       'Collect a customer-authorised household removal quote request through the official quote service.',
     canonical,

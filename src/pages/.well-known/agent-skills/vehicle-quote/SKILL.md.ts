@@ -5,25 +5,20 @@ const canonical = 'https://cartransport.au/.well-known/agent-skills/vehicle-quot
 
 export const GET: APIRoute = () =>
   agentSkillResponse({
-    name: 'Vehicle transport quote',
+    name: 'vehicle-quote',
+    title: 'Vehicle transport quote',
     description:
-      'Collect a customer-authorised vehicle transport quote request through the official quote service.',
+      'Hand the customer to the official vehicle transport quote form; no public vehicle submission API is currently available.',
     canonical,
-    consentRequired: true,
+    consentRequired: false,
     purpose:
-      'Use the official quote service to collect a vehicle transport quote request after the customer asks you to do so.',
+      'Use the official vehicle quote form as a human handoff. Do not collect or submit vehicle quote data through an API.',
     steps: [
-      'Read the canonical OpenAPI schema and quote capability manifest.',
-      'Collect the locations, vehicle details, condition, and modifications required by the schema.',
-      'Confirm the details and consent with the customer.',
-      'Submit the request and return the service response without changing its status or meaning.',
+      'Open the official vehicle quote form for the customer.',
+      'Explain that the customer must review and submit the form themselves.',
+      'Do not claim that a quote request, price, or booking has been created.',
     ],
     resources: [
       { label: 'Vehicle quote form', url: 'https://quoting.cartransport.au/quote/vehicle' },
-      { label: 'OpenAPI schema', url: 'https://quoting.cartransport.au/openapi.json' },
-      {
-        label: 'Quote capability manifest',
-        url: 'https://quoting.cartransport.au/quote-capability.json',
-      },
     ],
   });

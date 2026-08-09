@@ -5,7 +5,8 @@ const canonical = 'https://cartransport.au/.well-known/agent-skills/agent-discov
 
 export const GET: APIRoute = () =>
   agentSkillResponse({
-    name: 'Agent and API documentation discovery',
+    name: 'agent-discovery',
+    title: 'Agent and API documentation discovery',
     description:
       'Read the public Cartransport agent guidance and machine-readable service contracts.',
     canonical,

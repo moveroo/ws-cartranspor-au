@@ -29,16 +29,13 @@ export const GET: APIRoute = () => {
       {
         id: 'cartransport-au.vehicle_quote',
         name: 'Vehicle transport quote',
-        type: 'quote_request',
+        type: 'quote_handoff',
         description:
-          'Collect a customer-authorised vehicle transport quote request through the official Cartransport quote API.',
+          'Hand the customer to the official vehicle transport quote form; no public vehicle submission API is currently available.',
         url: 'https://cartransport.au/.well-known/agent-skills/vehicle-quote/SKILL.md',
-        openApi: 'https://cartransport.au/openapi.json',
-        capabilityManifest: 'https://cartransport.au/quote-capability.json',
-        examples: 'https://cartransport.au/agents/examples/',
-        executionHost: 'https://quoting.cartransport.au',
-        endpoint: 'https://quoting.cartransport.au/api/v1/vehicle-quotes/assistant/submit',
-        consentRequired: true,
+        handoffUrl: 'https://quoting.cartransport.au/quote/vehicle',
+        apiReady: false,
+        consentRequired: false,
       },
       {
         id: 'cartransport-au.callback_request',

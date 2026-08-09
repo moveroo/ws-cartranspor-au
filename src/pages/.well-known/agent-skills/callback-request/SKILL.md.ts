@@ -5,7 +5,8 @@ const canonical = 'https://cartransport.au/.well-known/agent-skills/callback-req
 
 export const GET: APIRoute = () =>
   agentSkillResponse({
-    name: 'Callback request',
+    name: 'callback-request',
+    title: 'Callback request',
     description: 'Request a customer-authorised callback through the official quote service.',
     canonical,
     consentRequired: true,
