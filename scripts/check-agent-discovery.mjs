@@ -2,6 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
+
+function countExactStringLiteral(source, value) {
+  const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return source.match(new RegExp(`["']${escaped}["']`, 'g'))?.length ?? 0;
+}
 const required = {
   domain: 'cartransport.au',
   siteUrl: 'https://cartransport.au/',
@@ -134,7 +139,7 @@ if (fs.existsSync(agentSkillIndexPath)) {
   const agentSkillIndex = fs.readFileSync(agentSkillIndexPath, 'utf8');
 
   for (const url of agentSkillUrls) {
-    const occurrenceCount = agentSkillIndex.split(url).length - 1;
+    const occurrenceCount = countExactStringLiteral(agentSkillIndex, url);
     if (occurrenceCount !== 1) {
       console.error(
         `Agent Skills index must advertise ${url} exactly once; found ${occurrenceCount}.`

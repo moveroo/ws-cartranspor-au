@@ -1,12 +1,24 @@
 const DOCUMENT_HEAD = /<head\b[^>]*>[\s\S]*?<\/head\s*>/gi;
-const NON_CONTENT_ELEMENT = /<(script|style|svg|template|noscript)\b[^>]*>[\s\S]*?<\/\1\s*>/gi;
-const HIDDEN_ELEMENT =
-  /<([a-z][\w:-]*)\b(?=[^>]*(?:\shidden(?:\s*=\s*(?:"hidden"|'hidden'|true|"true"|'true'))?|\saria-hidden\s*=\s*["']true["']))[^>]*>[\s\S]*?<\/\1\s*>/gi;
-const MOBILE_OR_SCREEN_READER_ELEMENT =
-  /<([a-z][\w:-]*)\b(?=[^>]*\bclass\s*=\s*["'][^"']*(?:fl-visible-mobile|sr-only)[^"']*["'])[^>]*>[\s\S]*?<\/\1\s*>/gi;
 const BLOCK_END_TAG =
   /<\/(?:address|article|aside|blockquote|div|dl|dt|dd|fieldset|figcaption|figure|footer|form|header|main|nav|ol|p|pre|section|table|tbody|td|tfoot|th|thead|tr|ul)>/gi;
 const LINE_BREAK_TAG = /<(?:br|hr)\b[^>]*>/gi;
+const NON_CONTENT_TAGS = new Set(['script', 'style', 'svg', 'template', 'noscript']);
+const VOID_TAGS = new Set([
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'hr',
+  'img',
+  'input',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track',
+  'wbr',
+]);
 
 function decodeHtmlEntities(value: string) {
   const named: Record<string, string> = {
@@ -29,6 +41,60 @@ function decodeHtmlEntities(value: string) {
   });
 }
 
+function isHiddenOpeningTag(tag: string, name: string) {
+  if (NON_CONTENT_TAGS.has(name)) return true;
+  if (/\saria-hidden\s*=\s*["']true["']/i.test(tag)) return true;
+  if (/\shidden(?:\s*=\s*(?:"hidden"|'hidden'|true|"true"|'true'))?(?=\s|\/?>)/i.test(tag)) {
+    return true;
+  }
+
+  const classes = tag.match(/\sclass\s*=\s*["']([^"']*)["']/i)?.[1] ?? '';
+  return classes
+    .split(/\s+/)
+    .some((className) => ['fl-visible-mobile', 'sr-only'].includes(className));
+}
+
+function removeHiddenSubtrees(html: string) {
+  const tagPattern = /<\/?([a-z][\w:-]*)\b[^>]*>/gi;
+  const hiddenStack: string[] = [];
+  let output = '';
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = tagPattern.exec(html)) !== null) {
+    const tag = match[0];
+    const name = match[1].toLowerCase();
+    const closing = tag.startsWith('</');
+    const selfClosing = tag.endsWith('/>') || VOID_TAGS.has(name);
+
+    if (hiddenStack.length === 0) {
+      output += html.slice(cursor, match.index);
+    }
+
+    if (closing) {
+      if (hiddenStack.length > 0) {
+        hiddenStack.pop();
+      } else {
+        output += tag;
+      }
+    } else if (hiddenStack.length > 0) {
+      if (!selfClosing) hiddenStack.push(name);
+    } else if (isHiddenOpeningTag(tag, name)) {
+      if (!selfClosing) hiddenStack.push(name);
+    } else {
+      output += tag;
+    }
+
+    cursor = tagPattern.lastIndex;
+  }
+
+  if (hiddenStack.length === 0) {
+    output += html.slice(cursor);
+  }
+
+  return output;
+}
+
 function plainText(html: string) {
   return decodeHtmlEntities(html.replace(/<[^>]+>/g, ' '))
     .replace(/\s+/g, ' ')
@@ -45,13 +111,10 @@ function safeHref(value: string) {
 
 function visibleMarkdown(html: string) {
   const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main\s*>/i)?.[1];
-  let content = main ?? html.replace(DOCUMENT_HEAD, ' ');
+  let content = removeHiddenSubtrees(main ?? html.replace(DOCUMENT_HEAD, ' '));
 
   content = content
     .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(NON_CONTENT_ELEMENT, ' ')
-    .replace(HIDDEN_ELEMENT, ' ')
-    .replace(MOBILE_OR_SCREEN_READER_ELEMENT, ' ')
     .replace(
       /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a\s*>/gi,
       (_match, _quote: string, rawHref: string, innerHtml: string) => {
