@@ -114,14 +114,17 @@ function generatedText(html: string) {
 }
 
 function accessibleLinkLabel(attributes: string, innerHtml: string) {
+  const imageAttributes = innerHtml.match(/<img\b([^>]*)>/i)?.[1] ?? '';
+  const explicit =
+    attributeValue(attributes, 'aria-label') || attributeValue(attributes, 'data-markdown-label');
+  if (explicit) {
+    return escapeMarkdownText(decodeHtmlEntities(explicit).trim());
+  }
+
   const visible = generatedText(innerHtml);
   if (visible) return visible;
 
-  const imageAttributes = innerHtml.match(/<img\b([^>]*)>/i)?.[1] ?? '';
-  const fallback =
-    attributeValue(attributes, 'aria-label') ||
-    attributeValue(imageAttributes, 'alt') ||
-    attributeValue(attributes, 'title');
+  const fallback = attributeValue(imageAttributes, 'alt') || attributeValue(attributes, 'title');
 
   return escapeMarkdownText(decodeHtmlEntities(fallback).trim());
 }
@@ -138,6 +141,47 @@ function hasAttribute(attributes: string, name: string) {
   return new RegExp(`(?:^|\\s)${name}(?=\\s|=|$)`, 'i').test(attributes);
 }
 
+function encodeHtmlAttribute(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function preserveAccessibleLinkNames(html: string) {
+  return html.replace(
+    /<a\b([^>]*)>([\s\S]*?)<\/a\s*>/gi,
+    (anchor, attributes: string, innerHtml: string) => {
+      if (
+        attributeValue(attributes, 'aria-label') ||
+        attributeValue(attributes, 'data-markdown-label')
+      ) {
+        return anchor;
+      }
+
+      const screenReaderText = [
+        ...innerHtml.matchAll(
+          /<(?:span|span\b[^>]*\bclass\s*=\s*["'][^"']*\b(?:sr-only|visually-hidden)\b[^"']*["'][^>]*)>([\s\S]*?)<\/span\s*>/gi
+        ),
+      ]
+        .map((match) => plainText(match[1]))
+        .filter(Boolean)
+        .join(' ');
+      const svgAttributes = innerHtml.match(/<svg\b([^>]*)>/i)?.[1] ?? '';
+      const svgLabel =
+        attributeValue(svgAttributes, 'aria-label') ||
+        plainText(
+          innerHtml.match(/<svg\b[^>]*>[\s\S]*?<title\b[^>]*>([\s\S]*?)<\/title\s*>/i)?.[1] ?? ''
+        );
+      const label = screenReaderText || svgLabel;
+      if (!label) return anchor;
+
+      return anchor.replace(/^<a\b/i, `<a data-markdown-label="${encodeHtmlAttribute(label)}"`);
+    }
+  );
+}
+
 function spanValue(attributes: string, name: 'colspan' | 'rowspan') {
   const parsed = Number.parseInt(attributeValue(attributes, name), 10);
   if (name === 'rowspan' && parsed === 0) return 0;
@@ -146,10 +190,19 @@ function spanValue(attributes: string, name: 'colspan' | 'rowspan') {
 
 function safeHref(value: string) {
   const href = decodeHtmlEntities(value).trim();
-  if (/^(?:https?:\/\/|\/|#)/i.test(href)) {
-    return href.replace(/\s/g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
+  if (!href || /[\u0000-\u001F\u007F]/.test(href) || /\\/.test(href)) return '';
+
+  const scheme = href.match(/^([a-z][a-z\d+.-]*):/i)?.[1]?.toLowerCase();
+  if (scheme && !['http', 'https'].includes(scheme)) return '';
+
+  try {
+    const parsed = new URL(href, 'https://markdown.invalid/');
+    if (!['http:', 'https:'].includes(parsed.protocol)) return '';
+  } catch {
+    return '';
   }
-  return '';
+
+  return href.replace(/\s/g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
 }
 
 function inlineMarkdown(html: string) {
@@ -324,7 +377,9 @@ function markdownTable(tableHtml: string) {
 
 function visibleMarkdown(html: string) {
   const body = html.match(/<body\b[^>]*>([\s\S]*?)<\/body\s*>/i)?.[1];
-  let content = removeHiddenSubtrees(body ?? html.replace(DOCUMENT_HEAD, ' '));
+  let content = removeHiddenSubtrees(
+    preserveAccessibleLinkNames(body ?? html.replace(DOCUMENT_HEAD, ' '))
+  );
   const markdownTokens: string[] = [];
   const markdownTokenKinds: Array<'inline' | 'block' | 'list'> = [];
   const preserveMarkdown = (markdown: string, kind: 'inline' | 'block' | 'list' = 'inline') => {
@@ -376,6 +431,8 @@ function visibleMarkdown(html: string) {
         const ordered = type.toLowerCase() === 'ol';
         const items = [...listHtml.matchAll(/<li\b([^>]*)>([\s\S]*?)<\/li\s*>/gi)];
         const reversed = ordered && hasAttribute(attributes, 'reversed');
+        const preservesExplicitCounters =
+          reversed || items.some((item) => hasAttribute(item[1], 'value'));
         let counter = Number.parseInt(attributeValue(attributes, 'start'), 10);
         if (!Number.isFinite(counter)) counter = reversed ? items.length : 1;
         const step = reversed ? -1 : 1;
@@ -386,24 +443,45 @@ function visibleMarkdown(html: string) {
           const explicitValue = Number.parseInt(attributeValue(itemAttributes, 'value'), 10);
           if (ordered && Number.isFinite(explicitValue)) counter = explicitValue;
 
-          const nestedLists: number[] = [];
-          const labelHtml = inner.replace(/\uE000(\d+)\uE001/g, (token, index: string) => {
-            const numericIndex = Number(index);
-            if (markdownTokenKinds[numericIndex] !== 'list') return token;
-            nestedLists.push(numericIndex);
-            return ' ';
-          });
-          const label = generatedText(labelHtml);
-          const marker = ordered ? `${counter}.` : '-';
+          const itemCounter = counter;
+          const marker = ordered && !preservesExplicitCounters ? `${counter}.` : '-';
           if (ordered) counter += step;
+          const indent = ' '.repeat(marker.length + 1);
+          const segments = inner.split(/(\uE000\d+\uE001)/g).filter(Boolean);
+          const lines: string[] = [];
+          let inline = ordered && preservesExplicitCounters ? `${itemCounter}\\.` : '';
 
-          const nestedMarkdown = nestedLists.map((index) =>
-            markdownTokens[index]
-              .split('\n')
-              .map((line) => `    ${line}`)
-              .join('\n')
-          );
-          return [`${marker}${label ? ` ${label}` : ''}`, ...nestedMarkdown].join('\n');
+          const flushInline = () => {
+            const text = inline.replace(/\s+/g, ' ').trim();
+            if (text) {
+              lines.push(lines.length === 0 ? `${marker} ${text}` : `${indent}${text}`);
+            }
+            inline = '';
+          };
+
+          for (const segment of segments) {
+            const token = segment.match(/^\uE000(\d+)\uE001$/);
+            if (!token) {
+              const text = generatedText(segment);
+              if (text) inline += `${inline ? ' ' : ''}${text}`;
+              continue;
+            }
+
+            const index = Number(token[1]);
+            const kind = markdownTokenKinds[index];
+            if (kind === 'inline') {
+              inline += `${inline ? ' ' : ''}${markdownTokens[index]}`;
+              continue;
+            }
+
+            flushInline();
+            if (lines.length === 0) lines.push(marker);
+            lines.push(...markdownTokens[index].split('\n').map((line) => `${indent}${line}`));
+          }
+
+          flushInline();
+          if (lines.length === 0) lines.push(marker);
+          return lines.join('\n');
         });
 
         return `\n${preserveMarkdown(lines.join('\n'), 'list')}\n`;
