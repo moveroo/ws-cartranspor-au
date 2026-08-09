@@ -44,7 +44,7 @@ function decodeHtmlEntities(value: string) {
 function isHiddenOpeningTag(tag: string, name: string) {
   if (NON_CONTENT_TAGS.has(name)) return true;
   if (/\saria-hidden\s*=\s*["']true["']/i.test(tag)) return true;
-  if (/\shidden(?:\s*=\s*(?:"hidden"|'hidden'|true|"true"|'true'))?(?=\s|\/?>)/i.test(tag)) {
+  if (/\shidden(?=\s|=|\/?>)/i.test(tag)) {
     return true;
   }
 
@@ -101,8 +101,12 @@ function plainText(html: string) {
     .trim();
 }
 
+function escapeMarkdownText(value: string) {
+  return value.replace(/\\/g, '\\\\').replace(/([`*_[\]~<>])/g, '\\$1');
+}
+
 function generatedText(html: string) {
-  return plainText(html).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return escapeMarkdownText(plainText(html));
 }
 
 function attributeValue(attributes: string, name: string) {
@@ -122,22 +126,28 @@ function spanValue(attributes: string, name: 'colspan' | 'rowspan') {
 function safeHref(value: string) {
   const href = decodeHtmlEntities(value).trim();
   if (/^(?:https?:\/\/|\/|#)/i.test(href)) {
-    return href.replace(/\s/g, '%20');
+    return href.replace(/\s/g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
   }
   return '';
 }
 
 function inlineMarkdown(html: string) {
+  const links: string[] = [];
   const linked = html.replace(
     /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a\s*>/gi,
     (_match, _quote: string, rawHref: string, innerHtml: string) => {
       const label = generatedText(innerHtml);
       const href = safeHref(rawHref);
-      return label && href ? `[${label}](${href})` : label;
+      if (!label || !href) return label;
+
+      const index = links.push(`[${label}](${href})`) - 1;
+      return `\uE000${index}\uE001`;
     }
   );
 
-  return generatedText(linked).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\|/g, '\\|');
+  return generatedText(linked)
+    .replace(/\uE000(\d+)\uE001/g, (_token, index: string) => links[Number(index)])
+    .replace(/\|/g, '\\|');
 }
 
 type TableCell = {
@@ -150,6 +160,7 @@ type TableRow = {
   cells: TableCell[];
   columnHeader: boolean;
   inThead: boolean;
+  inTfoot: boolean;
 };
 
 function rowGroupKey(tableHtml: string, rowIndex: number) {
@@ -231,6 +242,7 @@ function markdownTable(tableHtml: string) {
 
     const prefix = tableHtml.slice(0, rowMatch.index ?? 0).toLowerCase();
     const inThead = prefix.lastIndexOf('<thead') > prefix.lastIndexOf('</thead');
+    const inTfoot = prefix.lastIndexOf('<tfoot') > prefix.lastIndexOf('</tfoot');
     const explicitColumnScope = physicalCells.some(({ cell }) =>
       ['col', 'colgroup'].includes(cell.scope)
     );
@@ -240,28 +252,36 @@ function markdownTable(tableHtml: string) {
 
     rows.push({
       cells,
-      columnHeader: inThead || explicitColumnScope || allColumnHeaders,
+      columnHeader: !inTfoot && (inThead || explicitColumnScope || allColumnHeaders),
       inThead,
+      inTfoot,
     });
   }
 
   if (rows.length === 0) return generatedText(tableHtml);
 
   const columnCount = Math.max(...rows.map((row) => row.cells.length));
-  let theadHeaderIndex = -1;
-  rows.forEach((row, index) => {
-    if (row.inThead) theadHeaderIndex = index;
-  });
-  const headerIndex =
-    theadHeaderIndex >= 0 ? theadHeaderIndex : rows.findIndex((row) => row.columnHeader);
+  const theadRows = rows.filter((row) => row.inThead);
+  const headerIndex = theadRows.length === 0 && rows[0]?.columnHeader ? 0 : -1;
   const header =
-    headerIndex >= 0
-      ? rows[headerIndex].cells
-      : Array.from({ length: columnCount }, (_, index) => ({
-          header: true,
-          scope: 'col',
-          text: `Column ${index + 1}`,
-        }));
+    theadRows.length > 0
+      ? Array.from({ length: columnCount }, (_, index) => {
+          const labels = theadRows
+            .map((row) => row.cells[index]?.text ?? '')
+            .filter((label, labelIndex, all) => label !== '' && all.indexOf(label) === labelIndex);
+          return {
+            header: true,
+            scope: 'col',
+            text: labels.join(' / '),
+          };
+        })
+      : headerIndex >= 0
+        ? rows[headerIndex].cells
+        : Array.from({ length: columnCount }, (_, index) => ({
+            header: true,
+            scope: 'col',
+            text: `Column ${index + 1}`,
+          }));
   const body = rows
     .filter((row, index) => !row.inThead && index !== headerIndex)
     .map((row) => row.cells);
@@ -280,11 +300,17 @@ function markdownTable(tableHtml: string) {
 function visibleMarkdown(html: string) {
   const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main\s*>/i)?.[1];
   let content = removeHiddenSubtrees(main ?? html.replace(DOCUMENT_HEAD, ' '));
+  const markdownTokens: string[] = [];
+  const preserveMarkdown = (markdown: string) => {
+    const index = markdownTokens.push(markdown) - 1;
+    return `\uE000${index}\uE001`;
+  };
 
   content = content
     .replace(/<!--[\s\S]*?-->/g, ' ')
-    .replace(/<table\b[^>]*>([\s\S]*?)<\/table\s*>/gi, (_match, tableHtml: string) =>
-      markdownTable(tableHtml)
+    .replace(
+      /<table\b[^>]*>([\s\S]*?)<\/table\s*>/gi,
+      (_match, tableHtml: string) => `\n${preserveMarkdown(markdownTable(tableHtml))}\n`
     )
     .replace(
       /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a\s*>/gi,
@@ -295,32 +321,37 @@ function visibleMarkdown(html: string) {
             /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi,
             (_heading, level: string, headingHtml: string) => {
               const heading = generatedText(headingHtml);
-              return heading ? `\n${'#'.repeat(Number(level))} [${heading}](${href})\n` : '\n';
+              return heading
+                ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} [${heading}](${href})`)}\n`
+                : '\n';
             }
           );
         }
 
         const label = generatedText(innerHtml);
-        return label && href ? ` [${label}](${href}) ` : label;
+        return label && href ? ` ${preserveMarkdown(`[${label}](${href})`)} ` : label;
       }
     )
     .replace(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi, (_match, level: string, inner: string) => {
       const heading = generatedText(inner);
-      return heading ? `\n${'#'.repeat(Number(level))} ${heading}\n` : '\n';
+      return heading ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} ${heading}`)}\n` : '\n';
     })
     .replace(/<li\b[^>]*>([\s\S]*?)<\/li\s*>/gi, (_match, inner: string) => {
       const item = generatedText(inner);
-      return item ? `\n- ${item}` : '\n';
+      return item ? `\n${preserveMarkdown(`- ${item}`)}` : '\n';
     })
     .replace(BLOCK_END_TAG, '\n')
     .replace(LINE_BREAK_TAG, '\n')
     .replace(/<[^>]+>/g, ' ');
 
-  return decodeHtmlEntities(content)
-    .replace(/</g, '\\<')
-    .replace(/>/g, '\\>')
+  const markdown = escapeMarkdownText(decodeHtmlEntities(content))
     .replace(/[\t\f\v ]+/g, ' ')
     .replace(/ *\n */g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  return markdown
+    .replace(/\uE000(\d+)\uE001/g, (_token, index: string) => markdownTokens[Number(index)])
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }

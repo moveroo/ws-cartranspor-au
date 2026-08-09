@@ -2,7 +2,6 @@ import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = () => {
   const payload = {
-    $schema: 'https://cartransport.au/.well-known/agent-skills/schema.json',
     version: '2026-07-01',
     publisher: {
       name: 'Cartransport',

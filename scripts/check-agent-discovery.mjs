@@ -11,16 +11,15 @@ function indexedSkillUrl(source, expectedId) {
   return entry?.[0].match(/\burl:\s*["']([^"']+)["']/)?.[1] ?? null;
 }
 
-function indexedSkillUrlCount(source, expectedUrl) {
-  const entries = [
-    ...source.matchAll(/\{\s*id:\s*["']([^"']+)["']([\s\S]*?)\n\s*\}(?=\s*(?:,|\]))/g),
-  ];
-
-  return entries.filter(
-    (entry) => (entry[0].match(/\burl:\s*["']([^"']+)["']/)?.[1] ?? null) === expectedUrl
-  ).length;
+function indexedPropertyValueCount(source, property, expectedValue) {
+  const pattern = new RegExp(`\\b${property}\\s*:\\s*["']([^"']+)["']`, 'g');
+  return [...source.matchAll(pattern)].filter((match) => match[1] === expectedValue).length;
 }
 
+const indexedSkillUrlCount = (source, expectedUrl) =>
+  indexedPropertyValueCount(source, 'url', expectedUrl);
+const indexedSkillIdCount = (source, expectedId) =>
+  indexedPropertyValueCount(source, 'id', expectedId);
 const required = {
   domain: 'cartransport.au',
   siteUrl: 'https://cartransport.au/',
@@ -163,6 +162,10 @@ if (fs.existsSync(agentSkillIndexPath)) {
     const slug = path.basename(path.dirname(resource));
     const expectedId = agentSkillIds[index];
     const declaredUrl = indexedSkillUrl(agentSkillIndex, expectedId);
+    if (indexedSkillIdCount(agentSkillIndex, expectedId) !== 1) {
+      console.error(`Agent Skills index must declare ${expectedId} exactly once.`);
+      failed = true;
+    }
     if (indexedSkillUrlCount(agentSkillIndex, url) !== 1) {
       console.error(`Agent Skills index must declare ${url} exactly once.`);
       failed = true;
