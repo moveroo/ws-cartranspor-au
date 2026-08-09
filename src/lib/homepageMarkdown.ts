@@ -546,8 +546,8 @@ function visibleMarkdown(html: string) {
     preserveAccessibleSvgNames(preserveAccessibleLinkNames(withoutRawText))
   );
   content = content.replace(
-    /(<\/(?:b|em|i|small|span|strong)\s*>)[\t\r\n ]*(<(?:b|em|i|small|span|strong)\b(?:(?:"[^"]*"|'[^']*'|[^'">])*)>)/gi,
-    '$1 $2'
+    /<nav\b(?:"[^"]*"|'[^']*'|[^'">])*?>[\s\S]*?<\/nav\s*>/gi,
+    (navigation) => navigation.replace(/(<\/a\s*>)[\t\r\n ]*(<a\b)/gi, '$1 $2')
   );
   const fragmentTargets = new Set(
     [...content.matchAll(/<[a-z][\w:-]*\b((?:"[^"]*"|'[^']*'|[^'">])*)>/gi)]
@@ -556,6 +556,12 @@ function visibleMarkdown(html: string) {
         decodeHtmlEntities(attributeValue(match[1], 'name')),
       ])
       .filter(Boolean)
+  );
+  const fragmentReferences = new Set(
+    [...content.matchAll(/<a\b((?:"[^"]*"|'[^']*'|[^'">])*)>[\s\S]*?<\/a\s*>/gi)]
+      .map((match) => decodeHtmlEntities(attributeValue(match[1], 'href')))
+      .filter((href) => href.startsWith('#'))
+      .map((href) => href.slice(1))
   );
   const markdownTokens: string[] = [];
   const markdownTokenKinds: Array<'inline' | 'block' | 'list'> = [];
@@ -578,7 +584,6 @@ function visibleMarkdown(html: string) {
   };
   const inlineContentMarkdown = (value: string) =>
     value
-      .replace(/(\uE001)(?=\uE000)/g, '$1 ')
       .split(/(\uE000\d+\uE001)/g)
       .filter(Boolean)
       .map((segment) => {
@@ -591,6 +596,19 @@ function visibleMarkdown(html: string) {
       })
       .filter(Boolean)
       .join('');
+
+  content = content.replace(
+    /<[a-z][\w:-]*\b((?:"[^"]*"|'[^']*'|[^'">])*)>/gi,
+    (tag, attributes: string) => {
+      const target = [
+        decodeHtmlEntities(attributeValue(attributes, 'id')),
+        decodeHtmlEntities(attributeValue(attributes, 'name')),
+      ].find((value) => value && fragmentReferences.has(value));
+      return target
+        ? `${preserveMarkdown(`\n\n<a id="${encodeHtmlAttribute(target)}"></a>\n\n`, 'block')}${tag}`
+        : tag;
+    }
+  );
 
   content = content
     .replace(
@@ -798,8 +816,10 @@ function visibleMarkdown(html: string) {
               continue;
             }
 
+            const followsPreviousBlock = followsBlock;
             flushInline();
             if (lines.length === 0) lines.push(marker || counterPrefix);
+            else if (followsPreviousBlock) lines.push('');
             lines.push(...markdownTokens[index].split('\n').map((line) => `${indent}${line}`));
             followsBlock = true;
           }
@@ -822,7 +842,6 @@ function visibleMarkdown(html: string) {
     })
     .replace(BR_TAG, () => preserveMarkdown('  \n'))
     .replace(HR_TAG, () => preserveMarkdown('\n\n---\n\n', 'block'))
-    .replace(/(\uE001)(?=\uE000)/g, '$1 ')
     .replace(BLOCK_START_TAG, '\n\n')
     .replace(BLOCK_END_TAG, '\n\n')
     .replace(HTML_TAG, '');
