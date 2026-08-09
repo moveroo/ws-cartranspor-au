@@ -57,7 +57,12 @@ function decodeHtmlEntities(value: string) {
 
 function isHiddenOpeningTag(tag: string, name: string) {
   if (NON_CONTENT_TAGS.has(name)) return true;
-  if (attributeValue(tag, 'id').toLowerCase() === 'mobile-menu') return true;
+  if (
+    ['mobile-menu', 'moving-cars-mobile-menu-panel'].includes(
+      attributeValue(tag, 'id').toLowerCase()
+    )
+  )
+    return true;
   if (attributeValue(tag, 'aria-hidden').toLowerCase() === 'true') return true;
   if (/\shidden(?=\s|=|\/?>)/i.test(tag)) {
     return true;
@@ -527,7 +532,10 @@ function visibleMarkdown(html: string) {
       /<pre\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/pre\s*>/gi,
       (_match, inner: string) => {
         const preformatted = decodeHtmlEntities(
-          inner.replace(/^\s*<code\b[^>]*>/i, '').replace(/<\/code\s*>\s*$/i, '')
+          inner
+            .replace(/^\s*<code\b[^>]*>/i, '')
+            .replace(/<\/code\s*>\s*$/i, '')
+            .replace(HTML_TAG, '')
         ).replace(/\r\n?/g, '\n');
         const longestFence = Math.max(
           2,
@@ -686,20 +694,23 @@ function visibleMarkdown(html: string) {
   }
 
   content = content
-    .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary\s*>/gi, (_match, inner: string) => {
-      const inline: string[] = [];
-      const protectedSummary = restoreMarkdownTokens(inner)
-        .replace(/#{1,6}\s+/g, '')
-        .replace(/!?\[(?:\\.|[^\]])*\]\((?:\\.|[^)])*\)/g, (markdown) => {
-          const index = inline.push(markdown) - 1;
-          return `\uE000${index}\uE001`;
-        });
-      const question = escapeMarkdownText(plainText(protectedSummary)).replace(
-        /\uE000(\d+)\uE001/g,
-        (_token, index: string) => inline[Number(index)]
-      );
-      return question ? `\n${preserveMarkdown(`### ${question}`, 'block')}\n` : '\n';
-    })
+    .replace(
+      /<summary\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/summary\s*>/gi,
+      (_match, inner: string) => {
+        const inline: string[] = [];
+        const protectedSummary = restoreMarkdownTokens(inner)
+          .replace(/#{1,6}\s+/g, '')
+          .replace(/!?\[(?:\\.|[^\]])*\]\((?:\\.|[^)])*\)/g, (markdown) => {
+            const index = inline.push(markdown) - 1;
+            return `\uE000${index}\uE001`;
+          });
+        const question = escapeMarkdownText(plainText(protectedSummary)).replace(
+          /\uE000(\d+)\uE001/g,
+          (_token, index: string) => inline[Number(index)]
+        );
+        return question ? `\n${preserveMarkdown(`### ${question}`, 'block')}\n` : '\n';
+      }
+    )
     .replace(/<\/?details\b[^>]*>/gi, '\n')
     .replace(/<li\b[^>]*>([\s\S]*?)<\/li\s*>/gi, (_match, inner: string) => {
       const item = generatedText(inner);
