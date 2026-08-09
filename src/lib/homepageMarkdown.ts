@@ -43,7 +43,7 @@ function decodeHtmlEntities(value: string) {
 
 function isHiddenOpeningTag(tag: string, name: string) {
   if (NON_CONTENT_TAGS.has(name)) return true;
-  if (/\saria-hidden\s*=\s*["']true["']/i.test(tag)) return true;
+  if (attributeValue(tag, 'aria-hidden').toLowerCase() === 'true') return true;
   if (/\shidden(?=\s|=|\/?>)/i.test(tag)) {
     return true;
   }
@@ -102,7 +102,11 @@ function plainText(html: string) {
 }
 
 function escapeMarkdownText(value: string) {
-  return value.replace(/\\/g, '\\\\').replace(/([`*_[\]~<>])/g, '\\$1');
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/([`*_[\]~<>])/g, '\\$1')
+    .replace(/(^|\n)([ \t]{0,3})(#{1,6}|>|\+|-)(?=\s|$)/g, '$1$2\\$3')
+    .replace(/(^|\n)([ \t]{0,3})(\d+)([.)])(?=\s|$)/g, '$1$2$3\\$4');
 }
 
 function generatedText(html: string) {
@@ -178,6 +182,9 @@ function rowGroupKey(tableHtml: string, rowIndex: number) {
 }
 
 function markdownTable(tableHtml: string) {
+  const caption = generatedText(
+    tableHtml.match(/<caption\b[^>]*>([\s\S]*?)<\/caption\s*>/i)?.[1] ?? ''
+  );
   const carried = new Map<number, { cell: TableCell; group: string; remainingRows: number }>();
   const rows: TableRow[] = [];
 
@@ -290,6 +297,7 @@ function markdownTable(tableHtml: string) {
 
   return [
     '',
+    ...(caption ? [caption, ''] : []),
     `| ${cells(header).join(' | ')} |`,
     `| ${Array.from({ length: columnCount }, () => '---').join(' | ')} |`,
     ...body.map((row) => `| ${cells(row).join(' | ')} |`),
@@ -298,8 +306,8 @@ function markdownTable(tableHtml: string) {
 }
 
 function visibleMarkdown(html: string) {
-  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main\s*>/i)?.[1];
-  let content = removeHiddenSubtrees(main ?? html.replace(DOCUMENT_HEAD, ' '));
+  const body = html.match(/<body\b[^>]*>([\s\S]*?)<\/body\s*>/i)?.[1];
+  let content = removeHiddenSubtrees(body ?? html.replace(DOCUMENT_HEAD, ' '));
   const markdownTokens: string[] = [];
   const preserveMarkdown = (markdown: string) => {
     const index = markdownTokens.push(markdown) - 1;
@@ -336,6 +344,25 @@ function visibleMarkdown(html: string) {
       const heading = generatedText(inner);
       return heading ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} ${heading}`)}\n` : '\n';
     })
+    .replace(
+      /<ol\b([^>]*)>([\s\S]*?)<\/ol\s*>/gi,
+      (_match, attributes: string, listHtml: string) => {
+        let counter = Number.parseInt(attributeValue(attributes, 'start'), 10);
+        if (!Number.isFinite(counter)) counter = 1;
+
+        return listHtml.replace(
+          /<li\b([^>]*)>([\s\S]*?)<\/li\s*>/gi,
+          (_item, itemAttributes: string, inner: string) => {
+            const explicitValue = Number.parseInt(attributeValue(itemAttributes, 'value'), 10);
+            if (Number.isFinite(explicitValue)) counter = explicitValue;
+            const item = generatedText(inner);
+            const marker = `${counter}.`;
+            counter += 1;
+            return item ? `\n${preserveMarkdown(`${marker} ${item}`)}` : '\n';
+          }
+        );
+      }
+    )
     .replace(/<li\b[^>]*>([\s\S]*?)<\/li\s*>/gi, (_match, inner: string) => {
       const item = generatedText(inner);
       return item ? `\n${preserveMarkdown(`- ${item}`)}` : '\n';
@@ -350,10 +377,21 @@ function visibleMarkdown(html: string) {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
-  return markdown
-    .replace(/\uE000(\d+)\uE001/g, (_token, index: string) => markdownTokens[Number(index)])
-    .replace(/\n{3,}/g, '\n\n')
-    .trim();
+  let restored = markdown;
+  for (let pass = 0; pass <= markdownTokens.length; pass += 1) {
+    const next = restored.replace(
+      /\uE000(\d+)\uE001/g,
+      (_token, index: string) => markdownTokens[Number(index)]
+    );
+    if (next === restored) break;
+    restored = next;
+  }
+
+  if (/\uE000\d+\uE001/.test(restored)) {
+    throw new Error('Homepage Markdown contains an unresolved internal token.');
+  }
+
+  return restored.replace(/\n{3,}/g, '\n\n').trim();
 }
 
 export function prependHomepageContent(markdown: string, html: string) {
