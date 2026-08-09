@@ -57,6 +57,7 @@ function decodeHtmlEntities(value: string) {
 
 function isHiddenOpeningTag(tag: string, name: string) {
   if (NON_CONTENT_TAGS.has(name)) return true;
+  if (attributeValue(tag, 'id').toLowerCase() === 'mobile-menu') return true;
   if (attributeValue(tag, 'aria-hidden').toLowerCase() === 'true') return true;
   if (/\shidden(?=\s|=|\/?>)/i.test(tag)) {
     return true;
@@ -249,7 +250,8 @@ function safeHref(value: string) {
     return '';
   }
 
-  return href.replace(/\s/g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
+  const emittedHref = href.startsWith('?') ? `/${href}` : href;
+  return emittedHref.replace(/\s/g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
 }
 
 function formatOrderedCounter(value: number, type: string) {
@@ -326,9 +328,19 @@ function inlineMarkdown(html: string) {
     }
   );
 
-  return generatedText(linked)
-    .replace(/\uE000(\d+)\uE001/g, (_token, index: string) => inlineTokens[Number(index)])
-    .replace(/\|/g, '\\|');
+  let restored = generatedText(linked);
+  for (let pass = 0; pass <= inlineTokens.length; pass += 1) {
+    const next = restored.replace(
+      /\uE000(\d+)\uE001/g,
+      (_token, index: string) => inlineTokens[Number(index)]
+    );
+    if (next === restored) break;
+    restored = next;
+  }
+  if (/\uE000\d+\uE001/.test(restored)) {
+    throw new Error('Inline Markdown contains an unresolved internal token.');
+  }
+  return restored.replace(/\|/g, '\\|');
 }
 
 type TableCell = {
@@ -378,20 +390,20 @@ function markdownTable(tableHtml: string) {
       if (span.remainingRows === 0) carried.delete(column);
     }
 
-    const physicalCells = [...rowMatch[1].matchAll(/<(th|td)\b([^>]*)>([\s\S]*?)<\/\1\s*>/gi)].map(
-      (cellMatch) => {
-        const attributes = cellMatch[2];
-        return {
-          cell: {
-            header: cellMatch[1].toLowerCase() === 'th',
-            scope: attributeValue(attributes, 'scope').toLowerCase(),
-            text: inlineMarkdown(cellMatch[3]),
-          },
-          colspan: spanValue(attributes, 'colspan'),
-          rowspan: spanValue(attributes, 'rowspan'),
-        };
-      }
-    );
+    const physicalCells = [
+      ...rowMatch[1].matchAll(/<(th|td)\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/\1\s*>/gi),
+    ].map((cellMatch) => {
+      const attributes = cellMatch[2];
+      return {
+        cell: {
+          header: cellMatch[1].toLowerCase() === 'th',
+          scope: attributeValue(attributes, 'scope').toLowerCase(),
+          text: inlineMarkdown(cellMatch[3]),
+        },
+        colspan: spanValue(attributes, 'colspan'),
+        rowspan: spanValue(attributes, 'rowspan'),
+      };
+    });
 
     let column = 0;
     for (const physical of physicalCells) {
@@ -546,7 +558,7 @@ function visibleMarkdown(html: string) {
         if (href.startsWith('#') && /^skip\s+to\b/i.test(plainText(innerHtml))) {
           return ' ';
         }
-        return label && href ? ` ${preserveMarkdown(`[${label}](${href})`)} ` : label;
+        return label && href ? preserveMarkdown(`[${label}](${href})`) : label;
       }
     )
     .replace(/<img\b((?:"[^"]*"|'[^']*'|[^'">])*)>/gi, (_match, attributes: string) => {
@@ -669,8 +681,16 @@ function visibleMarkdown(html: string) {
 
   content = content
     .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary\s*>/gi, (_match, inner: string) => {
-      const question = escapeMarkdownText(
-        plainText(restoreMarkdownTokens(inner).replace(/#{1,6}\s+/g, ''))
+      const inline: string[] = [];
+      const protectedSummary = restoreMarkdownTokens(inner)
+        .replace(/#{1,6}\s+/g, '')
+        .replace(/!?\[(?:\\.|[^\]])*\]\((?:\\.|[^)])*\)/g, (markdown) => {
+          const index = inline.push(markdown) - 1;
+          return `\uE000${index}\uE001`;
+        });
+      const question = escapeMarkdownText(plainText(protectedSummary)).replace(
+        /\uE000(\d+)\uE001/g,
+        (_token, index: string) => inline[Number(index)]
       );
       return question ? `\n${preserveMarkdown(`### ${question}`, 'block')}\n` : '\n';
     })
