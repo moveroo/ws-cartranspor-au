@@ -101,27 +101,130 @@ function plainText(html: string) {
     .trim();
 }
 
+function attributeValue(attributes: string, name: string) {
+  const match = attributes.match(
+    new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>]+))`, 'i')
+  );
+
+  return match?.[1] ?? match?.[2] ?? match?.[3] ?? '';
+}
+
+function spanValue(attributes: string, name: 'colspan' | 'rowspan') {
+  const parsed = Number.parseInt(attributeValue(attributes, name), 10);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 100) : 1;
+}
+
+function safeHref(value: string) {
+  const href = decodeHtmlEntities(value).trim();
+  if (/^(?:https?:\/\/|\/|#)/i.test(href)) {
+    return href.replace(/\s/g, '%20');
+  }
+  return '';
+}
+
+function inlineMarkdown(html: string) {
+  const linked = html.replace(
+    /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a\s*>/gi,
+    (_match, _quote: string, rawHref: string, innerHtml: string) => {
+      const label = plainText(innerHtml);
+      const href = safeHref(rawHref);
+      return label && href ? `[${label}](${href})` : label;
+    }
+  );
+
+  return plainText(linked).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\|/g, '\\|');
+}
+
+type TableCell = {
+  header: boolean;
+  scope: string;
+  text: string;
+};
+
+type TableRow = {
+  cells: TableCell[];
+  columnHeader: boolean;
+};
+
 function markdownTable(tableHtml: string) {
-  const rows = [...tableHtml.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr\s*>/gi)]
-    .map((row) =>
-      [...row[1].matchAll(/<(th|td)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi)].map((cell) => ({
-        header: cell[1].toLowerCase() === 'th',
-        text: plainText(cell[2]).replace(/\|/g, '\\|'),
-      }))
-    )
-    .filter((row) => row.length > 0);
+  const carried = new Map<number, { cell: TableCell; remainingRows: number }>();
+  const rows: TableRow[] = [];
+
+  for (const rowMatch of tableHtml.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr\s*>/gi)) {
+    const cells: TableCell[] = [];
+    for (const [column, span] of [...carried.entries()].sort(([left], [right]) => left - right)) {
+      cells[column] = span.cell;
+      span.remainingRows -= 1;
+      if (span.remainingRows === 0) carried.delete(column);
+    }
+
+    const physicalCells = [...rowMatch[1].matchAll(/<(th|td)\b([^>]*)>([\s\S]*?)<\/\1\s*>/gi)].map(
+      (cellMatch) => {
+        const attributes = cellMatch[2];
+        return {
+          cell: {
+            header: cellMatch[1].toLowerCase() === 'th',
+            scope: attributeValue(attributes, 'scope').toLowerCase(),
+            text: inlineMarkdown(cellMatch[3]),
+          },
+          colspan: spanValue(attributes, 'colspan'),
+          rowspan: spanValue(attributes, 'rowspan'),
+        };
+      }
+    );
+
+    let column = 0;
+    for (const physical of physicalCells) {
+      while (
+        Array.from({ length: physical.colspan }, (_, offset) => cells[column + offset]).some(
+          (cell) => cell !== undefined
+        )
+      ) {
+        column += 1;
+      }
+      for (let offset = 0; offset < physical.colspan; offset += 1) {
+        const occupiedColumn = column + offset;
+        cells[occupiedColumn] = physical.cell;
+        if (physical.rowspan > 1) {
+          carried.set(occupiedColumn, {
+            cell: physical.cell,
+            remainingRows: physical.rowspan - 1,
+          });
+        }
+      }
+      column += physical.colspan;
+    }
+
+    if (cells.length === 0) continue;
+
+    const prefix = tableHtml.slice(0, rowMatch.index ?? 0).toLowerCase();
+    const inThead = prefix.lastIndexOf('<thead') > prefix.lastIndexOf('</thead');
+    const explicitColumnScope = physicalCells.some(({ cell }) =>
+      ['col', 'colgroup'].includes(cell.scope)
+    );
+    const allColumnHeaders =
+      physicalCells.length > 0 &&
+      physicalCells.every(({ cell }) => cell.header && cell.scope !== 'row');
+
+    rows.push({
+      cells,
+      columnHeader: inThead || explicitColumnScope || allColumnHeaders,
+    });
+  }
 
   if (rows.length === 0) return plainText(tableHtml);
 
-  const columnCount = Math.max(...rows.map((row) => row.length));
-  const firstRowIsHeader = rows[0].some((cell) => cell.header);
-  const header = firstRowIsHeader
-    ? rows[0]
-    : Array.from({ length: columnCount }, (_, index) => ({
-        header: true,
-        text: `Column ${index + 1}`,
-      }));
-  const body = firstRowIsHeader ? rows.slice(1) : rows;
+  const columnCount = Math.max(...rows.map((row) => row.cells.length));
+  const headerIndex = rows.findIndex((row) => row.columnHeader);
+  const header =
+    headerIndex >= 0
+      ? rows[headerIndex].cells
+      : Array.from({ length: columnCount }, (_, index) => ({
+          header: true,
+          scope: 'col',
+          text: `Column ${index + 1}`,
+        }));
+  const body = rows.filter((_row, index) => index !== headerIndex).map((row) => row.cells);
   const cells = (row: typeof header) =>
     Array.from({ length: columnCount }, (_, index) => row[index]?.text ?? '');
 
@@ -132,14 +235,6 @@ function markdownTable(tableHtml: string) {
     ...body.map((row) => `| ${cells(row).join(' | ')} |`),
     '',
   ].join('\n');
-}
-
-function safeHref(value: string) {
-  const href = decodeHtmlEntities(value).trim();
-  if (/^(?:https?:\/\/|\/|#)/i.test(href)) {
-    return href.replace(/\s/g, '%20');
-  }
-  return '';
 }
 
 function visibleMarkdown(html: string) {
@@ -154,8 +249,18 @@ function visibleMarkdown(html: string) {
     .replace(
       /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a\s*>/gi,
       (_match, _quote: string, rawHref: string, innerHtml: string) => {
-        const label = plainText(innerHtml);
         const href = safeHref(rawHref);
+        if (href && /<h[1-6]\b/i.test(innerHtml)) {
+          return innerHtml.replace(
+            /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi,
+            (_heading, level: string, headingHtml: string) => {
+              const heading = plainText(headingHtml);
+              return heading ? `\n${'#'.repeat(Number(level))} [${heading}](${href})\n` : '\n';
+            }
+          );
+        }
+
+        const label = plainText(innerHtml);
         return label && href ? ` [${label}](${href}) ` : label;
       }
     )
