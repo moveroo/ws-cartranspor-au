@@ -523,17 +523,20 @@ function visibleMarkdown(html: string) {
   };
 
   content = content
-    .replace(/<pre\b[^>]*>([\s\S]*?)<\/pre\s*>/gi, (_match, inner: string) => {
-      const preformatted = decodeHtmlEntities(
-        inner.replace(/^\s*<code\b[^>]*>/i, '').replace(/<\/code\s*>\s*$/i, '')
-      ).replace(/\r\n?/g, '\n');
-      const longestFence = Math.max(
-        2,
-        ...[...preformatted.matchAll(/`+/g)].map((match) => match[0].length)
-      );
-      const fence = '`'.repeat(longestFence + 1);
-      return `\n${preserveMarkdown(`${fence}\n${preformatted.trimEnd()}\n${fence}`, 'block')}\n`;
-    })
+    .replace(
+      /<pre\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/pre\s*>/gi,
+      (_match, inner: string) => {
+        const preformatted = decodeHtmlEntities(
+          inner.replace(/^\s*<code\b[^>]*>/i, '').replace(/<\/code\s*>\s*$/i, '')
+        ).replace(/\r\n?/g, '\n');
+        const longestFence = Math.max(
+          2,
+          ...[...preformatted.matchAll(/`+/g)].map((match) => match[0].length)
+        );
+        const fence = '`'.repeat(longestFence + 1);
+        return `\n${preserveMarkdown(`${fence}\n${preformatted.trimEnd()}\n${fence}`, 'block')}\n`;
+      }
+    )
     .replace(
       /<table\b[^>]*>([\s\S]*?)<\/table\s*>/gi,
       (_match, tableHtml: string) => `\n${preserveMarkdown(markdownTable(tableHtml), 'block')}\n`
@@ -544,7 +547,7 @@ function visibleMarkdown(html: string) {
         const href = safeHref(attributeValue(attributes, 'href'));
         if (href && /<h[1-6]\b/i.test(innerHtml)) {
           return innerHtml.replace(
-            /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi,
+            /<h([1-6])\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/h\1\s*>/gi,
             (_heading, level: string, headingHtml: string) => {
               const heading = accessibleLinkLabel(attributes, headingHtml);
               return heading
@@ -568,16 +571,44 @@ function visibleMarkdown(html: string) {
       const src = safeHref(attributeValue(attributes, 'src'));
       return src ? ` ${preserveMarkdown(`![${alt}](${src})`)} ` : ` ${alt} `;
     })
-    .replace(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi, (_match, level: string, inner: string) => {
-      const heading = generatedText(inner);
-      return heading
-        ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} ${heading}`, 'block')}\n`
-        : '\n';
-    });
+    .replace(
+      /<h([1-6])\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/h\1\s*>/gi,
+      (_match, level: string, inner: string) => {
+        const heading = generatedText(inner);
+        return heading
+          ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} ${heading}`, 'block')}\n`
+          : '\n';
+      }
+    );
 
   const innermostList = /<(ol|ul)\b([^>]*)>((?:(?!<(?:ol|ul)\b)[\s\S])*?)<\/\1\s*>/gi;
   for (let pass = 0; pass < 1000; pass += 1) {
     let converted = false;
+    content = content.replace(
+      /<blockquote\b(?:"[^"]*"|'[^']*'|[^'">])*?>((?:(?!<(?:blockquote|ol|ul)\b)[\s\S])*?)<\/blockquote\s*>/gi,
+      (_match, inner: string) => {
+        converted = true;
+        const normalized = escapeMarkdownText(
+          decodeHtmlEntities(
+            inner.replace(BLOCK_END_TAG, '\n\n').replace(LINE_BREAK_TAG, '\n').replace(HTML_TAG, '')
+          )
+        )
+          .replace(/[\t\f\v ]+/g, ' ')
+          .replace(/ *\n */g, '\n')
+          .replace(/\n{3,}/g, '\n\n')
+          .trim();
+        const quotation = restoreMarkdownTokens(normalized);
+        return quotation
+          ? `\n${preserveMarkdown(
+              quotation
+                .split('\n')
+                .map((line) => (line ? `> ${line}` : '>'))
+                .join('\n'),
+              'block'
+            )}\n`
+          : '\n';
+      }
+    );
     content = content.replace(
       innermostList,
       (_match, type: string, attributes: string, listHtml: string) => {
@@ -653,31 +684,6 @@ function visibleMarkdown(html: string) {
     );
     if (!converted) break;
   }
-
-  content = content.replace(
-    /<blockquote\b[^>]*>([\s\S]*?)<\/blockquote\s*>/gi,
-    (_match, inner: string) => {
-      const normalized = escapeMarkdownText(
-        decodeHtmlEntities(
-          inner.replace(BLOCK_END_TAG, '\n\n').replace(LINE_BREAK_TAG, '\n').replace(HTML_TAG, '')
-        )
-      )
-        .replace(/[\t\f\v ]+/g, ' ')
-        .replace(/ *\n */g, '\n')
-        .replace(/\n{3,}/g, '\n\n')
-        .trim();
-      const quotation = restoreMarkdownTokens(normalized);
-      return quotation
-        ? `\n${preserveMarkdown(
-            quotation
-              .split('\n')
-              .map((line) => (line ? `> ${line}` : '>'))
-              .join('\n'),
-            'block'
-          )}\n`
-        : '\n';
-    }
-  );
 
   content = content
     .replace(/<summary\b[^>]*>([\s\S]*?)<\/summary\s*>/gi, (_match, inner: string) => {
