@@ -5,8 +5,6 @@ icon: '🏠'
 heroImage: '/images/door-to-door.jpg'
 ---
 
-# Door to Door Car Transport
-
 Enjoy the ultimate convenience with our Door-to-Door service. We handle the
 logistics from your driveway to your final destination, saving you time and
 hassle.
