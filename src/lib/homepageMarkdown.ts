@@ -101,6 +101,39 @@ function plainText(html: string) {
     .trim();
 }
 
+function markdownTable(tableHtml: string) {
+  const rows = [...tableHtml.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr\s*>/gi)]
+    .map((row) =>
+      [...row[1].matchAll(/<(th|td)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi)].map((cell) => ({
+        header: cell[1].toLowerCase() === 'th',
+        text: plainText(cell[2]).replace(/\|/g, '\\|'),
+      }))
+    )
+    .filter((row) => row.length > 0);
+
+  if (rows.length === 0) return plainText(tableHtml);
+
+  const columnCount = Math.max(...rows.map((row) => row.length));
+  const firstRowIsHeader = rows[0].some((cell) => cell.header);
+  const header = firstRowIsHeader
+    ? rows[0]
+    : Array.from({ length: columnCount }, (_, index) => ({
+        header: true,
+        text: `Column ${index + 1}`,
+      }));
+  const body = firstRowIsHeader ? rows.slice(1) : rows;
+  const cells = (row: typeof header) =>
+    Array.from({ length: columnCount }, (_, index) => row[index]?.text ?? '');
+
+  return [
+    '',
+    `| ${cells(header).join(' | ')} |`,
+    `| ${Array.from({ length: columnCount }, () => '---').join(' | ')} |`,
+    ...body.map((row) => `| ${cells(row).join(' | ')} |`),
+    '',
+  ].join('\n');
+}
+
 function safeHref(value: string) {
   const href = decodeHtmlEntities(value).trim();
   if (/^(?:https?:\/\/|\/|#)/i.test(href)) {
@@ -115,6 +148,9 @@ function visibleMarkdown(html: string) {
 
   content = content
     .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<table\b[^>]*>([\s\S]*?)<\/table\s*>/gi, (_match, tableHtml: string) =>
+      markdownTable(tableHtml)
+    )
     .replace(
       /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a\s*>/gi,
       (_match, _quote: string, rawHref: string, innerHtml: string) => {
