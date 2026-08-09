@@ -68,7 +68,7 @@ function isHiddenOpeningTag(tag: string, name: string) {
   )
     return true;
   if (attributeValue(tag, 'aria-hidden').toLowerCase() === 'true') return true;
-  if (/\shidden(?=\s|=|\/?>)/i.test(tag)) {
+  if (hasAttribute(tag, 'hidden')) {
     return true;
   }
 
@@ -100,8 +100,18 @@ function removeHiddenSubtrees(html: string) {
     const name = match[1].toLowerCase();
     const closing = tag.startsWith('</');
     const selfClosing = tag.endsWith('/>') || VOID_TAGS.has(name);
+    const wasHidden = hiddenStack.length > 0;
 
-    if (hiddenStack.length === 0) {
+    if (
+      !closing &&
+      wasHidden &&
+      ['dd', 'dt', 'li', 'option', 'p', 'td', 'th', 'tr'].includes(name) &&
+      hiddenStack.at(-1) === name
+    ) {
+      hiddenStack.pop();
+    }
+
+    if (!wasHidden) {
       output += html.slice(cursor, match.index);
     }
 
@@ -193,7 +203,11 @@ function attributeValue(attributes: string, name: string) {
 }
 
 function hasAttribute(attributes: string, name: string) {
-  return new RegExp(`(?:^|\\s)${name}(?=\\s|=|$)`, 'i').test(attributes);
+  return [
+    ...attributes.matchAll(
+      /(?:^|[\s<])([^\s"'=<>`/]+)(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?/g
+    ),
+  ].some((match) => match[1].toLowerCase() === name.toLowerCase());
 }
 
 function encodeHtmlAttribute(value: string) {
@@ -367,8 +381,23 @@ function inlineMarkdown(html: string) {
       return preserveInline(`[${label}](${href})`);
     }
   );
+  const emphasized = linked
+    .replace(
+      /<(strong|b)\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/\1\s*>/gi,
+      (_match, _tag: string, inner: string) => {
+        const text = generatedText(inner);
+        return text ? preserveInline(`**${text}**`) : '';
+      }
+    )
+    .replace(
+      /<(em|i)\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/\1\s*>/gi,
+      (_match, _tag: string, inner: string) => {
+        const text = generatedText(inner);
+        return text ? preserveInline(`_${text}_`) : '';
+      }
+    );
 
-  let restored = generatedText(linked);
+  let restored = generatedText(emphasized);
   for (let pass = 0; pass <= inlineTokens.length; pass += 1) {
     const next = restored.replace(
       /\uE000(\d+)\uE001/g,
@@ -561,7 +590,13 @@ function visibleMarkdown(html: string) {
     [...content.matchAll(/<a\b((?:"[^"]*"|'[^']*'|[^'">])*)>[\s\S]*?<\/a\s*>/gi)]
       .map((match) => decodeHtmlEntities(attributeValue(match[1], 'href')))
       .filter((href) => href.startsWith('#'))
-      .map((href) => href.slice(1))
+      .map((href) => {
+        try {
+          return decodeURIComponent(href.slice(1));
+        } catch {
+          return href.slice(1);
+        }
+      })
   );
   const markdownTokens: string[] = [];
   const markdownTokenKinds: Array<'inline' | 'block' | 'list'> = [];
@@ -689,6 +724,20 @@ function visibleMarkdown(html: string) {
       return src ? ` ${preserveMarkdown(`![${alt}](${src})`)} ` : ` ${alt} `;
     })
     .replace(
+      /<(strong|b)\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/\1\s*>/gi,
+      (_match, _tag: string, inner: string) => {
+        const text = inlineContentMarkdown(inner);
+        return text ? preserveMarkdown(`**${text}**`) : '';
+      }
+    )
+    .replace(
+      /<(em|i)\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/\1\s*>/gi,
+      (_match, _tag: string, inner: string) => {
+        const text = inlineContentMarkdown(inner);
+        return text ? preserveMarkdown(`_${text}_`) : '';
+      }
+    )
+    .replace(
       /<h([1-6])\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/h\1\s*>/gi,
       (_match, level: string, inner: string) => {
         const heading = generatedText(inner);
@@ -780,14 +829,14 @@ function visibleMarkdown(html: string) {
           if (ordered && Number.isFinite(explicitValue)) counter = explicitValue;
 
           const itemCounter = counter;
-          const marker = ordered ? (preservesExplicitCounters ? '' : `${counter}.`) : '-';
+          const marker = ordered ? (preservesExplicitCounters ? '-' : `${counter}.`) : '-';
           if (ordered) counter += step;
           const indent = marker ? ' '.repeat(marker.length + 1) : '';
           const segments = inner.split(/(\uE000\d+\uE001)/g).filter(Boolean);
           const lines: string[] = [];
           let followsBlock = false;
           const counterPrefix = `${formatOrderedCounter(itemCounter, markerType)}\\.`;
-          let inline = ordered && preservesExplicitCounters ? counterPrefix : '';
+          let inline = ordered && preservesExplicitCounters ? `${counterPrefix} ` : '';
 
           const flushInline = () => {
             const text = inline.replace(/\s+/g, ' ').trim();
@@ -804,15 +853,21 @@ function visibleMarkdown(html: string) {
           for (const segment of segments) {
             const token = segment.match(/^\uE000(\d+)\uE001$/);
             if (!token) {
-              const text = generatedText(segment);
-              if (text) inline += `${inline ? ' ' : ''}${text}`;
+              const text = inlineMarkdown(segment);
+              if (text) {
+                if (/^\s/.test(segment) && inline && !inline.endsWith(' ')) {
+                  inline += ' ';
+                }
+                inline += text;
+                if (/\s$/.test(segment)) inline += ' ';
+              }
               continue;
             }
 
             const index = Number(token[1]);
             const kind = markdownTokenKinds[index];
             if (kind === 'inline') {
-              inline += `${inline ? ' ' : ''}${markdownTokens[index]}`;
+              inline += markdownTokens[index];
               continue;
             }
 
