@@ -3,12 +3,11 @@ import path from 'node:path';
 
 const root = process.cwd();
 
-function indexedSkillUrl(source, slug) {
-  const idSuffix = `.${slug.replaceAll('-', '_')}`;
+function indexedSkillUrl(source, expectedId) {
   const entries = [
     ...source.matchAll(/\{\s*id:\s*["']([^"']+)["']([\s\S]*?)\n\s*\}(?=\s*(?:,|\]))/g),
   ];
-  const entry = entries.find(([, id]) => id.endsWith(idSuffix));
+  const entry = entries.find(([, id]) => id === expectedId);
   return entry?.[0].match(/\burl:\s*["']([^"']+)["']/)?.[1] ?? null;
 }
 const required = {
@@ -127,6 +126,12 @@ const agentSkillUrls = [
   'https://cartransport.au/.well-known/agent-skills/callback-request/SKILL.md',
   'https://cartransport.au/.well-known/agent-skills/agent-discovery/SKILL.md',
 ];
+const agentSkillIds = [
+  "cartransport-au.household_quote",
+  "cartransport-au.vehicle_quote",
+  "cartransport-au.callback_request",
+  "cartransport-au.agent_discovery",
+];
 const agentSkillIndexPath = path.join(
   process.cwd(),
   'src/pages/.well-known/agent-skills/index.json.ts'
@@ -145,7 +150,8 @@ if (fs.existsSync(agentSkillIndexPath)) {
   for (const [index, url] of agentSkillUrls.entries()) {
     const resource = agentSkillResources[index];
     const slug = path.basename(path.dirname(resource));
-    const declaredUrl = indexedSkillUrl(agentSkillIndex, slug);
+    const expectedId = agentSkillIds[index];
+    const declaredUrl = indexedSkillUrl(agentSkillIndex, expectedId);
     if (declaredUrl !== url) {
       console.error(
         `Agent Skills index maps ${slug} to ${declaredUrl ?? 'no URL'}; expected ${url}.`
@@ -157,3 +163,4 @@ if (fs.existsSync(agentSkillIndexPath)) {
 
 if (failed) process.exit(1);
 console.log(`Agent discovery contract OK for ${required.domain}`);
+
