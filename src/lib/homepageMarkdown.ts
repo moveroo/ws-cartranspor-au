@@ -107,7 +107,8 @@ function removeHiddenSubtrees(html: string) {
 
     if (closing) {
       if (hiddenStack.length > 0) {
-        hiddenStack.pop();
+        const matchingIndex = hiddenStack.lastIndexOf(name);
+        if (matchingIndex >= 0) hiddenStack.splice(matchingIndex);
       } else {
         output += tag;
       }
@@ -242,6 +243,7 @@ function preserveAccessibleSvgNames(html: string) {
   return html.replace(
     /<svg\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/svg\s*>/gi,
     (_svg, attributes: string, innerHtml: string) => {
+      if (attributeValue(attributes, 'aria-hidden').toLowerCase() === 'true') return ' ';
       const label =
         attributeValue(attributes, 'aria-label') ||
         plainText(innerHtml.match(/<title\b[^>]*>([\s\S]*?)<\/title\s*>/i)?.[1] ?? '');
@@ -359,7 +361,7 @@ function inlineMarkdown(html: string) {
     /<a\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/a\s*>/gi,
     (_match, attributes: string, innerHtml: string) => {
       const label = accessibleLinkLabel(attributes, innerHtml);
-      const href = safeHref(attributeValue(attributes, 'href'));
+      const href = safeHref(attributeValue(attributes, 'href'), ['http', 'https', 'mailto', 'tel']);
       if (!label || !href) return label;
 
       return preserveInline(`[${label}](${href})`);
@@ -410,7 +412,7 @@ function rowGroupKey(tableHtml: string, rowIndex: number) {
 
 function markdownTable(tableHtml: string) {
   const caption = inlineMarkdown(
-    tableHtml.match(/<caption\b[^>]*>([\s\S]*?)<\/caption\s*>/i)?.[1] ?? ''
+    tableHtml.match(/<caption\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/caption\s*>/i)?.[1] ?? ''
   );
   const carried = new Map<number, { cell: TableCell; group: string; remainingRows: number }>();
   const rows: TableRow[] = [];
@@ -436,7 +438,7 @@ function markdownTable(tableHtml: string) {
         cell: {
           header: cellMatch[1].toLowerCase() === 'th',
           scope: attributeValue(attributes, 'scope').toLowerCase(),
-          text: inlineMarkdown(cellMatch[3]),
+          text: inlineMarkdown(cellMatch[3]).replace(/  \n/g, '<br>'),
         },
         colspan: spanValue(attributes, 'colspan'),
         rowspan: spanValue(attributes, 'rowspan'),
@@ -549,7 +551,10 @@ function visibleMarkdown(html: string) {
   );
   const fragmentTargets = new Set(
     [...content.matchAll(/<[a-z][\w:-]*\b((?:"[^"]*"|'[^']*'|[^'">])*)>/gi)]
-      .flatMap((match) => [attributeValue(match[1], 'id'), attributeValue(match[1], 'name')])
+      .flatMap((match) => [
+        decodeHtmlEntities(attributeValue(match[1], 'id')),
+        decodeHtmlEntities(attributeValue(match[1], 'name')),
+      ])
       .filter(Boolean)
   );
   const markdownTokens: string[] = [];
@@ -573,14 +578,19 @@ function visibleMarkdown(html: string) {
   };
   const inlineContentMarkdown = (value: string) =>
     value
+      .replace(/(\uE001)(?=\uE000)/g, '$1 ')
       .split(/(\uE000\d+\uE001)/g)
       .filter(Boolean)
       .map((segment) => {
         const token = segment.match(/^\uE000(\d+)\uE001$/);
-        return token ? markdownTokens[Number(token[1])] : inlineMarkdown(segment);
+        if (token) return markdownTokens[Number(token[1])];
+        if (segment.trim() === '') return ' ';
+        const leading = /^\s/.test(segment) ? ' ' : '';
+        const trailing = /\s$/.test(segment) ? ' ' : '';
+        return `${leading}${inlineMarkdown(segment)}${trailing}`;
       })
       .filter(Boolean)
-      .join(' ');
+      .join('');
 
   content = content
     .replace(
@@ -621,9 +631,8 @@ function visibleMarkdown(html: string) {
             return accessibleLinkLabel(attributes, innerHtml);
           }
           if (!fragmentTargets.has(target)) {
-            return /(?:back|scroll)\s+to\s+top/i.test(plainText(innerHtml))
-              ? ' '
-              : accessibleLinkLabel(attributes, innerHtml);
+            const label = accessibleLinkLabel(attributes, innerHtml);
+            return /(?:back|scroll)\s+to\s+top/i.test(label) ? ' ' : label;
           }
         }
         if (href && /<h[1-6]\b/i.test(innerHtml)) {
@@ -753,32 +762,22 @@ function visibleMarkdown(html: string) {
           if (ordered && Number.isFinite(explicitValue)) counter = explicitValue;
 
           const itemCounter = counter;
-          const explicitMarker =
-            Number.isInteger(itemCounter) && itemCounter >= 0 && String(itemCounter).length <= 9
-              ? `${itemCounter}.`
-              : '1.';
-          const marker = ordered
-            ? preservesExplicitCounters
-              ? explicitMarker
-              : `${counter}.`
-            : '-';
+          const marker = ordered ? (preservesExplicitCounters ? '' : `${counter}.`) : '-';
           if (ordered) counter += step;
-          const indent = ' '.repeat(marker.length + 1);
+          const indent = marker ? ' '.repeat(marker.length + 1) : '';
           const segments = inner.split(/(\uE000\d+\uE001)/g).filter(Boolean);
           const lines: string[] = [];
           let followsBlock = false;
-          const counterPrefix = nonNumericMarker
-            ? `${formatOrderedCounter(itemCounter, markerType)}\\.`
-            : explicitMarker === `${itemCounter}.`
-              ? ''
-              : `${itemCounter}\\.`;
+          const counterPrefix = `${formatOrderedCounter(itemCounter, markerType)}\\.`;
           let inline = ordered && preservesExplicitCounters ? counterPrefix : '';
 
           const flushInline = () => {
             const text = inline.replace(/\s+/g, ' ').trim();
             if (text) {
               if (followsBlock) lines.push('');
-              lines.push(lines.length === 0 ? `${marker} ${text}` : `${indent}${text}`);
+              lines.push(
+                lines.length === 0 ? `${marker ? `${marker} ` : ''}${text}` : `${indent}${text}`
+              );
             }
             inline = '';
             followsBlock = false;
@@ -800,13 +799,13 @@ function visibleMarkdown(html: string) {
             }
 
             flushInline();
-            if (lines.length === 0) lines.push(marker);
+            if (lines.length === 0) lines.push(marker || counterPrefix);
             lines.push(...markdownTokens[index].split('\n').map((line) => `${indent}${line}`));
             followsBlock = true;
           }
 
           flushInline();
-          if (lines.length === 0) lines.push(marker);
+          if (lines.length === 0) lines.push(marker || counterPrefix);
           return lines.join('\n');
         });
 
