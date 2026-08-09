@@ -1,6 +1,6 @@
 const DOCUMENT_HEAD = /<head\b[^>]*>[\s\S]*?<\/head\s*>/gi;
 const BLOCK_END_TAG =
-  /<\/(?:address|article|aside|blockquote|div|dl|dt|dd|fieldset|figcaption|figure|footer|form|header|main|nav|ol|p|pre|section|table|tbody|td|tfoot|th|thead|tr|ul)>/gi;
+  /<\/(?:address|article|aside|blockquote|div|dl|dt|dd|fieldset|figcaption|figure|footer|form|header|main|nav|ol|p|pre|section|table|tbody|td|tfoot|th|thead|tr|ul)\s*>/gi;
 const BLOCK_START_TAG =
   /<(?:address|article|aside|blockquote|div|dl|dt|dd|fieldset|figcaption|figure|footer|form|header|main|nav|ol|p|pre|section|table|tbody|td|tfoot|th|thead|tr|ul)\b(?:"[^"]*"|'[^']*'|[^'">])*?>/gi;
 const BR_TAG = /<br\b(?:"[^"]*"|'[^']*'|[^'">])*?>/gi;
@@ -238,13 +238,25 @@ function preserveAccessibleLinkNames(html: string) {
   );
 }
 
+function preserveAccessibleSvgNames(html: string) {
+  return html.replace(
+    /<svg\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/svg\s*>/gi,
+    (_svg, attributes: string, innerHtml: string) => {
+      const label =
+        attributeValue(attributes, 'aria-label') ||
+        plainText(innerHtml.match(/<title\b[^>]*>([\s\S]*?)<\/title\s*>/i)?.[1] ?? '');
+      return label ? ` ${decodeHtmlEntities(label)} ` : ' ';
+    }
+  );
+}
+
 function spanValue(attributes: string, name: 'colspan' | 'rowspan') {
   const parsed = Number.parseInt(attributeValue(attributes, name), 10);
   if (name === 'rowspan' && parsed === 0) return 0;
   return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 100) : 1;
 }
 
-function safeHref(value: string) {
+function safeHref(value: string, allowedSchemes: readonly string[] = ['http', 'https']) {
   let href = value.trim();
   for (let pass = 0; pass < 5; pass += 1) {
     const decoded = decodeHtmlEntities(href);
@@ -256,11 +268,11 @@ function safeHref(value: string) {
   if (/&(?:#(?:x[\da-f]+|\d+)|[a-z][a-z\d]+);/i.test(href)) return '';
 
   const scheme = href.match(/^([a-z][a-z\d+.-]*):/i)?.[1]?.toLowerCase();
-  if (scheme && !['http', 'https'].includes(scheme)) return '';
+  if (scheme && !allowedSchemes.includes(scheme)) return '';
 
   try {
     const parsed = new URL(href, 'https://markdown.invalid/');
-    if (!['http:', 'https:'].includes(parsed.protocol)) return '';
+    if (!allowedSchemes.map((item) => `${item}:`).includes(parsed.protocol)) return '';
   } catch {
     return '';
   }
@@ -504,9 +516,10 @@ function markdownTable(tableHtml: string) {
             scope: 'col',
             text: `Column ${index + 1}`,
           }));
-  const body = rows
-    .filter((row, index) => !row.inThead && index !== headerIndex)
-    .map((row) => row.cells);
+  const body = [
+    ...rows.filter((row, index) => !row.inThead && !row.inTfoot && index !== headerIndex),
+    ...rows.filter((row, index) => !row.inThead && row.inTfoot && index !== headerIndex),
+  ].map((row) => row.cells);
   const cells = (row: typeof header) =>
     Array.from({ length: columnCount }, (_, index) => row[index]?.text ?? '');
 
@@ -527,7 +540,18 @@ function visibleMarkdown(html: string) {
     /<(script|style|template|noscript)\b[^>]*>[\s\S]*?<\/\1\s*>/gi,
     ' '
   );
-  let content = removeHiddenSubtrees(preserveAccessibleLinkNames(withoutRawText));
+  let content = removeHiddenSubtrees(
+    preserveAccessibleSvgNames(preserveAccessibleLinkNames(withoutRawText))
+  );
+  content = content.replace(
+    /(<\/(?:b|em|i|small|span|strong)\s*>)[\t\r\n ]*(<(?:b|em|i|small|span|strong)\b(?:(?:"[^"]*"|'[^']*'|[^'">])*)>)/gi,
+    '$1 $2'
+  );
+  const fragmentTargets = new Set(
+    [...content.matchAll(/<[a-z][\w:-]*\b((?:"[^"]*"|'[^']*'|[^'">])*)>/gi)]
+      .flatMap((match) => [attributeValue(match[1], 'id'), attributeValue(match[1], 'name')])
+      .filter(Boolean)
+  );
   const markdownTokens: string[] = [];
   const markdownTokenKinds: Array<'inline' | 'block' | 'list'> = [];
   const preserveMarkdown = (markdown: string, kind: 'inline' | 'block' | 'list' = 'inline') => {
@@ -564,7 +588,7 @@ function visibleMarkdown(html: string) {
       (_match, inner: string) => {
         const preformatted = decodeHtmlEntities(
           inner
-            .replace(/^\s*<code\b[^>]*>/i, '')
+            .replace(/^\s*<code\b(?:"[^"]*"|'[^']*'|[^'">])*?>/i, '')
             .replace(/<\/code\s*>\s*$/i, '')
             .replace(HTML_TAG, '')
         ).replace(/\r\n?/g, '\n');
@@ -583,7 +607,25 @@ function visibleMarkdown(html: string) {
     .replace(
       /<a\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/a\s*>/gi,
       (_match, attributes: string, innerHtml: string) => {
-        const href = safeHref(attributeValue(attributes, 'href'));
+        const href = safeHref(attributeValue(attributes, 'href'), [
+          'http',
+          'https',
+          'mailto',
+          'tel',
+        ]);
+        if (href.startsWith('#')) {
+          let target = href.slice(1);
+          try {
+            target = decodeURIComponent(target);
+          } catch {
+            return accessibleLinkLabel(attributes, innerHtml);
+          }
+          if (!fragmentTargets.has(target)) {
+            return /(?:back|scroll)\s+to\s+top/i.test(plainText(innerHtml))
+              ? ' '
+              : accessibleLinkLabel(attributes, innerHtml);
+          }
+        }
         if (href && /<h[1-6]\b/i.test(innerHtml)) {
           const headingPattern = /<h([1-6])\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/h\1\s*>/gi;
           const linkedContent = [...innerHtml.matchAll(headingPattern)]
@@ -633,7 +675,7 @@ function visibleMarkdown(html: string) {
       (_match, inner: string) => {
         const inline: string[] = [];
         const protectedSummary = restoreMarkdownTokens(inner)
-          .replace(/#{1,6}\s+/g, '')
+          .replace(/(^|\n)#{1,6}\s+/g, '$1')
           .replace(/!?\[(?:\\.|[^\]])*\]\((?:\\.|[^)])*\)/g, (markdown) => {
             const index = inline.push(markdown) - 1;
             return `\uE000${index}\uE001`;
@@ -686,7 +728,9 @@ function visibleMarkdown(html: string) {
         converted = true;
         const ordered = type.toLowerCase() === 'ol';
         const items = [
-          ...listHtml.matchAll(/<li\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/li\s*>/gi),
+          ...listHtml.matchAll(
+            /<li\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)(?:<\/li\s*>|(?=<li\b)|$)/gi
+          ),
         ];
         const reversed = ordered && hasAttribute(attributes, 'reversed');
         const markerType = attributeValue(attributes, 'type');
@@ -709,22 +753,35 @@ function visibleMarkdown(html: string) {
           if (ordered && Number.isFinite(explicitValue)) counter = explicitValue;
 
           const itemCounter = counter;
-          const marker = ordered && !preservesExplicitCounters ? `${counter}.` : '-';
+          const explicitMarker =
+            Number.isInteger(itemCounter) && itemCounter >= 0 && String(itemCounter).length <= 9
+              ? `${itemCounter}.`
+              : '1.';
+          const marker = ordered
+            ? preservesExplicitCounters
+              ? explicitMarker
+              : `${counter}.`
+            : '-';
           if (ordered) counter += step;
           const indent = ' '.repeat(marker.length + 1);
           const segments = inner.split(/(\uE000\d+\uE001)/g).filter(Boolean);
           const lines: string[] = [];
-          let inline =
-            ordered && preservesExplicitCounters
-              ? `${formatOrderedCounter(itemCounter, markerType)}\\.`
-              : '';
+          let followsBlock = false;
+          const counterPrefix = nonNumericMarker
+            ? `${formatOrderedCounter(itemCounter, markerType)}\\.`
+            : explicitMarker === `${itemCounter}.`
+              ? ''
+              : `${itemCounter}\\.`;
+          let inline = ordered && preservesExplicitCounters ? counterPrefix : '';
 
           const flushInline = () => {
             const text = inline.replace(/\s+/g, ' ').trim();
             if (text) {
+              if (followsBlock) lines.push('');
               lines.push(lines.length === 0 ? `${marker} ${text}` : `${indent}${text}`);
             }
             inline = '';
+            followsBlock = false;
           };
 
           for (const segment of segments) {
@@ -745,6 +802,7 @@ function visibleMarkdown(html: string) {
             flushInline();
             if (lines.length === 0) lines.push(marker);
             lines.push(...markdownTokens[index].split('\n').map((line) => `${indent}${line}`));
+            followsBlock = true;
           }
 
           flushInline();
@@ -765,6 +823,7 @@ function visibleMarkdown(html: string) {
     })
     .replace(BR_TAG, () => preserveMarkdown('  \n'))
     .replace(HR_TAG, () => preserveMarkdown('\n\n---\n\n', 'block'))
+    .replace(/(\uE001)(?=\uE000)/g, '$1 ')
     .replace(BLOCK_START_TAG, '\n\n')
     .replace(BLOCK_END_TAG, '\n\n')
     .replace(HTML_TAG, '');
