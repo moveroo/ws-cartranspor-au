@@ -207,9 +207,14 @@ function spanValue(attributes: string, name: 'colspan' | 'rowspan') {
 }
 
 function safeHref(value: string) {
-  const href = decodeHtmlEntities(value).trim();
-  if (!href || /&(?:#|[a-z])/i.test(href) || /[\u0000-\u001F\u007F]/.test(href) || /\\/.test(href))
-    return '';
+  const rawHref = value.trim();
+  const hasUnknownNamedEntity = [...rawHref.matchAll(/&([a-z][a-z\d]+);/gi)].some(
+    (match) => !['amp', 'apos', 'gt', 'lt', 'nbsp', 'quot'].includes(match[1].toLowerCase())
+  );
+  if (hasUnknownNamedEntity) return '';
+
+  const href = decodeHtmlEntities(rawHref).trim();
+  if (!href || /[\u0000-\u001F\u007F]/.test(href) || /\\/.test(href)) return '';
 
   const scheme = href.match(/^([a-z][a-z\d+.-]*):/i)?.[1]?.toLowerCase();
   if (scheme && !['http', 'https'].includes(scheme)) return '';
