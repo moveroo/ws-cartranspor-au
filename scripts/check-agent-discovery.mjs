@@ -127,10 +127,10 @@ const agentSkillUrls = [
   'https://cartransport.au/.well-known/agent-skills/agent-discovery/SKILL.md',
 ];
 const agentSkillIds = [
-  "cartransport-au.household_quote",
-  "cartransport-au.vehicle_quote",
-  "cartransport-au.callback_request",
-  "cartransport-au.agent_discovery",
+  'cartransport-au.household_quote',
+  'cartransport-au.vehicle_quote',
+  'cartransport-au.callback_request',
+  'cartransport-au.agent_discovery',
 ];
 const agentSkillIndexPath = path.join(
   process.cwd(),
@@ -163,4 +163,3 @@ if (fs.existsSync(agentSkillIndexPath)) {
 
 if (failed) process.exit(1);
 console.log(`Agent discovery contract OK for ${required.domain}`);
-
