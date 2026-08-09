@@ -1,7 +1,11 @@
 const DOCUMENT_HEAD = /<head\b[^>]*>[\s\S]*?<\/head\s*>/gi;
 const BLOCK_END_TAG =
   /<\/(?:address|article|aside|blockquote|div|dl|dt|dd|fieldset|figcaption|figure|footer|form|header|main|nav|ol|p|pre|section|table|tbody|td|tfoot|th|thead|tr|ul)>/gi;
-const LINE_BREAK_TAG = /<(?:br|hr)\b[^>]*>/gi;
+const BLOCK_START_TAG =
+  /<(?:address|article|aside|blockquote|div|dl|dt|dd|fieldset|figcaption|figure|footer|form|header|main|nav|ol|p|pre|section|table|tbody|td|tfoot|th|thead|tr|ul)\b(?:"[^"]*"|'[^']*'|[^'">])*?>/gi;
+const BR_TAG = /<br\b(?:"[^"]*"|'[^']*'|[^'">])*?>/gi;
+const HR_TAG = /<hr\b(?:"[^"]*"|'[^']*'|[^'">])*?>/gi;
+const LINE_BREAK_TAG = /<(?:br|hr)\b(?:"[^"]*"|'[^']*'|[^'">])*?>/gi;
 const HTML_TAG = /<\/?[a-z][\w:-]*\b(?:"[^"]*"|'[^']*'|[^'">])*?>/gi;
 const NON_CONTENT_TAGS = new Set(['script', 'style', 'svg', 'template', 'noscript']);
 const VOID_TAGS = new Set([
@@ -71,15 +75,16 @@ function isHiddenOpeningTag(tag: string, name: string) {
   const classes = tag.match(/\sclass\s*=\s*["']([^"']*)["']/i)?.[1] ?? '';
   return classes
     .split(/\s+/)
-    .some((className) =>
-      [
-        'fl-visible-mobile',
-        'mobile-menu',
-        'mobile-nav',
-        'nav-logo-short',
-        'sr-only',
-        'wemove-mobile-menu',
-      ].includes(className)
+    .some(
+      (className) =>
+        [
+          'fl-visible-mobile',
+          'mobile-menu',
+          'mobile-nav',
+          'nav-logo-short',
+          'sr-only',
+          'wemove-mobile-menu',
+        ].includes(className) || className.endsWith(':hidden')
     );
 }
 
@@ -126,7 +131,11 @@ function removeHiddenSubtrees(html: string) {
 
 function plainText(html: string) {
   return decodeHtmlEntities(
-    html.replace(BLOCK_END_TAG, '\n').replace(LINE_BREAK_TAG, '\n').replace(HTML_TAG, '')
+    html
+      .replace(BLOCK_START_TAG, '\n')
+      .replace(BLOCK_END_TAG, '\n')
+      .replace(LINE_BREAK_TAG, '\n')
+      .replace(HTML_TAG, '')
   )
     .replace(/\s+/g, ' ')
     .trim();
@@ -236,14 +245,15 @@ function spanValue(attributes: string, name: 'colspan' | 'rowspan') {
 }
 
 function safeHref(value: string) {
-  const rawHref = value.trim();
-  const hasUnknownNamedEntity = [...rawHref.matchAll(/&([a-z][a-z\d]+);/gi)].some(
-    (match) => !['amp', 'apos', 'gt', 'lt', 'nbsp', 'quot'].includes(match[1].toLowerCase())
-  );
-  if (hasUnknownNamedEntity) return '';
-
-  const href = decodeHtmlEntities(rawHref).trim();
+  let href = value.trim();
+  for (let pass = 0; pass < 5; pass += 1) {
+    const decoded = decodeHtmlEntities(href);
+    if (decoded === href) break;
+    href = decoded;
+  }
+  href = href.trim();
   if (!href || /[\u0000-\u001F\u007F]/.test(href) || /\\/.test(href)) return '';
+  if (/&(?:#(?:x[\da-f]+|\d+)|[a-z][a-z\d]+);/i.test(href)) return '';
 
   const scheme = href.match(/^([a-z][a-z\d+.-]*):/i)?.[1]?.toLowerCase();
   if (scheme && !['http', 'https'].includes(scheme)) return '';
@@ -256,7 +266,12 @@ function safeHref(value: string) {
   }
 
   const emittedHref = href.startsWith('?') ? `/${href}` : href;
-  return emittedHref.replace(/\s/g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
+  return emittedHref
+    .replace(/\s/g, '%20')
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29')
+    .replace(/</g, '%3C')
+    .replace(/>/g, '%3E');
 }
 
 function formatOrderedCounter(value: number, type: string) {
@@ -313,7 +328,13 @@ function inlineMarkdown(html: string) {
     const index = inlineTokens.push(markdown) - 1;
     return `\uE000${index}\uE001`;
   };
-  const withImages = html.replace(
+  const separated = html
+    .replace(BR_TAG, () => preserveInline('  \n'))
+    .replace(HR_TAG, ' — ')
+    .replace(/<\/li\s*>/gi, '; ')
+    .replace(BLOCK_START_TAG, ' ')
+    .replace(BLOCK_END_TAG, ' ');
+  const withImages = separated.replace(
     /<img\b((?:"[^"]*"|'[^']*'|[^'">])*)>/gi,
     (_match, attributes: string) => {
       const alt = escapeMarkdownText(decodeHtmlEntities(attributeValue(attributes, 'alt')).trim());
@@ -526,6 +547,16 @@ function visibleMarkdown(html: string) {
     }
     return restored;
   };
+  const inlineContentMarkdown = (value: string) =>
+    value
+      .split(/(\uE000\d+\uE001)/g)
+      .filter(Boolean)
+      .map((segment) => {
+        const token = segment.match(/^\uE000(\d+)\uE001$/);
+        return token ? markdownTokens[Number(token[1])] : inlineMarkdown(segment);
+      })
+      .filter(Boolean)
+      .join(' ');
 
   content = content
     .replace(
@@ -554,22 +585,31 @@ function visibleMarkdown(html: string) {
       (_match, attributes: string, innerHtml: string) => {
         const href = safeHref(attributeValue(attributes, 'href'));
         if (href && /<h[1-6]\b/i.test(innerHtml)) {
-          return innerHtml.replace(
-            /<h([1-6])\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/h\1\s*>/gi,
-            (_heading, level: string, headingHtml: string) => {
-              const heading = accessibleLinkLabel(attributes, headingHtml);
-              return heading
-                ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} [${heading}](${href})`, 'block')}\n`
-                : '\n';
-            }
-          );
+          const headingPattern = /<h([1-6])\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/h\1\s*>/gi;
+          const linkedContent = [...innerHtml.matchAll(headingPattern)]
+            .map((match) => {
+              const heading = accessibleLinkLabel(attributes, match[2]);
+              return heading ? `${'#'.repeat(Number(match[1]))} [${heading}](${href})` : '';
+            })
+            .filter(Boolean);
+          const withoutHeadings = innerHtml.replace(headingPattern, ' ');
+          const remainingLabel = accessibleLinkLabel(attributes, withoutHeadings);
+          if (remainingLabel) {
+            linkedContent.push(`[${remainingLabel}](${href})`);
+          }
+          return linkedContent.length
+            ? `\n${preserveMarkdown(linkedContent.join('\n\n'), 'block')}\n`
+            : '\n';
         }
 
         const label = accessibleLinkLabel(attributes, innerHtml);
         if (href.startsWith('#') && /^skip\s+to\b/i.test(plainText(innerHtml))) {
           return ' ';
         }
-        return label && href ? preserveMarkdown(`[${label}](${href})`) : label;
+        if (!label || !href) return label;
+        const leading = innerHtml.match(/^\s*/)?.[0] ?? '';
+        const trailing = innerHtml.match(/\s*$/)?.[0] ?? '';
+        return `${leading}${preserveMarkdown(`[${label}](${href})`)}${trailing}`;
       }
     )
     .replace(/<img\b((?:"[^"]*"|'[^']*'|[^'">])*)>/gi, (_match, attributes: string) => {
@@ -587,9 +627,32 @@ function visibleMarkdown(html: string) {
           ? `\n${preserveMarkdown(`${'#'.repeat(Number(level))} ${heading}`, 'block')}\n`
           : '\n';
       }
-    );
+    )
+    .replace(
+      /<summary\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/summary\s*>/gi,
+      (_match, inner: string) => {
+        const inline: string[] = [];
+        const protectedSummary = restoreMarkdownTokens(inner)
+          .replace(/#{1,6}\s+/g, '')
+          .replace(/!?\[(?:\\.|[^\]])*\]\((?:\\.|[^)])*\)/g, (markdown) => {
+            const index = inline.push(markdown) - 1;
+            return `\uE000${index}\uE001`;
+          });
+        const question = escapeMarkdownText(plainText(protectedSummary)).replace(
+          /\uE000(\d+)\uE001/g,
+          (_token, index: string) => inline[Number(index)]
+        );
+        return question ? `\n${preserveMarkdown(`### ${question}`, 'block')}\n` : '\n';
+      }
+    )
+    .replace(/<\/?details\b(?:"[^"]*"|'[^']*'|[^'">])*?>/gi, '\n')
+    .replace(/<p\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/p\s*>/gi, (_match, inner: string) => {
+      const paragraph = inlineContentMarkdown(inner);
+      return paragraph ? `\n${preserveMarkdown(paragraph, 'block')}\n` : '\n';
+    });
 
-  const innermostList = /<(ol|ul)\b([^>]*)>((?:(?!<(?:ol|ul)\b)[\s\S])*?)<\/\1\s*>/gi;
+  const innermostList =
+    /<(ol|ul)\b((?:"[^"]*"|'[^']*'|[^'">])*)>((?:(?!<(?:ol|ul)\b)[\s\S])*?)<\/\1\s*>/gi;
   for (let pass = 0; pass < 1000; pass += 1) {
     let converted = false;
     content = content.replace(
@@ -622,7 +685,9 @@ function visibleMarkdown(html: string) {
       (_match, type: string, attributes: string, listHtml: string) => {
         converted = true;
         const ordered = type.toLowerCase() === 'ol';
-        const items = [...listHtml.matchAll(/<li\b([^>]*)>([\s\S]*?)<\/li\s*>/gi)];
+        const items = [
+          ...listHtml.matchAll(/<li\b((?:"[^"]*"|'[^']*'|[^'">])*)>([\s\S]*?)<\/li\s*>/gi),
+        ];
         const reversed = ordered && hasAttribute(attributes, 'reversed');
         const markerType = attributeValue(attributes, 'type');
         const nonNumericMarker = ['a', 'A', 'i', 'I'].includes(markerType);
@@ -694,30 +759,14 @@ function visibleMarkdown(html: string) {
   }
 
   content = content
-    .replace(
-      /<summary\b(?:"[^"]*"|'[^']*'|[^'">])*?>([\s\S]*?)<\/summary\s*>/gi,
-      (_match, inner: string) => {
-        const inline: string[] = [];
-        const protectedSummary = restoreMarkdownTokens(inner)
-          .replace(/#{1,6}\s+/g, '')
-          .replace(/!?\[(?:\\.|[^\]])*\]\((?:\\.|[^)])*\)/g, (markdown) => {
-            const index = inline.push(markdown) - 1;
-            return `\uE000${index}\uE001`;
-          });
-        const question = escapeMarkdownText(plainText(protectedSummary)).replace(
-          /\uE000(\d+)\uE001/g,
-          (_token, index: string) => inline[Number(index)]
-        );
-        return question ? `\n${preserveMarkdown(`### ${question}`, 'block')}\n` : '\n';
-      }
-    )
-    .replace(/<\/?details\b[^>]*>/gi, '\n')
     .replace(/<li\b[^>]*>([\s\S]*?)<\/li\s*>/gi, (_match, inner: string) => {
       const item = generatedText(inner);
       return item ? `\n${preserveMarkdown(`- ${item}`)}` : '\n';
     })
+    .replace(BR_TAG, () => preserveMarkdown('  \n'))
+    .replace(HR_TAG, () => preserveMarkdown('\n\n---\n\n', 'block'))
+    .replace(BLOCK_START_TAG, '\n\n')
     .replace(BLOCK_END_TAG, '\n\n')
-    .replace(LINE_BREAK_TAG, '\n')
     .replace(HTML_TAG, '');
 
   const markdown = escapeMarkdownText(decodeHtmlEntities(content))

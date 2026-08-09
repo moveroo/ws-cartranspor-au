@@ -168,6 +168,15 @@ if (fs.existsSync(agentSkillIndexPath)) {
       );
       failed = true;
     }
+    const declaredCanonical = resourceSource.match(
+      /\bconst\s+canonical\s*=\s*["']([^"']+)["']/
+    )?.[1];
+    if (declaredCanonical !== url) {
+      console.error(
+        `Agent Skill ${resource} declares canonical ${declaredCanonical ?? 'none'}; expected ${url}.`
+      );
+      failed = true;
+    }
     const expectedId = agentSkillIds[index];
     const declaredUrl = indexedSkillUrl(agentSkillIndex, expectedId);
     if (indexedSkillIdCount(agentSkillIndex, expectedId) !== 1) {
