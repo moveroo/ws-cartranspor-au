@@ -48,7 +48,7 @@ export const GET: APIRoute = () => {
       },
       {
         identifier: 'urn:ai:cartransport.au:quote:vehicle',
-        displayName: 'Vehicle Quote',
+        displayName: 'Vehicle Quote Form Handoff',
         type: 'text/html',
         url: 'https://quoting.cartransport.au/quote/vehicle',
       },
@@ -75,12 +75,6 @@ export const GET: APIRoute = () => {
         displayName: 'Household Quote Public Agent API',
         type: 'application/json',
         url: 'https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit',
-      },
-      {
-        identifier: 'urn:ai:cartransport.au:quote:vehicle-public-agent-api',
-        displayName: 'Vehicle Quote Public Agent API',
-        type: 'application/json',
-        url: 'https://quoting.cartransport.au/api/v1/vehicle-quotes/assistant/submit',
       },
       {
         identifier: 'urn:ai:cartransport.au:quote:callback-public-agent-api',

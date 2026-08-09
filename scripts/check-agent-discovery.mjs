@@ -2,6 +2,24 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
+
+function indexedSkillUrl(source, expectedId) {
+  const entries = [
+    ...source.matchAll(/\{\s*id:\s*["']([^"']+)["']([\s\S]*?)\n\s*\}(?=\s*(?:,|\]))/g),
+  ];
+  const entry = entries.find(([, id]) => id === expectedId);
+  return entry?.[0].match(/\burl:\s*["']([^"']+)["']/)?.[1] ?? null;
+}
+
+function indexedPropertyValueCount(source, property, expectedValue) {
+  const pattern = new RegExp(`\\b${property}\\s*:\\s*["']([^"']+)["']`, 'g');
+  return [...source.matchAll(pattern)].filter((match) => match[1] === expectedValue).length;
+}
+
+const indexedSkillUrlCount = (source, expectedUrl) =>
+  indexedPropertyValueCount(source, 'url', expectedUrl);
+const indexedSkillIdCount = (source, expectedId) =>
+  indexedPropertyValueCount(source, 'id', expectedId);
 const required = {
   domain: 'cartransport.au',
   siteUrl: 'https://cartransport.au/',
@@ -13,7 +31,6 @@ const required = {
   quoteCapability: 'https://quoting.cartransport.au/quote-capability.json',
   householdPublicAgentApi:
     'https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit',
-  vehiclePublicAgentApi: 'https://quoting.cartransport.au/api/v1/vehicle-quotes/assistant/submit',
   callbackPublicAgentApi: 'https://quoting.cartransport.au/api/v1/callbacks/assistant/request',
 };
 const requiredFiles = [
@@ -102,6 +119,78 @@ if (fs.existsSync(path.join(root, 'vercel.json'))) {
   ]) {
     if (!vercel.includes(value)) {
       console.error(`Vercel discovery header/redirect missing ${value}`);
+      failed = true;
+    }
+  }
+}
+
+const agentSkillResources = [
+  'src/pages/.well-known/agent-skills/household-quote/SKILL.md.ts',
+  'src/pages/.well-known/agent-skills/vehicle-quote/SKILL.md.ts',
+  'src/pages/.well-known/agent-skills/callback-request/SKILL.md.ts',
+  'src/pages/.well-known/agent-skills/agent-discovery/SKILL.md.ts',
+];
+const agentSkillUrls = [
+  'https://cartransport.au/.well-known/agent-skills/household-quote/SKILL.md',
+  'https://cartransport.au/.well-known/agent-skills/vehicle-quote/SKILL.md',
+  'https://cartransport.au/.well-known/agent-skills/callback-request/SKILL.md',
+  'https://cartransport.au/.well-known/agent-skills/agent-discovery/SKILL.md',
+];
+const agentSkillIds = [
+  'cartransport-au.household_quote',
+  'cartransport-au.vehicle_quote',
+  'cartransport-au.callback_request',
+  'cartransport-au.agent_discovery',
+];
+const agentSkillIndexPath = path.join(
+  process.cwd(),
+  'src/pages/.well-known/agent-skills/index.json.ts'
+);
+
+for (const file of ['src/lib/agentSkillDocument.ts', ...agentSkillResources]) {
+  if (!fs.existsSync(path.join(process.cwd(), file))) {
+    console.error(`Missing bounded Agent Skill file: ${file}`);
+    failed = true;
+  }
+}
+
+if (fs.existsSync(agentSkillIndexPath)) {
+  const agentSkillIndex = fs.readFileSync(agentSkillIndexPath, 'utf8');
+
+  for (const [index, url] of agentSkillUrls.entries()) {
+    const resource = agentSkillResources[index];
+    const slug = path.basename(path.dirname(resource));
+    const resourceSource = fs.readFileSync(path.join(process.cwd(), resource), 'utf8');
+    const declaredName = resourceSource.match(/\bname:\s*["']([^"']+)["']/)?.[1];
+    if (declaredName !== slug) {
+      console.error(
+        `Agent Skill ${resource} declares name ${declaredName ?? 'none'}; expected ${slug}.`
+      );
+      failed = true;
+    }
+    const declaredCanonical = resourceSource.match(
+      /\bconst\s+canonical\s*=\s*["']([^"']+)["']/
+    )?.[1];
+    if (declaredCanonical !== url) {
+      console.error(
+        `Agent Skill ${resource} declares canonical ${declaredCanonical ?? 'none'}; expected ${url}.`
+      );
+      failed = true;
+    }
+    const expectedId = agentSkillIds[index];
+    const declaredUrl = indexedSkillUrl(agentSkillIndex, expectedId);
+    if (indexedSkillIdCount(agentSkillIndex, expectedId) !== 1) {
+      console.error(`Agent Skills index must declare ${expectedId} exactly once.`);
+      failed = true;
+    }
+    if (indexedSkillUrlCount(agentSkillIndex, url) !== 1) {
+      console.error(`Agent Skills index must declare ${url} exactly once.`);
+      failed = true;
+    }
+    if (declaredUrl !== url) {
+      console.error(
+        `Agent Skills index maps ${slug} to ${declaredUrl ?? 'no URL'}; expected ${url}.`
+      );
       failed = true;
     }
   }

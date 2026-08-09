@@ -13,7 +13,7 @@ Quote system: https://quoting.cartransport.au/
 ## Key Pages
 - [Homepage](https://cartransport.au/): Main site entry point for Cartransport services.
 - [Agent/API documentation](https://cartransport.au/agents/): Human-readable guide for approved AI assistants and developers.
-- [Agent/API examples](https://cartransport.au/agents/examples/): Example quote, vehicle, and callback payloads.
+- [Agent/API examples](https://cartransport.au/agents/examples/): Household and callback payload examples, plus the vehicle form handoff.
 - [XML sitemap](https://cartransport.au/sitemap.xml): Crawlable page inventory for search engines and agents.
 - [Privacy policy](https://cartransport.au/privacy/): Privacy and data-handling policy.
 - [Terms and conditions](https://cartransport.au/terms/): Site and service terms.
@@ -37,13 +37,13 @@ Quote system: https://quoting.cartransport.au/
 
 ## Public Agent API Endpoints
 - [Household quote API](https://quoting.cartransport.au/api/v1/household-quotes/assistant/submit): Submit a customer-authorised household quote request.
-- [Vehicle quote API](https://quoting.cartransport.au/api/v1/vehicle-quotes/assistant/submit): Submit a customer-authorised vehicle transport quote request.
+- [Vehicle quote form](https://quoting.cartransport.au/quote/vehicle): Human handoff for a vehicle transport quote; no public vehicle submission API is currently available.
 - [Callback request API](https://quoting.cartransport.au/api/v1/callbacks/assistant/request): Request a customer-authorised callback.
 
 ## Ownership Notes
 - This marketing site is owned by the Cartransport Astro repository.
 - The quote host is the source of truth for API execution, OpenAPI schemas, and capability manifests.
-- Agents may read these resources for customer-authorised quote discovery and may only submit quote or callback requests when the customer has asked for that action.
+- Agents may read these resources for customer-authorised quote discovery. They may submit household quote or callback requests only when the customer has asked for that action. Vehicle quotes require the official form handoff.
 - Public host-aware API submissions should omit tenant unless Moveroo has supplied an agreed tenant slug.
 `;
 

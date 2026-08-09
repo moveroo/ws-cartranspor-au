@@ -2,7 +2,6 @@ import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = () => {
   const payload = {
-    $schema: 'https://cartransport.au/.well-known/agent-skills/schema.json',
     version: '2026-07-01',
     publisher: {
       name: 'Cartransport',
@@ -18,7 +17,7 @@ export const GET: APIRoute = () => {
         type: 'quote_request',
         description:
           'Collect a customer-authorised household removal quote request through the official Cartransport quote API.',
-        url: 'https://cartransport.au/agents/',
+        url: 'https://cartransport.au/.well-known/agent-skills/household-quote/SKILL.md',
         openApi: 'https://cartransport.au/openapi.json',
         capabilityManifest: 'https://cartransport.au/quote-capability.json',
         examples: 'https://cartransport.au/agents/examples/',
@@ -29,16 +28,13 @@ export const GET: APIRoute = () => {
       {
         id: 'cartransport-au.vehicle_quote',
         name: 'Vehicle transport quote',
-        type: 'quote_request',
+        type: 'quote_handoff',
         description:
-          'Collect a customer-authorised vehicle transport quote request through the official Cartransport quote API.',
-        url: 'https://cartransport.au/agents/',
-        openApi: 'https://cartransport.au/openapi.json',
-        capabilityManifest: 'https://cartransport.au/quote-capability.json',
-        examples: 'https://cartransport.au/agents/examples/',
-        executionHost: 'https://quoting.cartransport.au',
-        endpoint: 'https://quoting.cartransport.au/api/v1/vehicle-quotes/assistant/submit',
-        consentRequired: true,
+          'Hand the customer to the official vehicle transport quote form; no public vehicle submission API is currently available.',
+        url: 'https://cartransport.au/.well-known/agent-skills/vehicle-quote/SKILL.md',
+        handoffUrl: 'https://quoting.cartransport.au/quote/vehicle',
+        apiReady: false,
+        consentRequired: false,
       },
       {
         id: 'cartransport-au.callback_request',
@@ -46,7 +42,7 @@ export const GET: APIRoute = () => {
         type: 'contact_request',
         description:
           'Request a customer-authorised Cartransport callback through the official quote host contact API.',
-        url: 'https://cartransport.au/agents/',
+        url: 'https://cartransport.au/.well-known/agent-skills/callback-request/SKILL.md',
         openApi: 'https://cartransport.au/openapi.json',
         capabilityManifest: 'https://cartransport.au/quote-capability.json',
         examples: 'https://cartransport.au/agents/examples/',
@@ -60,7 +56,7 @@ export const GET: APIRoute = () => {
         type: 'documentation',
         description:
           'Read public Cartransport agent guidance, capability metadata, OpenAPI aliases, and integration examples.',
-        url: 'https://cartransport.au/agents/',
+        url: 'https://cartransport.au/.well-known/agent-skills/agent-discovery/SKILL.md',
         openApi: 'https://cartransport.au/openapi.json',
         capabilityManifest: 'https://cartransport.au/quote-capability.json',
         examples: 'https://cartransport.au/agents/examples/',
