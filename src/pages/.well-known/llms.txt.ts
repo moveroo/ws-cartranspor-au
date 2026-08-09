@@ -13,7 +13,7 @@ Quote system: https://quoting.cartransport.au/
 ## Key Pages
 - [Homepage](https://cartransport.au/): Main site entry point for Cartransport services.
 - [Agent/API documentation](https://cartransport.au/agents/): Human-readable guide for approved AI assistants and developers.
-- [Agent/API examples](https://cartransport.au/agents/examples/): Example quote, vehicle, and callback payloads.
+- [Agent/API examples](https://cartransport.au/agents/examples/): Household and callback payload examples, plus the vehicle form handoff.
 - [XML sitemap](https://cartransport.au/sitemap.xml): Crawlable page inventory for search engines and agents.
 - [Privacy policy](https://cartransport.au/privacy/): Privacy and data-handling policy.
 - [Terms and conditions](https://cartransport.au/terms/): Site and service terms.

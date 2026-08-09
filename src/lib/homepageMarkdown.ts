@@ -151,5 +151,10 @@ export function prependHomepageContent(markdown: string, html: string) {
   }
 
   const insertAt = frontmatterEnd + 4;
-  return `${markdown.slice(0, insertAt)}\n\n## Homepage content\n\n${homepage}\n\n${markdown.slice(insertAt).trimStart()}`;
+  const appendix = markdown
+    .slice(insertAt)
+    .trimStart()
+    .replace(/^# [^\n]+\n+/, '');
+
+  return `${markdown.slice(0, insertAt)}\n\n${homepage}\n\n${appendix}`;
 }

@@ -3,9 +3,13 @@ import path from 'node:path';
 
 const root = process.cwd();
 
-function countExactStringLiteral(source, value) {
-  const escaped = value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return source.match(new RegExp(`["']${escaped}["']`, 'g'))?.length ?? 0;
+function indexedSkillUrl(source, slug) {
+  const idSuffix = `.${slug.replaceAll('-', '_')}`;
+  const entries = [
+    ...source.matchAll(/\{\s*id:\s*["']([^"']+)["']([\s\S]*?)\n\s*\}(?=\s*(?:,|\]))/g),
+  ];
+  const entry = entries.find(([, id]) => id.endsWith(idSuffix));
+  return entry?.[0].match(/\burl:\s*["']([^"']+)["']/)?.[1] ?? null;
 }
 const required = {
   domain: 'cartransport.au',
@@ -138,11 +142,13 @@ for (const file of ['src/lib/agentSkillDocument.ts', ...agentSkillResources]) {
 if (fs.existsSync(agentSkillIndexPath)) {
   const agentSkillIndex = fs.readFileSync(agentSkillIndexPath, 'utf8');
 
-  for (const url of agentSkillUrls) {
-    const occurrenceCount = countExactStringLiteral(agentSkillIndex, url);
-    if (occurrenceCount !== 1) {
+  for (const [index, url] of agentSkillUrls.entries()) {
+    const resource = agentSkillResources[index];
+    const slug = path.basename(path.dirname(resource));
+    const declaredUrl = indexedSkillUrl(agentSkillIndex, slug);
+    if (declaredUrl !== url) {
       console.error(
-        `Agent Skills index must advertise ${url} exactly once; found ${occurrenceCount}.`
+        `Agent Skills index maps ${slug} to ${declaredUrl ?? 'no URL'}; expected ${url}.`
       );
       failed = true;
     }
