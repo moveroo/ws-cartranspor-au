@@ -10,6 +10,17 @@ function indexedSkillUrl(source, expectedId) {
   const entry = entries.find(([, id]) => id === expectedId);
   return entry?.[0].match(/\burl:\s*["']([^"']+)["']/)?.[1] ?? null;
 }
+
+function indexedSkillUrlCount(source, expectedUrl) {
+  const entries = [
+    ...source.matchAll(/\{\s*id:\s*["']([^"']+)["']([\s\S]*?)\n\s*\}(?=\s*(?:,|\]))/g),
+  ];
+
+  return entries.filter(
+    (entry) => (entry[0].match(/\burl:\s*["']([^"']+)["']/)?.[1] ?? null) === expectedUrl
+  ).length;
+}
+
 const required = {
   domain: 'cartransport.au',
   siteUrl: 'https://cartransport.au/',
@@ -152,6 +163,10 @@ if (fs.existsSync(agentSkillIndexPath)) {
     const slug = path.basename(path.dirname(resource));
     const expectedId = agentSkillIds[index];
     const declaredUrl = indexedSkillUrl(agentSkillIndex, expectedId);
+    if (indexedSkillUrlCount(agentSkillIndex, url) !== 1) {
+      console.error(`Agent Skills index must declare ${url} exactly once.`);
+      failed = true;
+    }
     if (declaredUrl !== url) {
       console.error(
         `Agent Skills index maps ${slug} to ${declaredUrl ?? 'no URL'}; expected ${url}.`

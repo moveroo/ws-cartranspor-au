@@ -101,6 +101,10 @@ function plainText(html: string) {
     .trim();
 }
 
+function generatedText(html: string) {
+  return plainText(html).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 function attributeValue(attributes: string, name: string) {
   const match = attributes.match(
     new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s"'=<>]+))`, 'i')
@@ -111,6 +115,7 @@ function attributeValue(attributes: string, name: string) {
 
 function spanValue(attributes: string, name: 'colspan' | 'rowspan') {
   const parsed = Number.parseInt(attributeValue(attributes, name), 10);
+  if (name === 'rowspan' && parsed === 0) return 0;
   return Number.isFinite(parsed) && parsed > 0 ? Math.min(parsed, 100) : 1;
 }
 
@@ -126,13 +131,13 @@ function inlineMarkdown(html: string) {
   const linked = html.replace(
     /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a\s*>/gi,
     (_match, _quote: string, rawHref: string, innerHtml: string) => {
-      const label = plainText(innerHtml);
+      const label = generatedText(innerHtml);
       const href = safeHref(rawHref);
       return label && href ? `[${label}](${href})` : label;
     }
   );
 
-  return plainText(linked).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\|/g, '\\|');
+  return generatedText(linked).replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\|/g, '\\|');
 }
 
 type TableCell = {
@@ -144,15 +149,35 @@ type TableCell = {
 type TableRow = {
   cells: TableCell[];
   columnHeader: boolean;
+  inThead: boolean;
 };
 
+function rowGroupKey(tableHtml: string, rowIndex: number) {
+  const prefix = tableHtml.slice(0, rowIndex).toLowerCase();
+  const candidates = ['thead', 'tbody', 'tfoot']
+    .map((name) => ({
+      name,
+      open: prefix.lastIndexOf(`<${name}`),
+      close: prefix.lastIndexOf(`</${name}`),
+    }))
+    .filter(({ open, close }) => open > close)
+    .sort((left, right) => right.open - left.open);
+
+  return candidates[0] ? `${candidates[0].name}:${candidates[0].open}` : 'table';
+}
+
 function markdownTable(tableHtml: string) {
-  const carried = new Map<number, { cell: TableCell; remainingRows: number }>();
+  const carried = new Map<number, { cell: TableCell; group: string; remainingRows: number }>();
   const rows: TableRow[] = [];
 
   for (const rowMatch of tableHtml.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr\s*>/gi)) {
+    const group = rowGroupKey(tableHtml, rowMatch.index ?? 0);
     const cells: TableCell[] = [];
     for (const [column, span] of [...carried.entries()].sort(([left], [right]) => left - right)) {
+      if (span.group !== group) {
+        carried.delete(column);
+        continue;
+      }
       cells[column] = span.cell;
       span.remainingRows -= 1;
       if (span.remainingRows === 0) carried.delete(column);
@@ -188,7 +213,14 @@ function markdownTable(tableHtml: string) {
         if (physical.rowspan > 1) {
           carried.set(occupiedColumn, {
             cell: physical.cell,
+            group,
             remainingRows: physical.rowspan - 1,
+          });
+        } else if (physical.rowspan === 0) {
+          carried.set(occupiedColumn, {
+            cell: physical.cell,
+            group,
+            remainingRows: Number.POSITIVE_INFINITY,
           });
         }
       }
@@ -209,13 +241,19 @@ function markdownTable(tableHtml: string) {
     rows.push({
       cells,
       columnHeader: inThead || explicitColumnScope || allColumnHeaders,
+      inThead,
     });
   }
 
-  if (rows.length === 0) return plainText(tableHtml);
+  if (rows.length === 0) return generatedText(tableHtml);
 
   const columnCount = Math.max(...rows.map((row) => row.cells.length));
-  const headerIndex = rows.findIndex((row) => row.columnHeader);
+  let theadHeaderIndex = -1;
+  rows.forEach((row, index) => {
+    if (row.inThead) theadHeaderIndex = index;
+  });
+  const headerIndex =
+    theadHeaderIndex >= 0 ? theadHeaderIndex : rows.findIndex((row) => row.columnHeader);
   const header =
     headerIndex >= 0
       ? rows[headerIndex].cells
@@ -224,7 +262,9 @@ function markdownTable(tableHtml: string) {
           scope: 'col',
           text: `Column ${index + 1}`,
         }));
-  const body = rows.filter((_row, index) => index !== headerIndex).map((row) => row.cells);
+  const body = rows
+    .filter((row, index) => !row.inThead && index !== headerIndex)
+    .map((row) => row.cells);
   const cells = (row: typeof header) =>
     Array.from({ length: columnCount }, (_, index) => row[index]?.text ?? '');
 
@@ -254,22 +294,22 @@ function visibleMarkdown(html: string) {
           return innerHtml.replace(
             /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi,
             (_heading, level: string, headingHtml: string) => {
-              const heading = plainText(headingHtml);
+              const heading = generatedText(headingHtml);
               return heading ? `\n${'#'.repeat(Number(level))} [${heading}](${href})\n` : '\n';
             }
           );
         }
 
-        const label = plainText(innerHtml);
+        const label = generatedText(innerHtml);
         return label && href ? ` [${label}](${href}) ` : label;
       }
     )
     .replace(/<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1\s*>/gi, (_match, level: string, inner: string) => {
-      const heading = plainText(inner);
+      const heading = generatedText(inner);
       return heading ? `\n${'#'.repeat(Number(level))} ${heading}\n` : '\n';
     })
     .replace(/<li\b[^>]*>([\s\S]*?)<\/li\s*>/gi, (_match, inner: string) => {
-      const item = plainText(inner);
+      const item = generatedText(inner);
       return item ? `\n- ${item}` : '\n';
     })
     .replace(BLOCK_END_TAG, '\n')
@@ -277,6 +317,8 @@ function visibleMarkdown(html: string) {
     .replace(/<[^>]+>/g, ' ');
 
   return decodeHtmlEntities(content)
+    .replace(/</g, '\\<')
+    .replace(/>/g, '\\>')
     .replace(/[\t\f\v ]+/g, ' ')
     .replace(/ *\n */g, '\n')
     .replace(/\n{3,}/g, '\n\n')
