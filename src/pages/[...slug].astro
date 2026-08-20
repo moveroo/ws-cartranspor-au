@@ -11,18 +11,31 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const hasContentH1 = headings.some((heading) => heading.depth === 1);
 ---
 
 <Layout title={post.data.title} description={post.data.description} type="article">
   <main class="container mx-auto px-4 py-8">
     <article class="prose lg:prose-xl mx-auto">
-      <h1>{post.data.title}</h1>
+      {!hasContentH1 && <h1>{post.data.title}</h1>}
       <div class="text-sm text-gray-500 mb-8">
         {new Date(post.data.pubDate).toLocaleDateString()}
         {post.data.author && <span> • {post.data.author}</span>}
       </div>
       <Content />
+      {
+        post.data.primaryCallToAction && post.data.primaryCallToActionUrl && (
+          <p class="not-prose mt-8">
+            <a
+              class="inline-flex rounded bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700"
+              href={post.data.primaryCallToActionUrl}
+            >
+              {post.data.primaryCallToAction}
+            </a>
+          </p>
+        )
+      }
     </article>
   </main>
 </Layout>
