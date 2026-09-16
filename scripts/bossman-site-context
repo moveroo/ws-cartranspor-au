@@ -1,16 +1,45 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+set -euo pipefail
 
-set -eu
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-MANIFEST_FILE="$SCRIPT_DIR/../bossman-site-manifest.json"
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+launcher_path="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/$(basename "${BASH_SOURCE[0]}")"
+git_common_dir="$(git -C "$repo_root" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
+primary_parent=''
+if [[ -n "$git_common_dir" ]]; then
+  primary_parent="$(dirname "$(dirname "$git_common_dir")")"
+fi
 
-DOMAIN="${1:-$(node -e "const fs = require('fs'); const path = process.argv[1]; const manifest = JSON.parse(fs.readFileSync(path, 'utf8')); process.stdout.write((manifest.domain || '').trim());" "$MANIFEST_FILE")}"
+declare -a candidates=()
+if [[ -n "${BOSSMAN_SITE_CONTEXT_HELPER:-}" ]]; then
+  candidates+=("$BOSSMAN_SITE_CONTEXT_HELPER")
+fi
+configured_helper="$(git config --global --path --get bossman.siteContextHelper 2>/dev/null || true)"
+if [[ -n "$configured_helper" ]]; then
+  candidates+=("$configured_helper")
+fi
+path_helper="$(command -v bossman-site-context 2>/dev/null || true)"
+if [[ -n "$path_helper" ]]; then
+  candidates+=("$path_helper")
+fi
+candidates+=("$(dirname "$repo_root")/bossman-laravel-v2/scripts/bossman-site-context")
+if [[ -n "$primary_parent" ]]; then
+  candidates+=("$primary_parent/bossman-laravel-v2/scripts/bossman-site-context")
+fi
 
-if [ -z "$DOMAIN" ]; then
-  echo "Usage: scripts/bossman-site-context [domain]" >&2
-  echo "Example: scripts/bossman-site-context cartransport.au" >&2
-  echo "The domain is loaded from bossman-site-manifest.json if omitted." >&2
+bossman_helper=''
+for candidate in "${candidates[@]}"; do
+  candidate_path="$(realpath "$candidate" 2>/dev/null || true)"
+  if [[ -x "$candidate" && "$candidate_path" != "$launcher_path" ]]; then
+    bossman_helper="$candidate"
+    break
+  fi
+done
+
+if [[ -z "$bossman_helper" ]]; then
+  echo "Bossman site-context helper is unavailable." >&2
+  echo "Set BOSSMAN_SITE_CONTEXT_HELPER, configure git key bossman.siteContextHelper, add the helper to PATH, or keep bossman-laravel-v2 beside the primary checkout." >&2
   exit 1
 fi
 
-exec /Users/jasonhill/Projects/Systems/bossman-laravel-v2/scripts/bossman-site-context "$DOMAIN"
+cd "$repo_root"
+exec "$bossman_helper" "$@"
