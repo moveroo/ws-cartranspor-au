@@ -27,4 +27,16 @@ Before finishing controlled site work, answer Bossman's repo handoff checklist:
 - If public output changed for SEO, content, conversion, brand, trust, technical health, or agentic visibility, was a Site Improvement Experiment created or attached?
 - Was baseline evidence captured or explicitly marked missing?
 
+## Bossman change recording (read-only cloud)
+
+Use `BOSSMAN_PRODUCTION_AGENT_READ_TOKEN` for site context. Do not request or use
+`BOSSMAN_PRODUCTION_AGENT_WRITE_TOKEN` in this website environment.
+Attach the existing planned experiment supplied by Bossman, check in
+`bossman-change-receipt-plan.json`, and let the normal build publish its receipt.
+Bossman verifies production, records implementation and schedules follow-up.
+If the central experiment or enrollment is missing, hand it to the Bossman
+operator; continue authorised code/local checks without inventing an ID or
+claiming recording is complete. See `docs/bossman-change-receipt.md`.
+Receipt publication is not approval, deployment proof or a measured result.
+
 Complete all authorized delivery steps, including merge, live proof and experiment recording when covered by the instruction. Report implementation, merge, deployment and measured results separately. State exactly what was tested; sampled URLs do not prove the whole estate.
