@@ -19,18 +19,18 @@ Check in `bossman-change-receipt-plan.json` with **only** these fields:
 
 ```json
 {
-    "schemaVersion": "bossman.site-change-receipt.v1",
-    "siteId": 4,
-    "canonicalUrl": "https://movingcars.com.au",
-    "repoUrl": "https://github.com/iamjasonhill/astrosites2026",
-    "experimentId": 149,
-    "changeKey": "movingcars-llms-guidance-quality-2026-10-01",
-    "resources": [
-        {
-            "url": "https://movingcars.com.au/llms.txt",
-            "contentType": "text/plain"
-        }
-    ]
+  "schemaVersion": "bossman.site-change-receipt.v1",
+  "siteId": 4,
+  "canonicalUrl": "https://movingcars.com.au",
+  "repoUrl": "https://github.com/iamjasonhill/astrosites2026",
+  "experimentId": 149,
+  "changeKey": "movingcars-llms-guidance-quality-2026-10-01",
+  "resources": [
+    {
+      "url": "https://movingcars.com.au/llms.txt",
+      "contentType": "text/plain"
+    }
+  ]
 }
 ```
 
