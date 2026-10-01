@@ -15,8 +15,10 @@
     ]
   },
   "scripts": {
+    "bossman:receipt": "node scripts/build-bossman-change-receipt.mjs --output=dist",
+    "test:bossman-receipt": "node --test scripts/build-bossman-change-receipt.test.mjs",
     "dev": "astro dev",
-    "build": "astro build && node scripts/check-contact-routing.mjs --dist && npm run check:rendered-headings",
+    "build": "astro build && node scripts/check-contact-routing.mjs --dist && npm run check:rendered-headings && node scripts/build-bossman-change-receipt.mjs --output=dist",
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check",
