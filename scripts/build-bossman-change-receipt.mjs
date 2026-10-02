@@ -32,7 +32,8 @@ export function createReceipt({ plan, manifest, commit, distDir }) {
     !Number.isSafeInteger(plan.experimentId) ||
     plan.experimentId < 1 ||
     typeof plan.changeKey !== 'string' ||
-    !/^[a-z0-9_-]{1,160}$/.test(plan.changeKey) ||
+    Array.from(plan.changeKey).length < 1 ||
+    Array.from(plan.changeKey).length > 160 ||
     plan.canonicalUrl !== manifest?.site?.canonicalUrl ||
     plan.repoUrl !== manifest?.site?.repositoryUrl ||
     !/^https:\/\/[a-z0-9.-]+$/.test(plan.canonicalUrl) ||
