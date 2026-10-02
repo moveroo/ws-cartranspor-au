@@ -90,8 +90,31 @@ test('hashes final files and nested HTML without publishing secrets', () =>
     );
   }));
 
+for (const key of [
+  'Approved Change.v2 / Route A+B',
+  'Changement approuvé 🚗'.repeat(4),
+  '🚗'.repeat(160),
+]) {
+  test('preserves the centrally approved change key exactly', () =>
+    fixture((root) => {
+      const active = { ...plan, changeKey: key };
+      setup(root, active);
+      output(root);
+      const result = buildReceipt(root);
+      assert.equal(result.receipt.changeKey, key);
+      const published = JSON.parse(
+        fs.readFileSync(path.join(root, 'dist/.well-known/bossman-change-receipt.json'), 'utf8')
+      );
+      assert.equal(published.changeKey, key);
+    }));
+}
+
 for (const [name, changed] of Object.entries({
   secret: { ...plan, token: 'not-a-real-secret' },
+  emptyChangeKey: { ...plan, changeKey: '' },
+  nonStringChangeKey: { ...plan, changeKey: 123 },
+  oversizedChangeKey: { ...plan, changeKey: 'a'.repeat(161) },
+  oversizedUnicodeChangeKey: { ...plan, changeKey: '🚗'.repeat(161) },
   invalidSite: { ...plan, siteId: 0 },
   invalidExperiment: { ...plan, experimentId: 0 },
   wrongHost: { ...plan, canonicalUrl: 'https://other.test' },
