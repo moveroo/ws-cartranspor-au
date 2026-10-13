@@ -25,12 +25,30 @@ The current migration and operating paperwork lives in:
 
 ## Important Commands
 
+Use Node.js 22.12.0 or newer, as required by `package.json`. The repository's `.nvmrc` and CI
+use Node.js 22.
+
+After cloning, install the versions recorded in `package-lock.json`:
+
 ```bash
-npm run dev
-npm run build
+npm ci
+```
+
+Run the existing repository checks and build:
+
+```bash
+npm run check:contract
 npm run check
+npm run lint
+npm run format:check
+npm run build
 npm run check:seo
 ```
+
+Netlify runs `npm run build` and publishes the static output in `dist/`.
+
+Start the local development server with `npm run dev`. To inspect the built site locally,
+run `npm run preview` after a successful build.
 
 Useful supporting commands:
 
