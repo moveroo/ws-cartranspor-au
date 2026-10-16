@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import FAQ from '../../components/FAQ.astro';
+import { site } from '../../config/site';
 
 export async function getStaticPaths() {
   const services = await getCollection('services');
@@ -28,11 +29,12 @@ const { Content } = await render(service);
       <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-10">
         {service.data.description}
       </p>
-      <span
+      <a
+        href={site.destinations.vehicleQuote}
         class="inline-block bg-brand-orange-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg"
       >
         Get an Instant Quote
-      </span>
+      </a>
     </div>
   </section>
 
@@ -53,11 +55,12 @@ const { Content } = await render(service);
   <section class="py-16 bg-slate-50 border-t border-slate-200">
     <div class="container mx-auto px-4 text-center">
       <h2 class="text-3xl font-bold text-slate-900 mb-6">Ready to book your transport?</h2>
-      <span
+      <a
+        href={site.destinations.vehicleQuote}
         class="inline-block bg-slate-900 text-white font-bold py-4 px-10 rounded-full shadow-xl"
       >
         Get Free Quote
-      </span>
+      </a>
     </div>
   </section>
 </Layout>
