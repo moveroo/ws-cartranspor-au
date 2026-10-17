@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "bossman.repair-completions.v1",
+  "siteId": 10,
+  "canonicalUrl": "https://cartransport.au",
+  "repoUrl": "https://github.com/moveroo/ws-cartranspor-au",
+  "completions": [
+    {
+      "completionKey": "cartransport-service-quote-links-pr81-2026-10-16",
+      "title": "Restore both vehicle quote links on the four service pages",
+      "defect": "The shared service template rendered Get an Instant Quote and Get Free Quote as styled spans without links or handlers, although the existing accepted destination was https://quoting.cartransport.au/quote/vehicle.",
+      "contractReference": "https://github.com/moveroo/ws-cartranspor-au/blob/39d8e608cc91fd1ba3fa69933efed1934acb02d7/bossman-site-manifest.json",
+      "pullRequestNumber": 81,
+      "representations": [
+        {
+          "url": "https://cartransport.au/services/interstate/",
+          "accept": "text/html",
+          "contentType": "text/html"
+        },
+        {
+          "url": "https://cartransport.au/services/depot-to-depot/",
+          "accept": "text/html",
+          "contentType": "text/html"
+        },
+        {
+          "url": "https://cartransport.au/services/door-to-door/",
+          "accept": "text/html",
+          "contentType": "text/html"
+        },
+        {
+          "url": "https://cartransport.au/services/commercial/",
+          "accept": "text/html",
+          "contentType": "text/html"
+        }
+      ],
+      "files": ["src/pages/services/[...slug].astro"],
+      "classification": {
+        "kind": "bounded_contract_repair",
+        "reason": "Restores two existing controls to the configured accepted vehicle quote destination, preserving copy and styling. The independent review explicitly approved no_experiment_needed for this bounded correctness repair; no new capability, claims or growth strategy was introduced.",
+        "reviewReference": "https://github.com/moveroo/ws-cartranspor-au/pull/81",
+        "reviewedBy": "GPT-6.1 Sol High; independent review reported in PR 81"
+      },
+      "commits": {
+        "reviewed": "39d8e608cc91fd1ba3fa69933efed1934acb02d7",
+        "merged": "34d9fc2d4594e79517645905936d37c30d80fe05"
+      },
+      "deployment": {
+        "commit": "34d9fc2d4594e79517645905936d37c30d80fe05",
+        "reference": "https://app.netlify.com/projects/cartransport/deploys/6ad2a3a44670db504887f002"
+      },
+      "publicProof": {
+        "reference": "https://github.com/moveroo/ws-cartranspor-au/blob/main/docs/evidence/2026-10-16-service-quote-links-live.md",
+        "observedAt": "2026-10-16T23:49:22Z",
+        "reportedBy": "Codex connected-iMac verifier; supported Chrome extension and Checkly hosted Chromium",
+        "summary": "Independent live proof after production publication: all 16 CTA click cases passed across four routes, two controls and desktop/mobile viewports (23:25:15.867-23:26:02.380 UTC). Six local Chrome Tab/Enter destination cases passed on interstate, depot-to-depot and door-to-door. The final hosted commercial keyboard run passed both remaining Tab/focus/Enter cases in 16.1 seconds (23:49:08.784-23:49:22.350 UTC). Homepage Services navigation and mobile menu opening also passed. No forms were filled or submitted."
+      },
+      "checks": {
+        "before": "Supported Mac Chrome observation on 2026-10-16 at 07:32 UTC showed both inert spans on interstate. The pre-repair source and published PR 79 deployment used those spans; no template or shared-runtime handler existed. This defect predates the Astro upgrade.",
+        "after": "PR 81 contract, lint, formatting, 40 tests, Astro checks, build and SEO/rendered-heading checks passed. Built HTML confirmed all eight controls used the accepted destination, with unchanged stylesheet bytes. Exact-head build, manifest validation, Netlify preview and redirect/header checks passed; post-merge build/manifest checks passed. Provider publication at 2026-10-16T22:25:20.869Z and the subsequent 16 clicks plus 8 keyboard destinations are separately evidenced in the dated report."
+      },
+      "uncertainties": [
+        "Browser evidence covers these four service routes and the stated navigation only, not the whole site; mobile is a 390x844 viewport, not a physical device or mobile user-agent.",
+        "Hosted tests used Chromium in Frankfurt. No quote calculation, form submission, authenticated workflow, conversion uplift or backend lead-record audit was performed.",
+        "Existing tracking appended lead-intent/source parameters. No form submission was invoked; backend side effects of ordinary link tracking were not inspected.",
+        "Earlier local commercial Enter navigation stalled with cause unknown. Both cases later passed in hosted Chromium; the local stall was not diagnosed or claimed fixed.",
+        "The door-to-door footer keyboard result survived a tool timeout via destination/source-path readback; only its observation window, not an exact per-case timestamp or Tab count, is retained.",
+        "Unsaved Checkly runs exposed no durable result-specific URL. Scripts, logs, screenshots, videos and traces are retained in the task and ChatGPT Library; the repository report records their hashes and limits.",
+        "Publication is source-reported repository evidence. Bossman intake and accepted owner recovery are separate and have not been triggered or claimed by this closeout."
+      ]
+    }
+  ]
+}
