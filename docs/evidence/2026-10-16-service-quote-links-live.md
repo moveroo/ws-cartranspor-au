@@ -231,7 +231,7 @@ for (const [label, slug] of [
     });
     expect(response.status()).toBeLessThan(400);
     let tabCount = 0;
-    for (; tabCount < 25; ) {
+    for (; tabCount < 25;) {
       await page.keyboard.press('Tab');
       tabCount++;
       const active = await page.evaluate(() => ({
