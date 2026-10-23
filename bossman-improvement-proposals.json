@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "bossman.improvement-proposals.v1",
+  "siteId": 10,
+  "canonicalUrl": "https://cartransport.au",
+  "repoUrl": "https://github.com/moveroo/ws-cartranspor-au",
+  "proposals": [
+    {
+      "proposalKey": "homepage-compiled-css-inline-20261023",
+      "title": "Evaluate inlining the existing compiled homepage stylesheet",
+      "hypothesis": "Inlining the unchanged compiled stylesheet at its existing homepage cascade position may remove one render-blocking request. This is a performance hypothesis, not a proven speed improvement. Preserve all content, contact destinations, CSP and other page output; keep the shared CSS asset for other routes.",
+      "urls": ["https://cartransport.au/"],
+      "primaryOutcomeLens": "technical_health",
+      "secondaryOutcomeLenses": [],
+      "measurementPlan": "Before launch, the existing central owner must review the baseline and exact homepage-only treatment, accept the plan, resolve baseline gaps and enroll its genuine experiment ID through the existing receipt process. Compare retained eligible mobile evidence on comparable collection conditions after a separately approved release, separating deterministic request removal from noisy FCP/LCP or score movement. Local checks establish exact CSS bytes, original HTML restoration, unchanged other files, contact guards and transfer-size tradeoffs. No new scan, collector, cadence or provider call is requested by this proposal. Inconclusive speed evidence remains inconclusive. Any rollback requires its own applicable delivery authority.",
+      "baselineGaps": [
+        "Retained mobile observation is 19 October 2026, not a fresh controlled prelaunch timing baseline.",
+        "Removing one stylesheet request does not establish lower FCP/LCP or a higher performance score.",
+        "Local gzip HTML plus CSS is 32500 bytes before versus 33107 bytes after; cache and repeat-view effects are unmeasured.",
+        "Central plan acceptance, baseline disposition and exact experiment collector enrollment have not been supplied."
+      ]
+    }
+  ]
+}
