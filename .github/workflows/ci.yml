@@ -47,6 +47,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Check emitted quote campaign handoff
+        run: node --test scripts/check-quote-campaign-handoff.test.mjs
+        env:
+          QUOTE_HANDOFF_BUILT_HTML: dist/index.html
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
