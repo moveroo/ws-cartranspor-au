@@ -25,7 +25,7 @@ The current migration and operating paperwork lives in:
 
 ## Important Commands
 
-Use Node.js 22.22.0 or newer, as required by `package.json`. The repository's `.nvmrc` and CI
+Use Node.js 22.23.4 or newer, as required by `package.json`. The repository's `.nvmrc` and CI
 use Node.js 22.
 
 After cloning, install the versions recorded in `package-lock.json`:
