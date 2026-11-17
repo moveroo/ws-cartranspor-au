@@ -9,23 +9,31 @@ import SEO from '../components/SEO.astro';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <SEO
       title="Page Not Found"
-      description="The page you're looking for doesn't exist."
+      description="Sorry, the page you're looking for on Vehicle Transport Australia could not be found. Explore our car transport routes, depot-to-depot services, or get a quote."
       noindex={true}
     />
   </head>
-  <body class="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-    <div class="text-center px-6">
-      <h1 class="text-9xl font-bold text-gray-300 dark:text-gray-700">404</h1>
-      <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mt-4">Page Not Found</h2>
-      <p class="text-gray-600 dark:text-gray-400 mt-2 max-w-md mx-auto">
+  <body
+    class="min-h-screen flex items-center justify-center bg-brand-light text-brand-dark font-sans"
+  >
+    <main id="main-content" class="text-center px-6">
+      <h1 class="text-9xl font-black text-brand-primary/20">404</h1>
+      <h2 class="text-2xl font-bold text-brand-dark mt-4">Page Not Found</h2>
+      <p class="text-brand-gray mt-2 max-w-md mx-auto">
         Sorry, the page you're looking for doesn't exist or has been moved.
       </p>
       <div class="mt-8 flex justify-center gap-4">
         <a
           href="/"
-          class="inline-flex items-center px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors"
+          class="inline-flex items-center px-6 py-3 bg-brand-primary hover:bg-brand-secondary text-white font-medium rounded-brand transition-colors shadow-sm"
         >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            aria-hidden="true"
+            class="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -36,10 +44,17 @@ import SEO from '../components/SEO.astro';
           Go Home
         </a>
         <button
+          type="button"
           onclick="history.back()"
-          class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition-colors"
+          class="inline-flex items-center px-6 py-3 bg-gray-200 hover:bg-gray-300 text-brand-dark font-medium rounded-brand transition-colors"
         >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg
+            aria-hidden="true"
+            class="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
@@ -49,7 +64,7 @@ import SEO from '../components/SEO.astro';
           Go Back
         </button>
       </div>
-    </div>
+    </main>
     <script
       is:inline
       src="https://quotes.moveroo.com.au/embed/vehicle-assistant/v1/loader.js"
