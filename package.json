@@ -45,7 +45,8 @@
     "check:links": "node scripts/analyze-internal-links.mjs",
     "indexnow:dry-run": "node ./scripts/indexnow-submit.mjs --dry-run",
     "indexnow:submit": "node ./scripts/indexnow-submit.mjs --live --force",
-    "check:agent-discovery": "node scripts/check-agent-discovery.mjs"
+    "check:agent-discovery": "node scripts/check-agent-discovery.mjs",
+    "contract:check": "node scripts/check-contract.mjs && node scripts/check-agent-discovery.mjs && node scripts/check-lead-intent-contract.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
@@ -66,7 +67,8 @@
     "sharp": "^0.35.3",
     "tailwindcss": "^3.4.19",
     "typescript-eslint": "^8.66.0",
-    "vitest": "^5.0.5"
+    "vitest": "^5.0.5",
+    "@tailwindcss/vite": "^4.0.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
