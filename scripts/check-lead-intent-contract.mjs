@@ -23,9 +23,13 @@ try {
 const quoteTargets = manifest.metadata?.quoteTargets || manifest.site?.quoteTargets || [];
 
 if (!Array.isArray(quoteTargets) || quoteTargets.length === 0) {
-  console.warn('⚠️ WARNING: No quoteTargets defined in manifest. Defaulting to general lead capture.');
+  console.warn(
+    '⚠️ WARNING: No quoteTargets defined in manifest. Defaulting to general lead capture.'
+  );
 } else {
-  console.log(`✔ Found ${quoteTargets.length} contracted quote target(s): ${quoteTargets.join(', ')}`);
+  console.log(
+    `✔ Found ${quoteTargets.length} contracted quote target(s): ${quoteTargets.join(', ')}`
+  );
 }
 
 console.log('✔ PASS: Lead intent contract verified.');

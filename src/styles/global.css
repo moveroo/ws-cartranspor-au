@@ -1,1 +1,26 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-brand-orange-50: #fff7ed;
+  --color-brand-orange-100: #ffedd5;
+  --color-brand-orange-200: #fed7aa;
+  --color-brand-orange-300: #fdba74;
+  --color-brand-orange-400: #fb923c;
+  --color-brand-orange-500: #f97316;
+  --color-brand-orange-600: #ea580c;
+  --color-brand-orange-700: #c2410c;
+  --color-brand-orange-800: #9a3412;
+  --color-brand-orange-900: #7c2d12;
+  --color-brand-orange-950: #431407;
+  --color-brand-orange: #f97316;
+
+  --color-brand-navy-900: #0f172a;
+  --color-brand-navy-800: #1e293b;
+  --color-brand-navy: #0f172a;
+
+  --color-brand-blue: #3b82f6;
+
+  --color-brand-slate-50: #f8fafc;
+  --color-brand-slate-700: #334155;
+}
