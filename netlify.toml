@@ -26,6 +26,10 @@
   command = "npm run build"
   publish = "dist"
 
+[[edge_functions]]
+  path = "/"
+  function = "markdown-negotiation"
+
 [[redirects]]
   from = "/interstate-car-transport-with-personal-items"
   to = "/services/interstate/"
