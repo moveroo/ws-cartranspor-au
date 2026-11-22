@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://wscartransporau.com.au/sitemap-index.xml
