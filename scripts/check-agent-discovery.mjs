@@ -4,17 +4,29 @@ import path from 'node:path';
 
 const ROOT_DIR = process.cwd();
 const PUBLIC_DIR = path.join(ROOT_DIR, 'public');
-const ROBOTS_PATH = path.join(PUBLIC_DIR, 'robots.txt');
+const ROBOTS_CANDIDATES = [
+  path.join(PUBLIC_DIR, 'robots.txt'),
+  path.join(ROOT_DIR, 'src', 'pages', 'robots.txt.ts'),
+];
+const ROBOTS_PATH = ROBOTS_CANDIDATES.find((candidate) => fs.existsSync(candidate));
 
 console.log('🤖 [Bossman Agent Discovery Guard] Checking crawler and agent discovery contract...');
 
-if (!fs.existsSync(ROBOTS_PATH)) {
-  console.error('❌ FAIL: public/robots.txt missing');
+if (!ROBOTS_PATH) {
+  console.error(
+    '❌ FAIL: robots.txt missing (expected public/robots.txt or src/pages/robots.txt.ts)'
+  );
   process.exit(1);
 }
 
-const robots = fs.readFileSync(ROBOTS_PATH, 'utf8');
-const lines = robots.split('\n').map((l) => l.trim());
+const robots = fs.readFileSync(ROBOTS_PATH, 'utf8').replace(/\\+n/g, '\n');
+const lines = robots.split(/\r?\n/).map((l) =>
+  l
+    .trim()
+    .replace(/^.*=\s*[`'"]/, '')
+    .replace(/[`'"]$/, '')
+    .trim()
+);
 
 // Check if entire site is inadvertently blocked to all crawlers
 for (let i = 0; i < lines.length; i++) {
