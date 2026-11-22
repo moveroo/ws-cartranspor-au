@@ -34,13 +34,14 @@ function normalizeSiteUrl(value) {
 }
 
 function siteUrlFromManifest(manifest) {
+  const indexNow = manifest.indexNow || manifest.metadata?.indexNow || {};
   return (
     process.env.PUBLIC_SITE_URL ||
     manifest.productionUrl ||
     manifest.site?.canonicalUrl ||
     (manifest.domain ? 'https://' + manifest.domain : null) ||
     (manifest.site?.domain ? 'https://' + manifest.site.domain : null) ||
-    (manifest.indexNow?.keyFileUrl ? new URL(manifest.indexNow.keyFileUrl).origin : null)
+    (indexNow.keyFileUrl ? new URL(indexNow.keyFileUrl).origin : null)
   );
 }
 
@@ -240,7 +241,7 @@ async function main() {
   const manifest = await readJson(path.join(root, 'bossman-site-manifest.json'));
   const siteUrl = normalizeSiteUrl(siteUrlFromManifest(manifest));
   const host = new URL(siteUrl).hostname;
-  const indexNow = manifest.indexNow || {};
+  const indexNow = manifest.indexNow || manifest.metadata?.indexNow || {};
   const key = validateKey((indexNow.key || process.env.INDEXNOW_KEY || '').trim());
   const keyLocation =
     process.env.INDEXNOW_KEY_LOCATION || indexNow.keyFileUrl || siteUrl + '/' + key + '.txt';
