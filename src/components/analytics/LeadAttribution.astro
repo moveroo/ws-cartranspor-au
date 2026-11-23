@@ -1,0 +1,18 @@
+---
+interface Props {
+  siteKey?: string;
+  trackedLinks?: ReadonlyArray<{ readonly href: string; readonly eventName: string }>;
+}
+
+const { siteKey = "", trackedLinks = [] } = Astro.props;
+const config = JSON.stringify({ siteKey, trackedLinks }).replace(
+  /</g,
+  "\\u003c",
+);
+---
+
+<script
+  is:inline
+  set:html={`globalThis.__LEAD_ATTRIBUTION_CONFIG__ = ${config};`}
+/>
+<script is:inline type="module" src="/lead-attribution.js"></script>
