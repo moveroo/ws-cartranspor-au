@@ -46,7 +46,8 @@
     "indexnow:dry-run": "node ./scripts/indexnow-submit.mjs --dry-run",
     "indexnow:submit": "node ./scripts/indexnow-submit.mjs --live --force",
     "check:agent-discovery": "node scripts/check-agent-discovery.mjs",
-    "contract:check": "node scripts/check-contract.mjs && node scripts/check-agent-discovery.mjs && node scripts/check-lead-intent-contract.mjs"
+    "contract:check": "node scripts/check-contract.mjs && node scripts/check-agent-discovery.mjs && node scripts/check-lead-intent-contract.mjs",
+    "test:lead-attribution": "node scripts/test-lead-attribution.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",

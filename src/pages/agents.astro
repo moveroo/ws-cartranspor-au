@@ -1,4 +1,6 @@
 ---
+import LeadAttribution from "../components/analytics/LeadAttribution.astro";
+import { site } from "../config/site";
 const title = 'Cartransport Agent/API';
 const description =
   'Cartransport publishes agent-readable discovery resources for customer-authorised household moving quotes, vehicle transport quotes, callbacks, and quote API documentation.';
@@ -99,6 +101,7 @@ const breadcrumbSchema = {
         font-size: 1rem;
       }
     </style>
+    <LeadAttribution siteKey={site.analytics.siteKey} trackedLinks={site.analytics.trackedLinks} />
   </head>
   <body>
     <main>
